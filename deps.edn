@@ -1,0 +1,17 @@
+{:deps {org.clojure/clojure {:mvn/version "1.11.1"}
+        org.clojure/clojurescript {:mvn/version "1.11.54"}
+        aleph/aleph {:mvn/version "0.4.6"}
+        cheshire/cheshire {:mvn/version "5.11.0"}
+        djblue/portal {:mvn/version "0.27.0"}
+        metosin/malli {:mvn/version "0.8.4"}
+        metosin/reitit {:mvn/version "0.5.18"}
+        mount/mount {:mvn/version "0.1.16"}
+        rum/rum {:mvn/version "0.12.9"}}
+ :paths ["src/clj" "src/cljs" "resources"]
+ :aliases {:fig {:extra-deps
+                 {com.bhauman/rebel-readline-cljs {:mvn/version "0.1.4"}
+                  org.slf4j/slf4j-nop {:mvn/version "1.7.30"}
+                  com.bhauman/figwheel-main {:mvn/version "0.2.17"}}
+                 :extra-paths ["target" "test"]}
+           :build {:main-opts ["-m" "figwheel.main" "-b" "dev" "-r"]}
+           :min   {:main-opts ["-m" "figwheel.main" "-O" "advanced" "-bo" "dev"]}}}
