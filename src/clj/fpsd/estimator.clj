@@ -7,7 +7,8 @@
 
 (def ticket {:identifier "PE-12345"
              :story-points nil
-             :sessions [{:story-points nil
+             :sessions [{:story-points nil ;; the final story points of the session
+                         :events [] ;; possibly hold a list of events like, voted, skipped, session started/stopped
                          :votes [{:author "Francesco"
                                   :vote 2}
                                  {:author "Luke"
