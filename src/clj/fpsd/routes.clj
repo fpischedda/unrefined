@@ -63,6 +63,13 @@
     {:headers {:location (str "/refine/" code)}
      :status 302}))
 
+(defn parse-int
+  "Return the integer value represented by the string int-str
+   or nil if it is possible to parse the number"
+  [int-str]
+  (try (Integer/parseInt int-str)
+       (catch NumberFormatException _ nil)))
+
 (defn vote-ticket
   [request]
   (tap> "vote-ticket")
@@ -70,10 +77,11 @@
   (let [code (-> request :path-params :code)
         ticket-id (-> request :path-params :ticket-id)
         user-id (-> request :cookies (get "user-id") :value)
-        vote (-> request :params :vote int)]
-    (refinements/vote-ticket code ticket-id user-id vote)
-    {:headers {:location (str "/refine/" code)}
-     :status 302}))
+        vote (-> request :params :vote parse-int)]
+    (if vote
+      (refinements/vote-ticket code ticket-id user-id vote)
+      (refinements/skip-ticket code ticket-id user-id))
+    {:status 201}))
 
 (defn refinement-details [request]
   {:body {:refinements (refinements/details (-> request :path-params :code))}})
@@ -97,12 +105,45 @@
 
 (defn refinement-page
   [request]
-  (let [owner (-> request :cookies (get "owner") :value)
+  (let [user-id (-> request :cookies (get "user-id") :value)
         name (-> request :cookies (get "name") :value)
-        session (refinements/details (-> request :path-params :code))]
+        session (refinements/details (-> request :path-params :code))
+        owner (refinements/is-owner session user-id)]
     {:body (rum/render-static-markup (views/refinement-page session name owner))
      :headers {:content-type "text/html"}
      :status 200}))
+
+(defn estimate-view
+  [request]
+  (let [user-id (-> request :common-cookies (:name (str (random-uuid))))
+        name (-> request :common-cookies :name)
+        code (-> request :path-params :code)
+        ticket-id (-> request :path-params :ticket-id)
+        refinement (refinements/details code)
+        ]
+    (if-let [ticket (-> refinement :tickets ticket-id)]
+      {:body (rum/render-static-markup (views/estimate-view code ticket name))
+       :headers {:content-type "text/html"}
+       :cookies {"user-id" user-id}
+       :status 200}
+      {:headers {:location "/"}
+       :status 302})))
+
+(defn estimate-done
+  [request]
+  (let [user-id (-> request :common-cookies :user-id)
+        name (-> request :common-cookies :name)
+        code (-> request :path-params :code)
+        ticket-id (-> request :path-params :ticket-id)
+        refinement (refinements/details code)
+        ]
+    (if-let [ticket (-> refinement :tickets ticket-id)]
+      {:body (rum/render-static-markup (views/estimate-view code ticket name))
+       :headers {:content-type "text/html"}
+       :cookies {"user-id" user-id}
+       :status 200}
+      {:headers {:location "/"}
+       :status 302})))
 
 (def test-stream (atom nil))
 (comment
@@ -115,8 +156,8 @@
   (let [user-id (-> cookies (get "user-id") :value)
         name (-> cookies (get "name") :value)
         code (:code path-params)
-        _ (refinements/send-event code {:event "user-joined"
-                                        :payload {:username name}})
+        _ (refinements/send-event! code {:event "user-joined"
+                                         :payload {:username name}})
         events-stream (refinements/user-connected code user-id)]
     (reset! test-stream events-stream)
 
@@ -132,6 +173,13 @@
                                       (merge headers fixed-headers)
                                       fixed-headers))))))
 
+(defn common-cookies [handler]
+  (fn [request]
+    (let [user-id (-> request :cookies (get "user-id") :value)
+          name (-> request :cookies (get "name") :value)]
+      (handler (assoc request :common-cookies {:user-id user-id
+                                               :name name})))))
+
 (def handler
   (ring/ring-handler
    (ring/router
@@ -144,12 +192,18 @@
       ["/refine" {:post create-session}]]
 
      ["/assets/*" (ring/create-resource-handler)]
-     ["/" {:get index}]
-     ["/events/:code" {:get events-handler}]
-     ["/join/:code" {:get join}]
-     ["/refine/:code/add-ticket" {:post add-ticket}]
-     ["/refine/:code" {:get refinement-page}]
-     ["/refine" {:post create-or-join}]]
+     ["/" {:get index
+           :middleware [common-cookies]}]
+     ["/refine" {:get index
+                 :post create-or-join
+                 :middleware [common-cookies]}
+      ["/:code/ticket/:ticket/estimate" {:get estimate-view
+                                         :post estimate-done}]
+      ["/:code/ticket" {:post add-ticket}]
+      ["/:code/events" {:get events-handler}]
+      ["/:code/join" {:get join}]
+      ["/:code" {:get refinement-page}]]]
+
     {:data {:muuntaja m/instance
             :middleware [wrap-cookies
                          wrap-session

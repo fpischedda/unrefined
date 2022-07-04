@@ -5,22 +5,20 @@
                :max-rediscussions 1
                :suggestion-strategy :majority})
 
-(def ticket {:identifier "PE-12345"
+(def ticket {:id "PE-12345"
              :story-points nil
              :sessions [{:story-points nil ;; the final story points of the session
                          :events [] ;; possibly hold a list of events like, voted, skipped, session started/stopped
-                         :votes [{:author "Francesco"
-                                  :vote 2}
-                                 {:author "Luke"
-                                  :vote 2}]}]})
+                         :votes {"Francesco" 2
+                                 "Luke" 2}}]})
 
 (defn count-votes
   [votes]
-  (->> (group-by :vote votes)
+  (->> (group-by second votes)
        (reduce (fn [acc [vote authors]]
                  (conj acc {:vote vote
                             :count (count authors)
-                            :authors (mapv :author authors)}))
+                            :authors (mapv first authors)}))
                [])
        (sort-by :vote)
        (reverse)
@@ -28,12 +26,12 @@
 
 (comment
 
-  (count-votes [{:author "Luke" :vote 3}
-                {:author "Yaroslav" :vote 2}
-                {:author "Emmanuel" :vote 2}
-                {:author "Fra" :vote 1}
-                {:author "Stan" :vote 3}
-                {:author "Nikhil" :vote 5}]) ;; => [{:vote 5, :count 1, :authors ["Nikhil"]} {:vote 3, :count 2, :authors ["Luke" "Stan"]} {:vote 2, :count 2, :authors ["Yaroslav" "Emmanuel"]} {:vote 1, :count 1, :authors ["Fra"]}]
+  (count-votes {"Luke" 3
+                "Yaroslav" 2
+                "Emmanuel" 2
+                "Fra" 1
+                "Stan" 3
+                "Nikhil" 5}) ;; => [{:vote 5, :count 1, :authors ["Nikhil"]} {:vote 3, :count 2, :authors ["Luke" "Stan"]} {:vote 2, :count 2, :authors ["Yaroslav" "Emmanuel"]} {:vote 1, :count 1, :authors ["Fra"]}]
   )
 
 (defn votes-delta
@@ -95,51 +93,35 @@
 
   (estimate-ticket ticket settings) ;; {:result :winner, :vote 2}
 
-  (estimate-ticket {:identifier "PE-12345"
+  (estimate-ticket {:id "PE-12345"
                     :story-points nil
                     :sessions [{:story-points nil
-                                :votes [{:author "Yaroslav"
-                                         :vote 3}
-                                        {:author "Luke"
-                                         :vote 2}
-                                        {:author "Francesco"
-                                         :vote 2}
-                                        {:author "Julio"
-                                         :vote 3}]}]}
+                                :votes {"Yaroslav" 3
+                                        "Luke" 2
+                                        "Francesco" 2
+                                        "Julio" 3}}]}
                    settings) ;; => {:result :ex-equo, :suggested 3, :votes [2 3]}
 
-  (estimate-ticket {:identifier "PE-12345"
+  (estimate-ticket {:id "PE-12345"
                     :story-points nil
                     :sessions [{:story-points nil
-                                :votes [{:author "Stan"
-                                         :vote 0}
-                                        {:author "Luke"
-                                         :vote 2}
-                                        {:author "Francesco"
-                                         :vote 4}
-                                        {:author "Julio"
-                                         :vote 3}]}]}
+                                :votes {"Stan" 0
+                                        "Luke" 2
+                                        "Francesco" 4
+                                        "Julio" 3}}]}
                    settings) ;; => {:result :discuss, :highest-vote 4, :highest-voters ["Francesco"], :lowest-vote 0, :lowest-voters ["Stan"]}
 
-  (estimate-ticket {:identifier "PE-12345"
+  (estimate-ticket {:id "PE-12345"
                     :story-points nil
                     :sessions [{:story-points nil
-                                :votes [{:author "Stan"
-                                         :vote 0}
-                                        {:author "Luke"
-                                         :vote 2}
-                                        {:author "Francesco"
-                                         :vote 5}
-                                        {:author "Julio"
-                                         :vote 3}]}
+                                :votes {"Stan" 4
+                                        "Luke" 2
+                                        "Francesco" 3
+                                        "Julio" 0}}
                                {:story-points nil
-                                :votes [{:author "Stan"
-                                         :vote 0}
-                                        {:author "Luke"
-                                         :vote 2}
-                                        {:author "Francesco"
-                                         :vote 4}
-                                        {:author "Julio"
-                                         :vote 3}]}]}
-                   settings) ;;{:result :ex-equo, :suggested 2, :votes [0 2]}
+                                :votes {"Stan" 3
+                                        "Luke" 2
+                                        "Francesco" 4
+                                        "Julio" 3}}]}
+                   settings) ;; => {:result :winner, :vote 3}
   )

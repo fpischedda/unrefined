@@ -68,6 +68,11 @@
     (swap! refinements_ assoc code refinement)
     refinement))
 
+(defn is-owner
+  "Return true if the user-id is the owner of the refinement"
+  [refinement user-id]
+  (= user-id (:owner refinement)))
+
 (defn add-ticket
   [code ticket-id]
   (let [ticket {:id ticket-id
@@ -89,8 +94,23 @@
 (defn vote-ticket
   [code ticket-id user-id vote]
   (swap! refinements_
-         update-in [code ticket-id :sessions last :votes]
-         assoc user-id vote)
+         update-in [code ticket-id :sessions last]
+         (fn [session]
+           (-> session
+               (update :skips disj user-id)
+               (update session :votes assoc user-id vote))))
   (send-event! code {:event :user-voted
+                     :payload {:user-id user-id
+                               :ticket-id ticket-id}}))
+
+(defn skip-ticket
+  [code ticket-id user-id]
+  (swap! refinements_
+         update-in [code ticket-id :sessions last]
+         (fn [session]
+           (-> session
+               (update :skips conj user-id)
+               (update :votes dissoc user-id))))
+  (send-event! code {:event :user-skipped
                      :payload {:user-id user-id
                                :ticket-id ticket-id}}))

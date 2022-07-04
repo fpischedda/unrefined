@@ -10,14 +10,11 @@
     [:h2 "Refined! (Alpha)"]
     [:div
      [:form {:method "POST" :action "/refine"}
-      [:p "HI " [:input {:name "name"
+      [:p "HI! Please, write the id of the ticket refine"
+       [:input {:name "name"
                          :value name
                          :placeholder "Insert your name here"}] " !"]
-      [:p "Start a refinement session " [:button {:name "start-session"} "Now!"]]
-      [:p "Or"]
-      [:p "Join an existing session "
-       [:input {:name "session-code" :placeholder "Session code here"}]
-       [:button {:name "join-session"} "Join"]]]]]])
+      [:p "Start a refinement sessionn " [:button {:name "start-session"} "Now!"]]]]]])
 
 (rum/defc render-session
   [{estimator :estimator :as _session}]
@@ -90,3 +87,27 @@
       [:p (str "Join the existing session " code " ")
        [:input {type :hidden :name "session-code" :value code}]
        [:button {:name "join-session"} "Join"]]]]]])
+
+(rum/defc estimate-view
+  [code {:keys [id sessions] :as _ticket} name]
+  [:html
+   [:head [:title "Refined! (Alpha)"]]
+   [:body
+    [:h2 "Refined! (Alpha)"]
+    [:h4 "The refinement tool no one asked for!"]
+    [:div
+     [:form {:method "POST" :action (format "/refine/%s/ticket/%s/vote" code id)}
+      [:p "HI " [:input {:name "name"
+                         :value name
+                         :placeholder "Insert your name here"}] " !"]
+      [:p (str "We are estimating ticket " id)
+       [:input {type :hidden :name "session-code" :value code}]
+       [:input {type :hidden :name "ticket-id" :value id}]
+
+       [:input {type :hidden :name "ticket-id" :value id}]
+       [:button {:name "join-session"} "Join"]]]]
+    (when-not (empty? sessions)
+      [:p (str "Previous voting sessions for ticket " id)
+       (for [s (reverse sessions)]
+         [:ul (for [[name vote] (:votes s)]
+                [:li (str name ": " vote)])])])]])
