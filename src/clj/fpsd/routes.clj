@@ -25,7 +25,7 @@
   [request]
   (let [owner-id (-> request :cookies (get "user-id") :value)
         name (-> request :params :name)
-        session (refinements/create {} owner-id name)]
+        session (refinements/create! {} owner-id name)]
     {:headers {:location (str "/refine/" (:code session))}
      :cookies {"owner" "1"
                "name" name}
