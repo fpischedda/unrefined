@@ -56,14 +56,13 @@
   "Return a new refinement with its own unique code, the provided
    settings, the owner name and id; the newly created refinement
    is atomically added to the global list of active refinements."
-  [settings owner-id name]
+  [owner-id settings]
   (let [code (gen-random-code 6)
         refinement {:code code
                     :settings (merge default-settings settings)
                     :tickets []
                     :owner owner-id
-                    :participants {owner-id {:name name
-                                             :owner true}}
+                    :participants {}
                     :event-sink (s/stream)}]
     (swap! refinements_ assoc code refinement)
     refinement))

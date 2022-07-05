@@ -19,39 +19,24 @@
   (def p (portal/open))
   (add-tap #'portal/submit)
 
+  (portal/close p)
   ,)
 
 (defn create-session
   [request]
-  (let [owner-id (-> request :cookies (get "user-id") :value)
-        name (-> request :params :name)
-        session (refinements/create! {} owner-id name)]
-    {:headers {:location (str "/refine/" (:code session))}
-     :cookies {"owner" "1"
-               "name" name}
+  (let [owner-id (-> request :common-cookies (:user-id (str (random-uuid))))
+        ticket-id (-> request :params :ticket-id)
+        refinement (refinements/create! owner-id {})
+        ticket (refinements/add-ticket (:code refinement) ticket-id)]
+    {:headers {:location (format "/refine/%s/ticket/%s" (:code refinement) ticket-id)}
+     :cookies {"user-id" owner-id}
      :status 302}))
-
-(defn join-session
-  [request]
-  (let [code (-> request :params :session-code)
-        name (-> request :params :name)
-        user-id (-> request :cookies (get "user-id") :value)]
-    (if (refinements/details code)
-      (do
-        (refinements/add-participant code user-id name)
-        {:headers {:location (str "/refine/" code)}
-         :cookies {"name" name}
-         :status 302})
-      {:headers {:location "/"}
-       :status 302})))
 
 (defn create-or-join
   [request]
   (tap> "create-or-join")
   (tap> request)
-  (if (some? (-> request :params :start-session))
-    (create-session request)
-    (join-session request)))
+  (create-session request))
 
 (defn add-ticket
   [request]
@@ -65,7 +50,7 @@
 
 (defn parse-int
   "Return the integer value represented by the string int-str
-   or nil if it is possible to parse the number"
+   or nil if it is not possible to parse the number"
   [int-str]
   (try (Integer/parseInt int-str)
        (catch NumberFormatException _ nil)))
@@ -88,9 +73,10 @@
 
 (defn index
   [request]
-  (let [user-id (-> request :cookies (get "user-id") :value)
-        name (-> request :cookies (get "name") :value)]
-    {:body (rum/render-static-markup (views/index name))
+  (tap> "index")
+  (tap> request)
+  (let [user-id (-> request :common-cookies :user-id)]
+    {:body (rum/render-static-markup (views/index))
      :headers {:content-type "text/html"}
      :cookies {"user-id" (or user-id (str (random-uuid)))}}))
 
@@ -180,6 +166,13 @@
       (handler (assoc request :common-cookies {:user-id user-id
                                                :name name})))))
 
+(defn tap-request-response [handler]
+  (fn [request]
+    (tap> request)
+    (let [response (handler request)]
+      (tap> response)
+      response)))
+
 (def handler
   (ring/ring-handler
    (ring/router
@@ -192,23 +185,24 @@
       ["/refine" {:post create-session}]]
 
      ["/assets/*" (ring/create-resource-handler)]
-     ["/" {:get index
-           :middleware [common-cookies]}]
-     ["/refine" {:get index
-                 :post create-or-join
-                 :middleware [common-cookies]}
+     ["/refine"
+      ["" {:get index
+           :post create-or-join}]
+
       ["/:code/ticket/:ticket/estimate" {:get estimate-view
                                          :post estimate-done}]
       ["/:code/ticket" {:post add-ticket}]
-      ["/:code/events" {:get events-handler}]
-      ["/:code/join" {:get join}]
-      ["/:code" {:get refinement-page}]]]
+      ["/:code/events" {:get events-handler}]]
+
+     ["/" {:get index}]]
 
     {:data {:muuntaja m/instance
             :middleware [wrap-cookies
                          wrap-session
                          wrap-params
                          wrap-keyword-params
+                         common-cookies
+                         tap-request-response
                          muuntaja/format-middleware]}})))
 
 (mount/defstate http-server

@@ -3,18 +3,17 @@
             [fpsd.refinements :as refinements]))
 
 (rum/defc index
-  [name]
+  []
   [:html
    [:head [:title "Refined! (Alpha)"]]
    [:body
     [:h2 "Refined! (Alpha)"]
     [:div
      [:form {:method "POST" :action "/refine"}
-      [:p "HI! Please, write the id of the ticket refine"
-       [:input {:name "name"
-                         :value name
-                         :placeholder "Insert your name here"}] " !"]
-      [:p "Start a refinement sessionn " [:button {:name "start-session"} "Now!"]]]]]])
+      [:p "HI! Please, write the id of the ticket to refine "
+       [:input {:name "ticket-id"
+                :placeholder "Ticket id here"}]
+       " and " [:button {:name "start-session"} "Start!"]]]]]])
 
 (rum/defc render-session
   [{estimator :estimator :as _session}]
