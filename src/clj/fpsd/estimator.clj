@@ -64,64 +64,60 @@
   ,)
 
 (defn can-rediscuss
-  [ticket settings]
-  (<= (count (:sessions ticket)) (:max-rediscussions settings)))
+  [sessions settings]
+  (<= (count sessions) (:max-rediscussions settings)))
 
 (comment
- (can-rediscuss ticket settings) ;; true
- (can-rediscuss ticket (update settings :max-rediscussions dec)) ;;false
+  (can-rediscuss (-> ticket :sessions) settings) ;; true
+  (can-rediscuss (-> ticket :sessions) (update settings :max-rediscussions dec)) ;;false
  ,)
 
-(defn estimate-ticket
-  [ticket settings]
-  (let [votes (-> ticket :sessions last :votes count-votes)
-        delta (votes-delta votes)]
+(defn estimate
+  [{:keys [current-session sessions] :as _ticket}settings]
+  (let [votes (-> current-session :votes count-votes)
+        delta (votes-delta votes)
+        result
+        (if (or (<= delta (:max-vote-delta settings))
+                (not (can-rediscuss sessions settings)))
+          (select-winner votes)
 
-    (if (or (<= delta (:max-vote-delta settings))
-            (not (can-rediscuss ticket settings)))
-      (select-winner votes)
-
-      (let [{lowest-vote :vote lowest-voters :authors} (last votes)
-            {highest-vote :vote highest-voters :authors} (first votes)]
-        {:result :discuss
-         :highest-vote highest-vote
-         :highest-voters highest-voters
-         :lowest-vote lowest-vote
-         :lowest-voters lowest-voters}))))
+          (let [{lowest-vote :vote lowest-voters :authors} (last votes)
+                {highest-vote :vote highest-voters :authors} (first votes)]
+            {:result :discuss
+             :highest-vote highest-vote
+             :highest-voters highest-voters
+             :lowest-vote lowest-vote
+             :lowest-voters lowest-voters}))]
+    (-> result
+        (assoc :votes votes))))
 
 (comment
 
-  (estimate-ticket ticket settings) ;; {:result :winner, :vote 2}
+  (estimate (-> ticket :sessions) settings) ;; {:result :winner, :vote 2}
 
-  (estimate-ticket {:id "PE-12345"
-                    :story-points nil
-                    :sessions [{:story-points nil
-                                :votes {"Yaroslav" 3
-                                        "Luke" 2
-                                        "Francesco" 2
-                                        "Julio" 3}}]}
-                   settings) ;; => {:result :ex-equo, :suggested 3, :votes [2 3]}
+  (estimate [{:story-points nil
+              :votes {"Yaroslav" 3
+                      "Luke" 2
+                      "Francesco" 2
+                      "Julio" 3}}]
+            settings) ;; => {:result :ex-equo, :suggested 3, :votes [2 3]}
 
-  (estimate-ticket {:id "PE-12345"
-                    :story-points nil
-                    :sessions [{:story-points nil
-                                :votes {"Stan" 0
-                                        "Luke" 2
-                                        "Francesco" 4
-                                        "Julio" 3}}]}
-                   settings) ;; => {:result :discuss, :highest-vote 4, :highest-voters ["Francesco"], :lowest-vote 0, :lowest-voters ["Stan"]}
+  (estimate [{:story-points nil
+              :votes {"Stan" 0
+                      "Luke" 2
+                      "Francesco" 4
+                      "Julio" 3}}]
+            settings) ;; => {:result :discuss, :highest-vote 4, :highest-voters ["Francesco"], :lowest-vote 0, :lowest-voters ["Stan"]}
 
-  (estimate-ticket {:id "PE-12345"
-                    :story-points nil
-                    :sessions [{:story-points nil
-                                :votes {"Stan" 4
-                                        "Luke" 2
-                                        "Francesco" 3
-                                        "Julio" 0}}
-                               {:story-points nil
-                                :votes {"Stan" 3
-                                        "Luke" 2
-                                        "Francesco" 4
-                                        "Julio" 3}}]}
-                   settings) ;; => {:result :winner, :vote 3}
+  (estimate [{:story-points nil
+              :votes {"Stan" 4
+                      "Luke" 2
+                      "Francesco" 3
+                      "Julio" 0}}
+             {:story-points nil
+              :votes {"Stan" 3
+                      "Luke" 2
+                      "Francesco" 4
+                      "Julio" 3}}]
+            settings) ;; => {:result :winner, :vote 3}
   )

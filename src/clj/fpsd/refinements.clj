@@ -25,10 +25,11 @@
 
 ;; SSE related code
 (defn user-connected
-  "Every refinement session have a event-sink (a stream in manifold, chan in core.async);
+  "Every refinement session have an event-sink (a stream in manifold,
+   or chan in core.async);
    once users land to a refinement page a stream is created to send them events,
-   this stream is connected to the event-sync so, every message sent to it will be
-   dispatched to user streams."
+   this stream is connected to the event-sync so, every message sent to it will
+   be dispatched to user streams."
   [code user-id]
   (let [user-stream (s/stream)
         {event-sink :event-sink} (details code)]
@@ -60,7 +61,7 @@
   (let [code (gen-random-code 6)
         refinement {:code code
                     :settings (merge default-settings settings)
-                    :tickets []
+                    :tickets {}
                     :owner owner-id
                     :participants {}
                     :event-sink (s/stream)}]
@@ -72,44 +73,66 @@
   [refinement user-id]
   (= user-id (:owner refinement)))
 
+(defn new-empty-session
+  []
+  {:status :open
+   :result nil
+   :votes {}
+   :skips #{}})
+
 (defn add-ticket
   [code ticket-id]
   (let [ticket {:id ticket-id
                 :status :unrefined
                 :score nil
+                :current-session (new-empty-session)
                 :sessions []}]
-    (swap! refinements_ update-in [code :tickets] conj ticket)
+    (swap! refinements_ update-in [code :tickets] assoc ticket-id ticket)
     ticket))
 
-(defn add-participant
+(defn set-participant
   [code user-id name]
-  (swap! refinements_ update-in [code :participants] assoc user-id {:name name :voter true}))
+  (swap! refinements_ update-in [code :participants] assoc user-id name))
 
 (comment
   (add-ticket "OKCAVG" "PE-1234")
   (identity (get @refinements_ "OKCAVG"))
   ,)
 
+(defn count-voted
+  [ticket]
+  (count (-> ticket :current-session :votes)))
+
+(defn count-skipped
+  [ticket]
+  (count (-> ticket :current-session :skips)))
+
 (defn vote-ticket
   [code ticket-id user-id vote]
   (swap! refinements_
-         update-in [code ticket-id :sessions last]
+         update-in [code :tickets ticket-id :current-session]
          (fn [session]
            (-> session
                (update :skips disj user-id)
-               (update session :votes assoc user-id vote))))
-  (send-event! code {:event :user-voted
-                     :payload {:user-id user-id
-                               :ticket-id ticket-id}}))
+               (update :votes assoc user-id vote))))
+  (let [ticket (get-in @refinements_ [code :tickets ticket-id])]
+    (send-event! code {:event :user-voted
+                       :payload {:user-id user-id
+                                 :total-voted (count-voted ticket)
+                                 :total-skipped (count-skipped ticket)
+                                 :ticket-id ticket-id}})))
 
 (defn skip-ticket
   [code ticket-id user-id]
   (swap! refinements_
-         update-in [code ticket-id :sessions last]
+         update-in [code :tickets ticket-id :current-session]
          (fn [session]
            (-> session
                (update :skips conj user-id)
                (update :votes dissoc user-id))))
-  (send-event! code {:event :user-skipped
-                     :payload {:user-id user-id
-                               :ticket-id ticket-id}}))
+  (let [ticket (get-in @refinements_ [code :tickets ticket-id])]
+    (send-event! code {:event :user-skipped
+                       :payload {:user-id user-id
+                                 :total-voted (count-voted ticket)
+                                 :total-skipped (count-skipped ticket)
+                                 :ticket-id ticket-id}})))

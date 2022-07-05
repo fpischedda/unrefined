@@ -12,6 +12,7 @@
             [ring.middleware.session :refer [wrap-session]]
             [rum.core :as rum]
             [fpsd.configuration :refer [config]]
+            [fpsd.estimator :as estimator]
             [fpsd.refinements :as refinements]
             [fpsd.views :as views]))
 
@@ -22,7 +23,7 @@
   (portal/close p)
   ,)
 
-(defn create-session
+(defn create-refinement
   [request]
   (let [owner-id (-> request :common-cookies (:user-id (str (random-uuid))))
         ticket-id (-> request :params :ticket-id)
@@ -32,12 +33,6 @@
      :cookies {"user-id" owner-id}
      :status 302}))
 
-(defn create-or-join
-  [request]
-  (tap> "create-or-join")
-  (tap> request)
-  (create-session request))
-
 (defn add-ticket
   [request]
   (tap> "add-ticket")
@@ -45,7 +40,7 @@
   (let [code (-> request :path-params :code)
         ticket-id (-> request :params :ticket-id)]
     (refinements/add-ticket code ticket-id)
-    {:headers {:location (str "/refine/" code)}
+    {:headers {:location (format "/refine/%s/ticket/%s" code ticket-id)}
      :status 302}))
 
 (defn parse-int
@@ -68,9 +63,6 @@
       (refinements/skip-ticket code ticket-id user-id))
     {:status 201}))
 
-(defn refinement-details [request]
-  {:body {:refinements (refinements/details (-> request :path-params :code))}})
-
 (defn index
   [request]
   (tap> "index")
@@ -80,34 +72,35 @@
      :headers {:content-type "text/html"}
      :cookies {"user-id" (or user-id (str (random-uuid)))}}))
 
-(defn join
+(defn estimate-watch
   [request]
-  (let [user-id (-> request :cookies (get "user-id") :value)
-        name (-> request :cookies (get "name") :value)
-        code (-> request :path-params :code)]
-    {:body (rum/render-static-markup (views/join name code))
+  (let [refinement (refinements/details (-> request :path-params :code))
+        ticket-id (-> request :path-params :ticket-id)]
+    {:body
+     (rum/render-static-markup (views/estimate-watch refinement ticket-id))
      :headers {:content-type "text/html"}
-     :cookies {"user-id" (or user-id (str (random-uuid)))}}))
+     :status 200}))
 
-(defn refinement-page
+(defn estimate-reveal
   [request]
-  (let [user-id (-> request :cookies (get "user-id") :value)
-        name (-> request :cookies (get "name") :value)
-        session (refinements/details (-> request :path-params :code))
-        owner (refinements/is-owner session user-id)]
-    {:body (rum/render-static-markup (views/refinement-page session name owner))
+  (let [refinement (refinements/details (-> request :path-params :code))
+        ticket-id (-> request :path-params :ticket-id)
+        ticket (-> refinement :tickets (get ticket-id))
+        estimation (estimator/estimate ticket (:settings refinement))]
+    {:body
+     (rum/render-static-markup (views/estimate-reveal refinement ticket estimation))
      :headers {:content-type "text/html"}
      :status 200}))
 
 (defn estimate-view
   [request]
-  (let [user-id (-> request :common-cookies (:name (str (random-uuid))))
+  (let [user-id (or (-> request :common-cookies :user-id) (str (random-uuid)))
         name (-> request :common-cookies :name)
         code (-> request :path-params :code)
         ticket-id (-> request :path-params :ticket-id)
-        refinement (refinements/details code)
-        ]
-    (if-let [ticket (-> refinement :tickets ticket-id)]
+        refinement (refinements/details code)]
+
+    (if-let [ticket (-> refinement :tickets (get ticket-id))]
       {:body (rum/render-static-markup (views/estimate-view code ticket name))
        :headers {:content-type "text/html"}
        :cookies {"user-id" user-id}
@@ -117,17 +110,23 @@
 
 (defn estimate-done
   [request]
-  (let [user-id (-> request :common-cookies :user-id)
-        name (-> request :common-cookies :name)
+  (let [user-id (or (-> request :common-cookies :user-id) (str (random-uuid)))
+        name (-> request :params :name)
         code (-> request :path-params :code)
         ticket-id (-> request :path-params :ticket-id)
         refinement (refinements/details code)
-        ]
-    (if-let [ticket (-> refinement :tickets ticket-id)]
-      {:body (rum/render-static-markup (views/estimate-view code ticket name))
-       :headers {:content-type "text/html"}
-       :cookies {"user-id" user-id}
-       :status 200}
+        vote (-> request :params :vote parse-int)]
+    (if-let [ticket (-> refinement :tickets (get ticket-id))]
+      (do
+        (refinements/set-participant code user-id name)
+        (if vote
+          (refinements/vote-ticket code ticket-id user-id vote)
+          (refinements/skip-ticket code ticket-id user-id))
+        {:body (rum/render-static-markup (views/estimate-done code ticket name))
+         :headers {:content-type "text/html"}
+         :cookies {"user-id" user-id
+                   "name" name}
+         :status 200})
       {:headers {:location "/"}
        :status 302})))
 
@@ -185,12 +184,16 @@
       ["/refine" {:post create-session}]]
 
      ["/assets/*" (ring/create-resource-handler)]
+
      ["/refine"
       ["" {:get index
-           :post create-or-join}]
+           :post create-refinement}]
 
-      ["/:code/ticket/:ticket/estimate" {:get estimate-view
-                                         :post estimate-done}]
+      ["/:code/ticket/:ticket-id" {:get estimate-watch}]
+      ["/:code/ticket/:ticket-id/reveal" {:get estimate-reveal}]
+
+      ["/:code/ticket/:ticket-id/estimate" {:get estimate-view
+                                            :post estimate-done}]
       ["/:code/ticket" {:post add-ticket}]
       ["/:code/events" {:get events-handler}]]
 

@@ -31,7 +31,7 @@ async function post_data(url, data) {
 	      headers: {'Content-Type': 'application/json'},
 	      body: JSON.stringify(data)}
 
-  const response = await = fetch(url, post);
+  const response = await fetch(url, post);
 
   return response.json();
 }
