@@ -111,6 +111,27 @@
        ]
       #_[:script {:src "/assets/main.js"}]]]))
 
+(defmulti render-estimation :result)
+
+(defmethod render-estimation :winner
+  [estimation]
+  [:div
+   [:p "Ticket estimated with a score of: " (:vote estimation)]])
+
+(defmethod render-estimation :ex-equo
+  [estimation]
+  [:div
+   [:p "We have a tie!"]
+   [:p "Suggested: " (:suggested estimation)]
+   [:p "Votes: " (clojure.string/join ", " (:votes estimation))]])
+
+(defmethod render-estimation :discuss
+  [estimation]
+  [:div
+   [:p "Difference too high! Lets discuss"]
+   [:p "Highest: " (:highest-vote estimation) ", voters: " (clojure.string/join ", " (:higest-voters estimation))]
+   [:p "Lowest: " (:lowest-vote estimation) ", voters: " (clojure.string/join ", " (:lowest-voters estimation))]])
+
 (rum/defc estimate-reveal
   [refinement ticket estimation]
   (let [{:keys [code settings tickets]} refinement
@@ -125,12 +146,12 @@
       [:p (str "Refinement session code " code)]
       [:div
        [:p (format "Results of the last voting session for ticket %s" (:id ticket))]
+       (render-estimation estimation)
        [:p "Total voted: " (refinements/count-voted ticket)]
        [:p "Total skipped: " (refinements/count-skipped ticket)]
-       [:p "Final score: " (:result estimation)]
        [:p "Votes" [:ul (for [{:keys [vote count authors]} (:votes estimation)]
-                          [:li "Vote " vote " selected " count " times by " authors])]]
-       [:p "Skipped by " (:skips session)]
+                          [:li "Vote " vote " selected " count " times by " (clojure.string/join ", " authors)])]]
+       [:p "Skipped by " (clojure.string/join ", " (:skips session))]
 
        (render-settings settings)
        ]
