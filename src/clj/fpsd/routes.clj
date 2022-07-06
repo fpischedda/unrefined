@@ -28,15 +28,13 @@
   (let [owner-id (-> request :common-cookies (:user-id (str (random-uuid))))
         ticket-id (-> request :params :ticket-id)
         refinement (refinements/create! owner-id {})
-        ticket (refinements/add-ticket (:code refinement) ticket-id)]
+        _ticket (refinements/add-ticket (:code refinement) ticket-id)]
     {:headers {:location (format "/refine/%s/ticket/%s" (:code refinement) ticket-id)}
      :cookies {"user-id" owner-id}
      :status 302}))
 
 (defn add-ticket
   [request]
-  (tap> "add-ticket")
-  (tap> request)
   (let [code (-> request :path-params :code)
         ticket-id (-> request :params :ticket-id)]
     (refinements/add-ticket code ticket-id)
@@ -52,8 +50,6 @@
 
 (defn vote-ticket
   [request]
-  (tap> "vote-ticket")
-  (tap> request)
   (let [code (-> request :path-params :code)
         ticket-id (-> request :path-params :ticket-id)
         user-id (-> request :cookies (get "user-id") :value)
@@ -65,8 +61,6 @@
 
 (defn index
   [request]
-  (tap> "index")
-  (tap> request)
   (let [user-id (-> request :common-cookies :user-id)]
     {:body (rum/render-static-markup (views/index))
      :headers {:content-type "text/html"}
@@ -178,10 +172,11 @@
     [["/api" {:options (fn [_] {:headers {"Access-Control-Allow-Origin" "*"}})
               :middleware [[add-headers {"Access-Control-Allow-Origin" "*"}]]}
 
+      ;; these are just placeholders not sure it will be needed to
+      ;; have a REST API
       ["/refine/:code/ticket/:ticket/vote" {:post vote-ticket}]
       ["/refine/:code/ticket" {:post add-ticket}]
-      ["/refine/:code" {:get refinement-details}]
-      ["/refine" {:post create-session}]]
+      ["/refine" {:post create-refinement}]]
 
      ["/assets/*" (ring/create-resource-handler)]
 
@@ -205,7 +200,7 @@
                          wrap-params
                          wrap-keyword-params
                          common-cookies
-                         tap-request-response
+                         ;; tap-request-response
                          muuntaja/format-middleware]}})))
 
 (mount/defstate http-server

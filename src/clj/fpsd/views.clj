@@ -2,13 +2,15 @@
   (:require [rum.core :as rum]
             [fpsd.refinements :as refinements]))
 
+(def project-title "Unrefined! (Alpha)")
+
 (rum/defc index
   []
   [:html
-   [:head [:title "Refined! (Alpha)"]
+   [:head [:title project-title]
     [:meta {:http-equiv "content-type" :content "text/html; charset=utf-8"}]]
    [:body
-    [:h2 "Refined! (Alpha)"]
+    [:h2 project-title]
     [:h4 "The refinement tool no one asked for!"]
     [:div
      [:form {:method "POST" :action "/refine"}
@@ -17,31 +19,6 @@
                 :placeholder "Ticket id here"}]
        " and " [:button {:name "start-session"} "Start!"]]]]]])
 
-(rum/defc render-session
-  [{estimator :estimator :as _session}]
-  [:div (case (:result estimator)
-          :ex-equo
-          [:p "Ex equo"
-           [:p (str "Suggested: " (:suggested estimator))]]
-          :discuss
-          [:p "Discuss"
-           [:div (str "Lowest score: " (:lowest-vote estimator) " by " (:lowest-voters estimator))]
-           [:div (str "Highest score: " (:min-vote estimator) " by " (:highest-voters estimator))]]
-          :winner
-          [:p (str "Ticket estimated with a score of " (:vote estimator))])])
-
-(rum/defc render-ticket
-  [{:keys [id sessions] :as _ticket} code]
-  [:div
-   [:h3 "Id: " id]
-   [:p "Start voting " [:button {:name "start-voting"
-                                 :onclick "toggle_voting(this)"
-                                 :data-session-code code
-                                 :data-ticket-id id} "tic toc"]]
-   [:p "Voting sessions"
-    (for [s (reverse sessions)]
-      (render-session s))]])
-
 (defn render-settings
   [settings]
   [:p "Settings"
@@ -49,41 +26,13 @@
     [:li (str "Max delta: " (:max-vote-delta settings))]
     [:li (str "Max rediscussions: " (:max-rediscussions settings))]]])
 
-(rum/defc refinement-page
-  [refinement name owner]
-  (let [{:keys [code settings tickets]} refinement]
-    [:html
-     [:head [:title "Refined! (Alpha)"]
-      [:script {:src "/assets/sse.js"}]]
-     [:body
-      [:input {:id "refinement-code"
-               :value code
-               :style {"display" "hidden"}}]
-      [:h2 "Refined! (Alpha)"]
-      [:h4 "The refinement tool no one asked for!"]
-      (if (some? owner)
-        [:p (str "Hi " name "! You are the owner of the current session.")]
-        [:p (str "Hi " name "! You can vote in the current session.")])
-      [:p (str "Session code " code)]
-      [:div
-       (render-settings settings)
-       [:p "Add a new ticket "
-        [:form {:id "create-ticket-form" :action "javascript: create_ticket(this);"}
-         [:input {:name "ticket-id"
-                  :id "new-ticket-id"
-                  :placeholder "Ticket ID"}]
-         [:button {:name "add-ticket"} "+"]]]
-       [:p "Tickets" (for [t (reverse tickets)]
-                       (render-ticket t code))]]
-      [:script {:src "/assets/main.js"}]]]))
-
 (rum/defc estimate-watch
   [refinement ticket-id]
   (let [{:keys [code settings tickets]} refinement
         ticket (get tickets ticket-id)
         sessions (:sessions ticket)]
     [:html
-     [:head [:title "Refined! (Alpha)"]
+     [:head [:title project-title]
       [:script {:src "/assets/sse.js"}]]
      [:body
       [:input {:id "refinement-code"
@@ -92,7 +41,7 @@
       [:input {:id "ticket-id"
                :value (:id ticket)
                :type  "hidden"}]
-      [:h2 "Refined! (Alpha)"]
+      [:h2 project-title]
       [:h4 "The refinement tool no one asked for!"]
 
       [:p (str "Refinement session code " code)]
@@ -137,10 +86,10 @@
   (let [{:keys [code settings tickets]} refinement
         session (-> ticket :current-session)]
     [:html
-     [:head [:title "Refined! (Alpha)"]
+     [:head [:title project-title]
       [:script {:src "/assets/sse.js"}]]
      [:body
-      [:h2 "Refined! (Alpha)"]
+      [:h2 project-title]
       [:h4 "The refinement tool no one asked for!"]
 
       [:p (str "Refinement session code " code)]
@@ -168,9 +117,9 @@
 (rum/defc estimate-view
   [code {:keys [id sessions] :as _ticket} name]
   [:html
-   [:head [:title "Refined! (Alpha)"]]
+   [:head [:title project-title]]
    [:body
-    [:h2 "Refined! (Alpha)"]
+    [:h2 project-title]
     [:h4 "The refinement tool no one asked for!"]
     [:div
      [:form {:method "POST" :action (format "/refine/%s/ticket/%s/estimate" code id)}
@@ -191,9 +140,9 @@
 (rum/defc estimate-done
   [code {:keys [id sessions] :as _ticket} name]
   [:html
-   [:head [:title "Refined! (Alpha)"]]
+   [:head [:title project-title]]
    [:body
-    [:h2 "Refined! (Alpha)"]
+    [:h2 project-title]
     [:h4 "The refinement tool no one asked for!"]
     [:div
      [:p (format "Hi %s! Thank you for estimating the ticket %s." name id)]
