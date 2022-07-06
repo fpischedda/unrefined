@@ -42,7 +42,7 @@ function create_ticket() {
   var data = {ticket_id: ticket_id.value,
 	      code: code}
 
-  var url = '/api/refinement/' + code '/ticket';
+  var url = '/api/refinement/' + code + '/ticket';
 
   post_data(url, data).then( data => {
     console.log('create ticket response');
@@ -59,7 +59,7 @@ function send_vote() {
   var vote = document.getElementById('vote');
   var data = {vote: vote.value}
 
-  var url = '/api/refinement/' + code '/ticket/vote';
+  var url = '/api/refinement/' + code + '/ticket/vote';
 
   post_data(url, data).then( data => {
     console.log('vote response');
@@ -68,4 +68,9 @@ function send_vote() {
   })
 
   return false;
+}
+
+function copy_estimation_link() {
+  var url = document.location.href + '/estimate';
+  navigator.clipboard.writeText(url);
 }

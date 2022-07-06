@@ -46,19 +46,19 @@
 
       [:p (str "Refinement session code " code)]
       [:div
-       [:p "Ticket id: " (:id ticket) ", share the following URL to estimate "
-        (format "http://localhost:8080/refine/%s/ticket/%s/estimate" code ticket-id)
+       [:p "Ticket id: " ticket-id " " [:button {:onclick "copy_estimation_link()"} "Copy link"]
         [:p "Current activity"]
         [:p "Total voted: " [:span {:id "total-voted"}
                              (refinements/count-voted ticket)]]
         [:p "Total skipped: " [:span {:id "total-skipped"}
                                (refinements/count-skipped ticket)]]
+        [:a {:href (format "/refine/%s/ticket/%s/reveal" code ticket-id)} "Go to results"]
         (if (empty? sessions)
           [:p "No estimations yet"]
           [:p "Previous estimations"])]
        (render-settings settings)
        ]
-      #_[:script {:src "/assets/main.js"}]]]))
+      [:script {:src "/assets/main.js"}]]]))
 
 (defmulti render-estimation :result)
 
