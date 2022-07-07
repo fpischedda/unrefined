@@ -53,7 +53,7 @@
     (if (= (count first-voters) (count second-voters))
       {:result :ex-equo
        :suggested (max first-vote second-vote)
-       :votes [first-vote second-vote]}
+       :same-votes [[first-vote first-voters] [second-vote second-voters]]}
       {:result :winner
        :vote first-vote})))
 
@@ -73,11 +73,11 @@
  ,)
 
 (defn estimate
-  [{:keys [current-session sessions] :as _ticket}settings]
+  [{:keys [current-session sessions] :as _ticket} settings]
   (let [votes (-> current-session :votes count-votes)
         delta (votes-delta votes)
         result
-        (if (or (<= delta (:max-vote-delta settings))
+        (if (or (< delta (:max-vote-delta settings))
                 (not (can-rediscuss sessions settings)))
           (select-winner votes)
 

@@ -81,9 +81,9 @@
   [:div
    [:p "We have a tie!"]
    [:p "Suggested: " (:suggested estimation)]
-   [:p "Votes: "
-    [:ul (for [[vote authors] (:votes estimation)]
-           [:li vote ": " (join ", " (resolve-participant-names authors participants))])]]])
+   [:p "Same votes: "
+    [:ul (for [[vote authors] (:same-votes estimation)]
+           [:li "Story points: " vote ", by " (join ", " (resolve-participant-names authors participants))])]]])
 
 (defmethod render-estimation :discuss
   [estimation participants]
@@ -91,7 +91,7 @@
    [:p "Difference too high! Lets discuss"]
    [:p "Highest: " (:highest-vote estimation)
     ", voters: "
-    (join ", " (resolve-participant-names (:higest-voters estimation) participants))]
+    (join ", " (resolve-participant-names (:highest-voters estimation) participants))]
    [:p "Lowest: " (:lowest-vote estimation)
     ", voters: "
     (join ", " (resolve-participant-names (:lowest-voters estimation) participants))]])
@@ -109,8 +109,9 @@
 
       [:p (str "Refinement session code " code)]
       [:div
-       [:p (format "Results of the last voting session for ticket %s" (:id ticket))]
+       [:h3 (format "Results of the last voting session for ticket %s" (:id ticket))]
        (render-estimation estimation participants)
+       [:h3 "Session stats"]
        [:p "Total voted: " (refinements/count-voted ticket)]
        [:p "Total skipped: " (refinements/count-skipped ticket)]
        [:p "Votes"
@@ -121,7 +122,7 @@
        [:p "Skipped by " (join ", " (resolve-participant-names (:skips session) participants))]
 
        (render-settings settings)]
-      #_[:script {:src "/assets/main.js"}]]]))
+      ]]))
 
 (defn render-ticket-previous-sessions
   [id sessions]

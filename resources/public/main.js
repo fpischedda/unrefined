@@ -74,7 +74,7 @@ function copy_estimation_link() {
   navigator.clipboard.writeText(url);
 }
 
-function revel_results() {
+function reveal_results() {
   var url = document.location.href + '/reveal';
   document.location.href = url;
 }
