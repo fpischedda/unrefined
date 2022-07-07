@@ -84,7 +84,7 @@
   [code ticket-id]
   (let [ticket {:id ticket-id
                 :status :unrefined
-                :score nil
+                :result nil
                 :current-session (new-empty-session)
                 :sessions []}]
     (swap! refinements_ update-in [code :tickets] assoc ticket-id ticket)

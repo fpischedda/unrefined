@@ -1,5 +1,6 @@
 (ns fpsd.views
   (:require [rum.core :as rum]
+            [clojure.string :refer [join]]
             [fpsd.refinements :as refinements]))
 
 (def project-title "Unrefined! (Alpha)")
@@ -33,6 +34,7 @@
         sessions (:sessions ticket)]
     [:html
      [:head [:title project-title]
+      [:link {:rel "stylesheet" :href "/assets/style.css"}]
       [:script {:src "/assets/sse.js"}]]
      [:body
       [:input {:id "refinement-code"
@@ -44,46 +46,59 @@
       [:h2 project-title]
       [:h4 "The refinement tool no one asked for!"]
 
-      [:p (str "Refinement session code " code)]
+      [:p "Refinement session code " [:strong code]]
       [:div
-       [:p "Ticket id: " ticket-id " " [:button {:onclick "copy_estimation_link()"} "Copy link"]
+       [:p "Ticket id: " [:strong (:id ticket)] " " [:button {:onclick "copy_estimation_link()"} "Copy link"]
+
         [:p "Current activity"]
         [:p "Total voted: " [:span {:id "total-voted"}
                              (refinements/count-voted ticket)]]
         [:p "Total skipped: " [:span {:id "total-skipped"}
                                (refinements/count-skipped ticket)]]
-        [:a {:href (format "/refine/%s/ticket/%s/reveal" code ticket-id)} "Go to results"]
+        [:button {:onclick "reveal_results()"} "Reveal results"]
+
         (if (empty? sessions)
-          [:p "No estimations yet"]
+          [:p "No previous estimations"]
           [:p "Previous estimations"])]
-       (render-settings settings)
-       ]
+       (render-settings settings)]
       [:script {:src "/assets/main.js"}]]]))
 
-(defmulti render-estimation :result)
+(defn resolve-participant-names
+  [user-ids participants]
+  (for [user-id user-ids]
+    (get participants user-id)))
+
+(defmulti render-estimation
+  (fn [estimation _participants] (:result estimation)))
 
 (defmethod render-estimation :winner
-  [estimation]
+  [estimation _participants]
   [:div
    [:p "Ticket estimated with a score of: " (:vote estimation)]])
 
 (defmethod render-estimation :ex-equo
-  [estimation]
+  [estimation participants]
   [:div
    [:p "We have a tie!"]
    [:p "Suggested: " (:suggested estimation)]
-   [:p "Votes: " (clojure.string/join ", " (:votes estimation))]])
+   [:p "Votes: "
+    [:ul (for [[vote authors] (:votes estimation)]
+           [:li vote ": " (join ", " (resolve-participant-names authors participants))])]]])
 
 (defmethod render-estimation :discuss
-  [estimation]
+  [estimation participants]
   [:div
    [:p "Difference too high! Lets discuss"]
-   [:p "Highest: " (:highest-vote estimation) ", voters: " (clojure.string/join ", " (:higest-voters estimation))]
-   [:p "Lowest: " (:lowest-vote estimation) ", voters: " (clojure.string/join ", " (:lowest-voters estimation))]])
+   [:p "Highest: " (:highest-vote estimation)
+    ", voters: "
+    (join ", " (resolve-participant-names (:higest-voters estimation) participants))]
+   [:p "Lowest: " (:lowest-vote estimation)
+    ", voters: "
+    (join ", " (resolve-participant-names (:lowest-voters estimation) participants))]])
 
 (rum/defc estimate-reveal
   [refinement ticket estimation]
-  (let [{:keys [code settings tickets]} refinement
+  (let [{:keys [code settings participants]} refinement
         session (-> ticket :current-session)]
     [:html
      [:head [:title project-title]
@@ -95,15 +110,17 @@
       [:p (str "Refinement session code " code)]
       [:div
        [:p (format "Results of the last voting session for ticket %s" (:id ticket))]
-       (render-estimation estimation)
+       (render-estimation estimation participants)
        [:p "Total voted: " (refinements/count-voted ticket)]
        [:p "Total skipped: " (refinements/count-skipped ticket)]
-       [:p "Votes" [:ul (for [{:keys [vote count authors]} (:votes estimation)]
-                          [:li "Vote " vote " selected " count " times by " (clojure.string/join ", " authors)])]]
-       [:p "Skipped by " (clojure.string/join ", " (:skips session))]
+       [:p "Votes"
+        [:ul
+         (for [{:keys [vote count authors]} (:votes estimation)]
+           [:li "Vote " vote " selected " count " times by "
+            (join ", " (resolve-participant-names authors participants))])]]
+       [:p "Skipped by " (join ", " (resolve-participant-names (:skips session) participants))]
 
-       (render-settings settings)
-       ]
+       (render-settings settings)]
       #_[:script {:src "/assets/main.js"}]]]))
 
 (defn render-ticket-previous-sessions
