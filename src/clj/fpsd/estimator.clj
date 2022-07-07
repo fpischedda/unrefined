@@ -93,31 +93,33 @@
 
 (comment
 
-  (estimate (-> ticket :sessions) settings) ;; {:result :winner, :vote 2}
+  (estimate ticket settings) ;; {:result :winner, :vote 2}
 
-  (estimate [{:story-points nil
-              :votes {"Yaroslav" 3
-                      "Luke" 2
-                      "Francesco" 2
-                      "Julio" 3}}]
+  (estimate {:current-session {:story-points nil
+                               :votes {"Yaroslav" 3
+                                       "Luke" 2
+                                       "Francesco" 2
+                                       "Julio" 3}}
+             :sessions []}
             settings) ;; => {:result :ex-equo, :suggested 3, :votes [2 3]}
 
-  (estimate [{:story-points nil
-              :votes {"Stan" 0
-                      "Luke" 2
-                      "Francesco" 4
-                      "Julio" 3}}]
+  (estimate {:current-session {:story-points nil
+                               :votes {"Stan" 0
+                                       "Luke" 2
+                                       "Francesco" 4
+                                       "Julio" 3}}
+             :sessions []}
             settings) ;; => {:result :discuss, :highest-vote 4, :highest-voters ["Francesco"], :lowest-vote 0, :lowest-voters ["Stan"]}
 
-  (estimate [{:story-points nil
-              :votes {"Stan" 4
-                      "Luke" 2
-                      "Francesco" 3
-                      "Julio" 0}}
-             {:story-points nil
-              :votes {"Stan" 3
-                      "Luke" 2
-                      "Francesco" 4
-                      "Julio" 3}}]
+  (estimate {:current-session {:story-points nil
+                               :votes {"Stan" 3
+                                       "Luke" 2
+                                       "Francesco" 4
+                                       "Julio" 3}}
+             :sessions [{:story-points nil
+                         :votes {"Stan" 4
+                                 "Luke" 2
+                                 "Francesco" 3
+                                 "Julio" 0}}]}
             settings) ;; => {:result :winner, :vote 3}
   )
