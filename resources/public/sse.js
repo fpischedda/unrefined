@@ -1,5 +1,5 @@
 function connect_to_events(code){
-  var source = new EventSource('/events/' + code);
+  var source = new EventSource('/refinement/' + code + '/events');
 
   source.onmessage = (e) => {
     console.log(e);
