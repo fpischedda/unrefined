@@ -73,8 +73,3 @@ function copy_estimation_link() {
   var url = document.location.href + '/estimate';
   navigator.clipboard.writeText(url);
 }
-
-function reveal_results() {
-  var url = document.location.href + '/reveal';
-  document.location.href = url;
-}

@@ -55,7 +55,8 @@
                              (refinements/count-voted ticket)]]
         [:p "Total skipped: " [:span {:id "total-skipped"}
                                (refinements/count-skipped ticket)]]
-        [:button {:onclick "reveal_results()"} "Reveal results"]
+        [:a {:href (format "/reveal/%s/ticket/%s/reveal" code (:id ticket))}
+         [:button "Reveal results"]]
 
         (if (empty? sessions)
           [:p "No previous estimations"]
