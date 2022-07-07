@@ -133,10 +133,7 @@
 (defn events-handler
   [{:keys [cookies path-params] :as _request}]
   (let [user-id (-> cookies (get "user-id") :value)
-        name (-> cookies (get "name") :value)
         code (:code path-params)
-        _ (refinements/send-event! code {:event "user-joined"
-                                         :payload {:username name}})
         events-stream (refinements/user-connected code user-id)]
     (reset! test-stream events-stream)
 

@@ -1,16 +1,10 @@
-function connect_to_events(code){
-  var source = new EventSource('/refinement/' + code + '/events');
+function connect_to_events(url, message_handler){
+  var source = new EventSource(url);
 
   source.onmessage = (e) => {
     console.log(e);
-    // const data = JSON.parse(e.data);
-    // console.log(data);
 
-    // if (data.msg == "end") {
-    //   console.log("Closing the stream.");
-    //   source.close();
-    // }
-    //update time series graph, tabular data etc
+    message_handler(e);
   };
 
   source.onopen = (e) => {

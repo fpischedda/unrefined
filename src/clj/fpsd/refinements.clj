@@ -118,8 +118,8 @@
   (let [ticket (get-in @refinements_ [code :tickets ticket-id])]
     (send-event! code {:event :user-voted
                        :payload {:user-id user-id
-                                 :total-voted (count-voted ticket)
-                                 :total-skipped (count-skipped ticket)
+                                 :voted (count-voted ticket)
+                                 :skipped (count-skipped ticket)
                                  :ticket-id ticket-id}})))
 
 (defn skip-ticket
@@ -133,6 +133,6 @@
   (let [ticket (get-in @refinements_ [code :tickets ticket-id])]
     (send-event! code {:event :user-skipped
                        :payload {:user-id user-id
-                                 :total-voted (count-voted ticket)
-                                 :total-skipped (count-skipped ticket)
+                                 :voted (count-voted ticket)
+                                 :skipped (count-skipped ticket)
                                  :ticket-id ticket-id}})))

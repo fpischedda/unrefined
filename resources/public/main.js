@@ -4,22 +4,21 @@ function get_refinement_code() {
   return code;
 }
 
+function handle_sse_messages(e) {
+  const data = JSON.parse(e.data);
+  console.log(data);
+
+  if( data.event == 'user-voted' || data.event == 'user-skipped' ) {
+    document.getElementById('total-voted').textContent = data.payload.voted;
+    document.getElementById('total-skipped').textContent = data.payload.skipped;
+  }
+}
+
 function start() {
 
   var code = get_refinement_code();
-  var source = connect_to_events(code);
-
-  source.addEventListener('user-joined', (e) => {
-    console.log('user-joined event received, payload', e.data);
-  })
-
-  source.addEventListener('ticket-added', (e) => {
-    console.log('ticket-added event received, payload', e.data);
-  })
-
-  source.addEventListener('vote-sent', (e) => {
-    console.log('vote-sent event received, payload', e.data);
-  })
+  var source = connect_to_events('/refine/' + code + '/events',
+				 handle_sse_messages);
 }
 
 start();
@@ -73,4 +72,9 @@ function send_vote() {
 function copy_estimation_link() {
   var url = document.location.href + '/estimate';
   navigator.clipboard.writeText(url);
+}
+
+function revel_results() {
+  var url = document.location.href + '/reveal';
+  document.location.href = url;
 }
