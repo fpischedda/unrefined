@@ -36,17 +36,10 @@
      [:head [:title project-title]
       [:link {:rel "stylesheet" :href "/assets/style.css"}]
       [:script {:src "/assets/sse.js"}]]
-     [:body
-      [:input {:id "refinement-code"
-               :value code
-               :type  "hidden"}]
-      [:input {:id "ticket-id"
-               :value (:id ticket)
-               :type  "hidden"}]
+     [:body {:data-refinement code :data-ticket ticket-id}
       [:h2 project-title]
       [:h4 "The refinement tool no one asked for!"]
 
-      [:p "Refinement session code " [:strong code]]
       [:div
        [:p "Ticket id: " [:strong (:id ticket)] " " [:button {:onclick "copy_estimation_link()"} "Copy link"]
 
@@ -58,9 +51,9 @@
         [:a {:href (format "/reveal/%s/ticket/%s/reveal" code (:id ticket))}
          [:button "Reveal results"]]
 
-        (if (empty? sessions)
-          [:p "No previous estimations"]
+        (when (empty? sessions)
           [:p "Previous estimations"])]
+
        (render-settings settings)]
       [:script {:src "/assets/main.js"}]]]))
 
@@ -137,13 +130,11 @@
   [code {:keys [id sessions] :as _ticket} name]
   [:html
    [:head [:title project-title]]
-   [:body
+   [:body {:data-refinement code :data-ticket id}
     [:h2 project-title]
     [:h4 "The refinement tool no one asked for!"]
     [:div
      [:form {:method "POST" :action (format "/refine/%s/ticket/%s/estimate" code id)}
-      [:input {:type :hidden :name "session-code" :value code}]
-      [:input {:type :hidden :name "ticket-id" :value id}]
 
       [:p "HI " [:input {:name "name"
                          :value name
@@ -160,7 +151,7 @@
   [code {:keys [id sessions] :as _ticket} name]
   [:html
    [:head [:title project-title]]
-   [:body
+   [:body {:data-refinement code :data-ticket id}
     [:h2 project-title]
     [:h4 "The refinement tool no one asked for!"]
     [:div

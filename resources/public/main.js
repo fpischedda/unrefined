@@ -1,5 +1,5 @@
 function get_refinement_code() {
-  var code = document.getElementById('refinement-code').value;
+  const code = document.getElementsByTagName('body')[0].dataset['refinement'];
   console.log('session code: ' + code);
   return code;
 }
@@ -16,16 +16,18 @@ function handle_sse_messages(e) {
 
 function start() {
 
-  var code = get_refinement_code();
-  var source = connect_to_events('/refine/' + code + '/events',
-				 handle_sse_messages);
+  const code = get_refinement_code();
+  const url = '/refine/' + code + '/events';
+
+  console.log('connecting to SSE endpoint ' + url)
+  connect_to_events(url, handle_sse_messages);
 }
 
 start();
 
 async function post_data(url, data) {
 
-  var post = {method: 'POST',
+  const post = {method: 'POST',
 	      credentials: 'same-origin',
 	      headers: {'Content-Type': 'application/json'},
 	      body: JSON.stringify(data)}

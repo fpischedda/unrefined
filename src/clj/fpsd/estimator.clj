@@ -58,7 +58,7 @@
        :vote first-vote})))
 
 (comment
-  (select-winner [{:vote 5, :count 1, :authors ["Nikhil"]} {:vote 3, :count 2, :authors ["Luke" "Stan"]} {:vote 2, :count 2, :authors ["Yaroslav" "Emmanuel"]} {:vote 1, :count 1, :authors ["Fra"]}]) ;; => {:result :ex-equo, :suggested 3, :votes [2 3]}
+  (select-winner [{:vote 5, :count 1, :authors ["Nikhil"]} {:vote 3, :count 2, :authors ["Luke" "Stan"]} {:vote 2, :count 2, :authors ["Yaroslav" "Emmanuel"]} {:vote 1, :count 1, :authors ["Fra"]}]) ;; => {:result :ex-equo, :suggested 3, :same-votes [2 3]}
 
   (select-winner [{:vote 5, :count 1, :authors ["Nikhil"]} {:vote 3, :count 2, :authors ["Luke" "Stan"]} {:vote 2, :count 3, :authors ["Yaroslav" "Emmanuel" "Julio"]} {:vote 1, :count 1, :authors ["Fra"]}]) ;; => {:result :winner, :vote 2}
   ,)

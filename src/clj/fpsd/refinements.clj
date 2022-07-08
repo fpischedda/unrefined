@@ -24,17 +24,6 @@
         code))))
 
 ;; SSE related code
-(defn user-connected
-  "Every refinement session have an event-sink (a stream in manifold,
-   or chan in core.async);
-   once users land to a refinement page a stream is created to send them events,
-   this stream is connected to the event-sync so, every message sent to it will
-   be dispatched to user streams."
-  [code user-id]
-  (let [user-stream (s/stream)
-        {event-sink :event-sink} (details code)]
-    (s/connect event-sink user-stream)
-    user-stream))
 
 (defn serialize-event
   "Return a one line string with the event serialized to JSON,
@@ -52,6 +41,19 @@
         {event-sink :event-sink} (details code)]
     (s/put! event-sink serialized)))
 
+(defn user-connected
+  "Every refinement session have an event-sink (a stream in manifold,
+   or chan in core.async);
+   once users land to a refinement page a stream is created to send them events,
+   this stream is connected to the event-sync so, every message sent to it will
+   be dispatched to user streams."
+  [code]
+  (let [user-stream (s/stream)
+        {event-sink :event-sink} (details code)]
+    (s/connect event-sink user-stream)
+    (send-event! code {:event "ping"})
+    user-stream))
+
 ;; refinements code
 (defn create!
   "Return a new refinement with its own unique code, the provided
@@ -67,11 +69,6 @@
                     :event-sink (s/stream)}]
     (swap! refinements_ assoc code refinement)
     refinement))
-
-(defn is-owner
-  "Return true if the user-id is the owner of the refinement"
-  [refinement user-id]
-  (= user-id (:owner refinement)))
 
 (defn new-empty-session
   []
