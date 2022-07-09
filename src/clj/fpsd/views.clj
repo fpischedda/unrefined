@@ -27,6 +27,24 @@
     [:li (str "Max delta: " (:max-vote-delta settings))]
     [:li (str "Max rediscussions: " (:max-rediscussions settings))]]])
 
+(defn link-to-ticket
+  [ticket-id]
+  (format "http://jira.atlassian.com/%s" ticket-id))
+
+(defn link-to-results
+  [code ticket-id]
+  (format "/reveal/%s/ticket/%s/reveal" code ticket-id))
+
+(defn ticket-activity
+  []
+  [:div
+   [:p "Current activity"]
+   [:p "Total voted: " [:span {:id "total-voted"}
+                        (refinements/count-voted ticket)]]
+   [:p "Total skipped: " [:span {:id "total-skipped"}
+                          (refinements/count-skipped ticket)]]])
+
+
 (rum/defc estimate-watch
   [refinement ticket-id]
   (let [{:keys [code settings tickets]} refinement
@@ -41,18 +59,16 @@
       [:h4 "The refinement tool no one asked for!"]
 
       [:div
-       [:p "Ticket id: " [:strong (:id ticket)] " " [:button {:onclick "copy_estimation_link()"} "Copy link"]
+       [:p "Ticket id: " [:a {:href (link-to-ticket ticket-id)} [:strong ticket-id]]
+        [:div [:small [:button {:onclick "copy_estimation_link()"} "Copy link to estimation page"]]]
 
-        [:p "Current activity"]
-        [:p "Total voted: " [:span {:id "total-voted"}
-                             (refinements/count-voted ticket)]]
-        [:p "Total skipped: " [:span {:id "total-skipped"}
-                               (refinements/count-skipped ticket)]]
-        [:a {:href (format "/reveal/%s/ticket/%s/reveal" code (:id ticket))}
-         [:button "Reveal results"]]
+        (ticket-activity)
 
-        (when (empty? sessions)
-          [:p "Previous estimations"])]
+        [:a {:href (link-to-results code ticket-id)}
+         [:button "Reveal results"]]]
+
+       (when (empty? sessions)
+         [:p "Previous estimations"])
 
        (render-settings settings)]
       [:script {:src "/assets/main.js"}]]]))
@@ -139,7 +155,8 @@
       [:p "HI " [:input {:name "name"
                          :value name
                          :placeholder "Insert your name here"}] " !"]
-      [:p (str "We are estimating ticket " id)
+      [:p "We are estimating ticket " [:a {href (link-to-ticket id)} [:string id]]
+       [:div [:small [:button {:onclick "copy_estimation_link()"} "Copy link to estimation page"]]]
 
        [:div "Please cast your vote "
         [:input {:type :text :name "vote"}]
@@ -156,6 +173,8 @@
     [:h4 "The refinement tool no one asked for!"]
     [:div
      [:p (format "Hi %s! Thank you for estimating the ticket %s." name id)]
+     (ticket-activity)
      [:p "Wait for a new ticket to estimate, or do whatever you want, I am not your mother..."]]
 
-    (render-ticket-previous-sessions id sessions)]])
+    (render-ticket-previous-sessions id sessions)
+    [:script {:src "/assets/main.js"}]]])
