@@ -1,38 +1,42 @@
 # unrefined
-A simple ticket refinement tool 
+A simple ticket estimation tool
 
-FIXME: Write a one-line description of your library/project.
+__Unrefined_ aims to provide a dead simple flow to estimate tickets
 
 ## Overview
 
-FIXME: Write a paragraph about the library/project and highlight its goals.
+Product guy:
+- Lands to the home page
+- Inserts the ticket id and creates an estimation session
+- Sends the link to the estimation page
+- Wait for estimations to come from engineers
+- Show results
+
+Engineer:
+- Land to the estimation page
+- Write their name and vote (or skip)
+- Wait for the final result
+
+Repeat...
 
 ## Development
 
-To get an interactive development environment run:
+You will need clojure build tools and a editor that support REPL driven development; popular options:
 
-    clojure -A:fig:build
-
-This will auto compile and send all changes to the browser without the
-need to reload. After the compilation process is complete, you will
-get a Browser Connected REPL. An easy way to try it is:
-
-    (js/alert "Am I connected?")
-
-and you should see an alert in the browser window.
-
-To clean all compiled files:
-
-    rm -rf target/public
+- Emacs + CIDER
+- VSCode + Calva
+- (Neo)Vim + Conjure or Fireplace
+- Cursive
+- Others...
 
 To create a production build run:
 
-	rm -rf target/public
-	clojure -A:fig:min
+	clj -T:build uber
 
+A new version of the standalone jar will be available in the target/ directory.
 
 ## License
 
-Copyright © 2018 FIXME
+Copyleft © 2022 Francesco Pischedda
 
-Distributed under the Eclipse Public License either version 1.0 or (at your option) any later version.
+Distributed under the AGPL v3, see LICENCE file for more details
