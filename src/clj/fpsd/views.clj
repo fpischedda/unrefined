@@ -157,11 +157,11 @@
                          :value name
                          :placeholder "Insert your name here"}] " !"]
       [:p "We are estimating ticket " [:a {:href (link-to-ticket id)} [:string id]]
-       [:div [:small [:button {:onclick "copy_estimation_link()"} "Copy link to estimation page"]]]
+       [:div [:small [:button {:onclick "copy_estimation_link()"} "Copy link to estimation page"]]]]
 
-       [:div "Please cast your vote "
-        [:input {:type :text :name "vote"}]
-        [:button {:name "estimate"} "Estimate!"]]]]]
+      [:p "Please cast your vote "
+       [:input {:type :text :name "vote"}]
+       [:button {:name "estimate"} "Estimate!"]]]]
 
     (render-ticket-previous-sessions id sessions)]])
 
