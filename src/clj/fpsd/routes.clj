@@ -45,7 +45,7 @@
 (def handler
   (ring/ring-handler
    (ring/router
-    [["/" {:get index}]
+    [["/" {:get handlers/index}]
      ["/assets/*" (ring/create-resource-handler)]
 
      ["/refine"
