@@ -129,7 +129,8 @@
          (for [{:keys [vote count authors]} (:votes estimation)]
            [:li "Vote " vote " selected " count " times by "
             (join ", " (resolve-participant-names authors participants))])]]
-       [:p "Skipped by " (join ", " (resolve-participant-names (:skips session) participants))]
+       (when (:skips session)
+         [:p "Skipped by " (join ", " (resolve-participant-names (:skips session) participants))])
 
        (render-settings settings)]
       ]]))
