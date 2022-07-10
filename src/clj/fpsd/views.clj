@@ -36,7 +36,7 @@
   (format "/reveal/%s/ticket/%s/reveal" code ticket-id))
 
 (defn ticket-activity
-  []
+  [ticket]
   [:div
    [:p "Current activity"]
    [:p "Total voted: " [:span {:id "total-voted"}
@@ -62,7 +62,7 @@
        [:p "Ticket id: " [:a {:href (link-to-ticket ticket-id)} [:strong ticket-id]]
         [:div [:small [:button {:onclick "copy_estimation_link()"} "Copy link to estimation page"]]]
 
-        (ticket-activity)
+        (ticket-activity ticket)
 
         [:a {:href (link-to-results code ticket-id)}
          [:button "Reveal results"]]]
@@ -156,7 +156,7 @@
       [:p "HI " [:input {:name "name"
                          :value name
                          :placeholder "Insert your name here"}] " !"]
-      [:p "We are estimating ticket " [:a {href (link-to-ticket id)} [:string id]]
+      [:p "We are estimating ticket " [:a {:href (link-to-ticket id)} [:string id]]
        [:div [:small [:button {:onclick "copy_estimation_link()"} "Copy link to estimation page"]]]
 
        [:div "Please cast your vote "
@@ -166,15 +166,18 @@
     (render-ticket-previous-sessions id sessions)]])
 
 (rum/defc estimate-done
-  [code {:keys [id sessions] :as _ticket} name]
+  [code {:keys [id sessions] :as ticket} name]
   [:html
-   [:head [:title project-title]]
+   [:head [:title project-title]
+    [:script {:src "/assets/sse.js"}]]]
    [:body {:data-refinement code :data-ticket id}
     [:h2 project-title]
     [:h4 "The refinement tool no one asked for!"]
     [:div
      [:p (format "Hi %s! Thank you for estimating the ticket %s." name id)]
-     (ticket-activity)
+
+     (ticket-activity ticket)
+
      [:p "Wait for a new ticket to estimate, or do whatever you want, I am not your mother..."]]
 
     (render-ticket-previous-sessions id sessions)
