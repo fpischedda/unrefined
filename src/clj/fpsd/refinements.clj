@@ -104,6 +104,14 @@
   [ticket]
   (count (-> ticket :current-session :skips)))
 
+(defn send-vote-event!
+  [event code user-id ticket]
+  (send-event! code {:event event
+                     :payload {:user-id user-id
+                               :voted (count-voted ticket)
+                               :skipped (count-skipped ticket)
+                               :ticket-id (:id ticket)}}))
+
 (defn vote-ticket
   [code ticket-id user-id vote]
   (swap! refinements_
@@ -113,11 +121,7 @@
                (update :skips disj user-id)
                (update :votes assoc user-id vote))))
   (let [ticket (get-in @refinements_ [code :tickets ticket-id])]
-    (send-event! code {:event :user-voted
-                       :payload {:user-id user-id
-                                 :voted (count-voted ticket)
-                                 :skipped (count-skipped ticket)
-                                 :ticket-id ticket-id}})))
+    (send-vote-event! :user-voted code user-id ticket)))
 
 (defn skip-ticket
   [code ticket-id user-id]
@@ -128,8 +132,4 @@
                (update :skips conj user-id)
                (update :votes dissoc user-id))))
   (let [ticket (get-in @refinements_ [code :tickets ticket-id])]
-    (send-event! code {:event :user-skipped
-                       :payload {:user-id user-id
-                                 :voted (count-voted ticket)
-                                 :skipped (count-skipped ticket)
-                                 :ticket-id ticket-id}})))
+    (send-vote-event! :user-skipped code user-id ticket)))
