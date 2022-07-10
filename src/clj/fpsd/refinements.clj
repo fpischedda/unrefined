@@ -1,6 +1,7 @@
 (ns fpsd.refinements
   (:require [cheshire.core :refer [generate-string]]
-            [manifold.stream :as s]))
+            [manifold.stream :as s]
+            [fpsd.estimator :as estimator]))
 
 (def default-settings {:max-vote-delta 3
                        :voting-style :linear ;; or :fibonacci
@@ -105,14 +106,18 @@
   (count (-> ticket :current-session :skips)))
 
 (defn send-vote-event!
+  "Send a vote event (both for voting and skipping) with some stats about the
+   current voting state of the ticket."
   [event code user-id ticket]
   (send-event! code {:event event
                      :payload {:user-id user-id
                                :voted (count-voted ticket)
                                :skipped (count-skipped ticket)
-                               :ticket-id (:id ticket)}}))
+                               :ticket-id (:id ticket)
+                               :votes (-> ticket :current-session :votes estimator/count-votes)}}))
 
 (defn vote-ticket
+  "Store that a user voted and send an event accordingly"
   [code ticket-id user-id vote]
   (swap! refinements_
          update-in [code :tickets ticket-id :current-session]
@@ -124,6 +129,7 @@
     (send-vote-event! :user-voted code user-id ticket)))
 
 (defn skip-ticket
+  "Store that a user skipped voting and send an event accordingly"
   [code ticket-id user-id]
   (swap! refinements_
          update-in [code :tickets ticket-id :current-session]
