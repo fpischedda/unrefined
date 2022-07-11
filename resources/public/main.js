@@ -4,13 +4,23 @@ function get_refinement_code() {
   return code;
 }
 
+function update_vote_stats(payload) {
+  document.getElementById('total-voted').textContent = payload.voted;
+  document.getElementById('total-skipped').textContent = payload.skipped;
+  var data = {labels: [], series: []}
+  payload.votes.forEach(i => {
+    data.labels.append(i.vote);
+    data.series.append(i.count);
+  });
+
+  new Chartist.Pie('#vote-chart', data);
+}
+
 function handle_sse_messages(e) {
   const data = JSON.parse(e.data);
   console.log(data);
 
   if( data.event == 'user-voted' || data.event == 'user-skipped' ) {
-    document.getElementById('total-voted').textContent = data.payload.voted;
-    document.getElementById('total-skipped').textContent = data.payload.skipped;
   }
 }
 
