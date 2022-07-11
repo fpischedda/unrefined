@@ -43,7 +43,7 @@
                         (refinements/count-voted ticket)]]
    [:p "Total skipped: " [:span {:id "total-skipped"}
                           (refinements/count-skipped ticket)]]
-   [:div {:id "vote-chart"}]])
+   [:div {:id "vote-chart" :width 700 :height 600}]])
 
 
 (rum/defc estimate-watch
@@ -53,9 +53,8 @@
         sessions (:sessions ticket)]
     [:html
      [:head [:title project-title]
-      [:link {:rel "stylesheet" :href "/assets/style.css"}]
-      [:link {:rel "stylesheet" :href "//cdn.jsdelivr.net/chartist.js/latest/chartist.min.css"}]
-      [:script {:src "//cdn.jsdelivr.net/chartist.js/latest/chartist.min.js"}]
+      [:link {:rel "stylesheet" :href "/assets/css/style.css"}]
+      [:script {:src "https://www.gstatic.com/charts/loader.js"}]
       [:script {:src "/assets/sse.js"}]]
      [:body {:data-refinement code :data-ticket ticket-id}
       [:h2 project-title]
@@ -172,8 +171,8 @@
   [code {:keys [id sessions] :as ticket} name]
   [:html
    [:head [:title project-title]
-    [:link {:rel "stylesheet" :href "//cdn.jsdelivr.net/chartist.js/latest/chartist.min.css"}]
-    [:script {:src "//cdn.jsdelivr.net/chartist.js/latest/chartist.min.js"}]
+    [:link {:rel "stylesheet" :href "/assets/css/style.css"}]
+    [:script {:src "https://www.gstatic.com/charts/loader.js"}]
     [:script {:src "/assets/sse.js"}]]
    [:body {:data-refinement code :data-ticket id}
     [:h2 project-title]

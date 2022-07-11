@@ -4,16 +4,23 @@ function get_refinement_code() {
   return code;
 }
 
+// when the google chart library will be loaded this will hold a reference
+// to the chart object, used for rendering
+var g_chart = null;
+
 function update_vote_stats(payload) {
   document.getElementById('total-voted').textContent = payload.voted;
   document.getElementById('total-skipped').textContent = payload.skipped;
-  var data = {labels: [], series: []}
+
+  var raw_data = [['Estimation', 'Number of votes'],];
+
   payload.votes.forEach(i => {
-    data.labels.append(i.vote);
-    data.series.append(i.count);
+    raw_data.push(['Vote: ' + i.vote, i.count]);
   });
 
-  new Chartist.Pie('#vote-chart', data);
+  const data = google.visualization.arrayToDataTable(raw_data);
+
+  g_chart.draw(data, {title: 'Distribution of votes'});
 }
 
 function handle_sse_messages(e) {
@@ -21,6 +28,7 @@ function handle_sse_messages(e) {
   console.log(data);
 
   if( data.event == 'user-voted' || data.event == 'user-skipped' ) {
+    update_vote_stats(data.payload);
   }
 }
 
@@ -28,6 +36,14 @@ function start() {
 
   const code = get_refinement_code();
   const url = '/refine/' + code + '/events';
+
+  google.charts.load('current', {'packages':['corechart']});
+  google.charts.setOnLoadCallback( e => {
+    const elem = document.getElementById('vote-chart');
+    g_chart = new google.visualization.PieChart(elem);
+  });
+
+
 
   console.log('connecting to SSE endpoint ' + url)
   connect_to_events(url, handle_sse_messages);
