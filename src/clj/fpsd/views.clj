@@ -1,17 +1,16 @@
 (ns fpsd.views
   (:require [rum.core :as rum]
             [clojure.string :refer [join]]
+            [fpsd.configuration :refer [config]]
             [fpsd.refinements :as refinements]))
-
-(def project-title "Unrefined! (Alpha)")
 
 (rum/defc index
   []
   [:html
-   [:head [:title project-title]
+   [:head [:title (:project-title config)]
     [:meta {:http-equiv "content-type" :content "text/html; charset=utf-8"}]]
    [:body
-    [:h2 project-title]
+    [:h2 (:project-title config)]
     [:h4 "The refinement tool no one asked for!"]
     [:div
      [:form {:method "POST" :action "/refine"}
@@ -29,7 +28,7 @@
 
 (defn link-to-ticket
   [ticket-id]
-  (format "http://jira.atlassian.com/%s" ticket-id))
+  (format (:link-to-ticket config) ticket-id))
 
 (defn link-to-results
   [code ticket-id]
@@ -52,12 +51,12 @@
         ticket (get tickets ticket-id)
         sessions (:sessions ticket)]
     [:html
-     [:head [:title project-title]
+     [:head [:title (:project-title config)]
       [:link {:rel "stylesheet" :href "/assets/css/style.css"}]
       [:script {:src "https://www.gstatic.com/charts/loader.js"}]
       [:script {:src "/assets/sse.js"}]]
      [:body {:data-refinement code :data-ticket ticket-id}
-      [:h2 project-title]
+      [:h2 (:project-title config)]
       [:h4 "The refinement tool no one asked for!"]
 
       [:div
@@ -113,10 +112,10 @@
   (let [{:keys [code settings participants]} refinement
         session (-> ticket :current-session)]
     [:html
-     [:head [:title project-title]
+     [:head [:title (:project-title config)]
       [:script {:src "/assets/sse.js"}]]
      [:body
-      [:h2 project-title]
+      [:h2 (:project-title config)]
       [:h4 "The refinement tool no one asked for!"]
 
       [:p (str "Refinement session code " code)]
@@ -148,9 +147,9 @@
 (rum/defc estimate-view
   [code {:keys [id sessions] :as _ticket} name]
   [:html
-   [:head [:title project-title]]
+   [:head [:title (:project-title config)]]
    [:body {:data-refinement code :data-ticket id}
-    [:h2 project-title]
+    [:h2 (:project-title config)]
     [:h4 "The refinement tool no one asked for!"]
     [:div
      [:form {:method "POST" :action (format "/refine/%s/ticket/%s/estimate" code id)}
@@ -170,12 +169,12 @@
 (rum/defc estimate-done
   [code {:keys [id sessions] :as ticket} name]
   [:html
-   [:head [:title project-title]
+   [:head [:title (:project-title config)]
     [:link {:rel "stylesheet" :href "/assets/css/style.css"}]
     [:script {:src "https://www.gstatic.com/charts/loader.js"}]
     [:script {:src "/assets/sse.js"}]]
    [:body {:data-refinement code :data-ticket id}
-    [:h2 project-title]
+    [:h2 (:project-title config)]
     [:h4 "The refinement tool no one asked for!"]
     [:div
      [:p (format "Hi %s! Thank you for estimating the ticket %s." name id)]
