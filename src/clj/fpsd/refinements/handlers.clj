@@ -125,7 +125,10 @@
         (if vote
           (refinements/vote-ticket code ticket-id user-id vote)
           (refinements/skip-ticket code ticket-id user-id))
-        {:body (rum/render-static-markup (views/estimate-done code ticket name))
+        {:body (render-file "templates/estimate-done.html" {:refinement refinement
+                                                            :ticket ticket
+                                                            :name name
+                                                            :vote (or vote "Skipped")})
          :headers {:content-type "text/html"}
          :cookies {"user-id" {:value user-id :same-site :strict}
                    "name" {:value name :same-site :strict}}

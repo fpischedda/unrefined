@@ -97,7 +97,7 @@ function send_vote() {
   return false;
 }
 
-function copy_estimation_link() {
-  var url = document.location.href + '/estimate';
+function copy_estimation_link(suffix='') {
+  var url = document.location.href + suffix;
   navigator.clipboard.writeText(url);
 }

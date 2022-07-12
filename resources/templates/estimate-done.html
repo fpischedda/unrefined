@@ -1,22 +1,19 @@
 {% extends "templates/base.html" %}
+
 {% block head %}
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 {% endblock %}
 
 {% block body %}
-<p> "Ticket id: " <a href="{{ticket.link-to-original}}">{{ticket.id}}</a>
-  <div><button onclick="copy_estimation_link('/estimate')">Copy link to estimation page</button></div>
-</p>
+<p>Hi {{name}}! Thank you for estimating the ticket {{ticket.id}}.</p>
+<p>Your vote: {{vote}}</p>
+
 <div>
   <p>Current activity</p>
   <p>Total voted: <span id="total-voted">{{ticket.current-session.votes|count}}</span></p>
   <p>Total skipped: <span id="total-skipped">{{ticket.current-session.skips|count}}</span></p>
   <div id="vote-chart" width="700" height="600"></div>
 </div>
-
-<a href="/refine/{{refinement.code}}/ticket/{{ticket.id}}/reveal">
-  <button>Reveal results</button>
-</a>
 
 <script type="text/javascript" src="/assets/sse.js"></script>
 <script type="text/javascript" src="/assets/main.js"></script>
