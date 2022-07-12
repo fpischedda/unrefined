@@ -1,6 +1,8 @@
 (ns fpsd.refinements.handlers
   (:require
    [rum.core :as rum]
+   [selmer.parser :refer [render-file]]
+   [fpsd.configuration :refer [config]]
    [fpsd.estimator :as estimator]
    [fpsd.refinements :as refinements]
    [fpsd.views :as views]))
@@ -12,8 +14,8 @@
   ,)
 
 (defn events-stream-handler
-  [{:keys [cookies path-params] :as _request}]
-  (let [code (:code path-params)
+  [request]
+  (let [code (-> request :path-params :code)
         events-stream (refinements/user-connected code)]
     (reset! test-stream events-stream)
 
@@ -62,8 +64,9 @@
 
 (defn index
   [request]
-  (let [user-id (or (-> request :common-cookies :user-id) (str (random-uuid)))]
-    {:body (rum/render-static-markup (views/index))
+  (let [user-id (or (-> request :common-cookies :user-id) (str (random-uuid)))
+        ctx {:project-title (:project-title config)}]
+    {:body (render-file "templates/index.html" ctx)
      :headers {:content-type "text/html"}
      :cookies {"user-id" {:value user-id
                           :same-site :strict}}}))
@@ -71,9 +74,11 @@
 (defn estimate-watch
   [request]
   (let [refinement (refinements/details (-> request :path-params :code))
-        ticket-id (-> request :path-params :ticket-id)]
+        ticket-id (-> request :path-params :ticket-id)
+        ticket (-> refinement :tickets (get ticket-id))]
     {:body
-     (rum/render-static-markup (views/estimate-watch refinement ticket-id))
+     (render-file "templates/estimate-watch.html" {:refinement refinement
+                                                   :ticket ticket})
      :headers {:content-type "text/html"}
      :status 200}))
 
@@ -97,7 +102,9 @@
         refinement (refinements/details code)]
 
     (if-let [ticket (-> refinement :tickets (get ticket-id))]
-      {:body (rum/render-static-markup (views/estimate-view code ticket name))
+      {:body (render-file "templates/estimate-view.html" {:refinement refinement
+                                                          :ticket ticket
+                                                          :name name})
        :headers {:content-type "text/html"}
        :cookies {"user-id" {:value user-id :same-site :strict}}
        :status 200}

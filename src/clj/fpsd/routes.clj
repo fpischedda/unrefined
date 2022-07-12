@@ -1,7 +1,6 @@
 (ns fpsd.routes
   (:require [reitit.ring :as ring]
             [reitit.ring.middleware.muuntaja :as muuntaja]
-            [manifold.stream :as s]
             [muuntaja.core :as m]
             [aleph.http :as http]
             [mount.core :as mount]

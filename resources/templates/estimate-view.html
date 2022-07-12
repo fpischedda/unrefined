@@ -1,0 +1,12 @@
+{% extends "templates/base.html" %}
+{% block body %}
+<form method="POST" action="/refine/{{refinement.code}}/ticket/{{ticket.id}}/estimate">
+  <p>HI <input type="text" name="name" {% if name %}value="{{name}}"{% endif %} placeholder="Insert your name here" />!</p>
+  <p>We are estimating ticket <a href="{{ticket.original-link}}">{{ticketid}}</a>
+    <div>
+      <button onclick="copy_estimation_link()">Copy link to estimation page</button>
+    </div>
+  </p>
+  <p>Please cast your vote <input type="text" name="vote"/> <button name="estimate">Estimate!</button><p/>
+</form>
+{% endblock %}

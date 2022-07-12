@@ -4,21 +4,6 @@
             [fpsd.configuration :refer [config]]
             [fpsd.refinements :as refinements]))
 
-(rum/defc index
-  []
-  [:html
-   [:head [:title (:project-title config)]
-    [:meta {:http-equiv "content-type" :content "text/html; charset=utf-8"}]]
-   [:body
-    [:h2 (:project-title config)]
-    [:h4 "The refinement tool no one asked for!"]
-    [:div
-     [:form {:method "POST" :action "/refine"}
-      [:p "HI! Please, write the id of the ticket to refine "
-       [:input {:name "ticket-id"
-                :placeholder "Ticket id here"}]
-       " and " [:button {:name "start-session"} "Start!"]]]]]])
-
 (defn render-settings
   [settings]
   [:p "Settings"
@@ -28,7 +13,8 @@
 
 (defn link-to-ticket
   [ticket-id]
-  (format (:link-to-ticket config) ticket-id))
+  (when-let [link-template (:link-to-ticket config)]
+    (format link-template ticket-id)))
 
 (defn link-to-results
   [code ticket-id]
@@ -43,36 +29,6 @@
    [:p "Total skipped: " [:span {:id "total-skipped"}
                           (refinements/count-skipped ticket)]]
    [:div {:id "vote-chart" :width 700 :height 600}]])
-
-
-(rum/defc estimate-watch
-  [refinement ticket-id]
-  (let [{:keys [code settings tickets]} refinement
-        ticket (get tickets ticket-id)
-        sessions (:sessions ticket)]
-    [:html
-     [:head [:title (:project-title config)]
-      [:link {:rel "stylesheet" :href "/assets/css/style.css"}]
-      [:script {:src "https://www.gstatic.com/charts/loader.js"}]
-      [:script {:src "/assets/sse.js"}]]
-     [:body {:data-refinement code :data-ticket ticket-id}
-      [:h2 (:project-title config)]
-      [:h4 "The refinement tool no one asked for!"]
-
-      [:div
-       [:p "Ticket id: " [:a {:href (link-to-ticket ticket-id)} [:strong ticket-id]]
-        [:div [:small [:button {:onclick "copy_estimation_link()"} "Copy link to estimation page"]]]
-
-        (ticket-activity ticket)
-
-        [:a {:href (link-to-results code ticket-id)}
-         [:button "Reveal results"]]]
-
-       (when (empty? sessions)
-         [:p "Previous estimations"])
-
-       (render-settings settings)]
-      [:script {:src "/assets/main.js"}]]]))
 
 (defn resolve-participant-names
   [user-ids participants]
