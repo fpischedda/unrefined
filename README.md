@@ -19,6 +19,14 @@ Engineer:
 
 Repeat...
 
+## Disclaimer
+
+This is a VERY primitive software, lots of stuff is missing like authentication,
+durable storage and a good UI; nothing stops you to trash it in favor of more
+mature solutions, but you are free to extend it to fit your needs.
+
+This is nothing more than an experiment so don't expect more from it.
+
 ## Development
 
 You will need clojure build tools and a editor that support REPL driven development; popular options:
