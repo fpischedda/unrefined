@@ -56,6 +56,7 @@
 
       ["/:code/ticket/:ticket-id/estimate" {:get handlers/estimate-view
                                             :post handlers/estimate-done}]
+      ["/:code/ticket/:ticket-id/events" {:get handlers/events-stream-handler}]
       ["/:code/ticket" {:post handlers/add-ticket}]
       ["/:code/events" {:get handlers/events-stream-handler}]]]
 

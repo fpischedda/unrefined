@@ -16,8 +16,11 @@
 (defn events-stream-handler
   [request]
   (let [code (-> request :path-params :code)
+        ticket-id (-> request :path-params :code)
         events-stream (refinements/user-connected code)]
     (reset! test-stream events-stream)
+    (when ticket-id
+      (refinements/send-ticket-status-event! code ticket-id))
 
     {:status 200
      :headers {:content-type "text/event-stream"
@@ -119,19 +122,15 @@
         ticket-id (-> request :path-params :ticket-id)
         refinement (refinements/details code)
         vote (-> request :params :vote parse-int)]
-    (if-let [ticket (-> refinement :tickets (get ticket-id))]
-      (do
-        (refinements/set-participant code user-id name)
-        (if vote
-          (refinements/vote-ticket code ticket-id user-id vote)
-          (refinements/skip-ticket code ticket-id user-id))
-        {:body (render-file "templates/estimate-done.html" {:refinement refinement
-                                                            :ticket ticket
-                                                            :name name
-                                                            :vote (or vote "Skipped")})
-         :headers {:content-type "text/html"}
-         :cookies {"user-id" {:value user-id :same-site :strict}
-                   "name" {:value name :same-site :strict}}
-         :status 200})
-      {:headers {:location "/"}
-       :status 302})))
+    (refinements/set-participant code user-id name)
+    (if vote
+      (refinements/vote-ticket code ticket-id user-id vote)
+      (refinements/skip-ticket code ticket-id user-id))
+    {:body (render-file "templates/estimate-done.html" {:refinement refinement
+                                                        :ticket (-> refinement :tickets (get ticket-id))
+                                                        :name name
+                                                        :vote (or vote "Skipped")})
+     :headers {:content-type "text/html"}
+     :cookies {"user-id" {:value user-id :same-site :strict}
+               "name" {:value name :same-site :strict}}
+     :status 200}))

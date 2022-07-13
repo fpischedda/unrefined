@@ -4,6 +4,12 @@ function get_refinement_code() {
   return code;
 }
 
+function get_ticket_id() {
+  const ticket = document.getElementsByTagName('body')[0].dataset['ticket'];
+  console.log('ticket id: ' + ticket);
+  return ticket;
+}
+
 // when the google chart library will be loaded this will hold a reference
 // to the chart object, used for rendering
 var g_chart = null;
@@ -27,7 +33,7 @@ function handle_sse_messages(e) {
   const data = JSON.parse(e.data);
   console.log(data);
 
-  if( data.event == 'user-voted' || data.event == 'user-skipped' ) {
+  if( data.event == 'user-voted' || data.event == 'user-skipped' || data.event == 'ticket-status') {
     update_vote_stats(data.payload);
   }
 }
@@ -35,7 +41,8 @@ function handle_sse_messages(e) {
 function start() {
 
   const code = get_refinement_code();
-  const url = '/refine/' + code + '/events';
+  const ticket_id = get_ticket_id();
+  const url = '/refine/' + code + '/ticket/' + ticket_id + '/events';
 
   google.charts.load('current', {'packages':['corechart']});
   google.charts.setOnLoadCallback( e => {
