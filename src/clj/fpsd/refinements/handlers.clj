@@ -33,7 +33,7 @@
   (let [owner-id (or (-> request :common-cookies :user-id) (str (random-uuid)))
         ticket-id (-> request :params :ticket-id)
         refinement (refinements/create! owner-id {})
-        _ticket (refinements/add-ticket (:code refinement) ticket-id)]
+        _ticket (refinements/add-new-ticket! (:code refinement) ticket-id)]
     {:headers {:location (format "/refine/%s/ticket/%s" (:code refinement) ticket-id)}
      :cookies {"user-id" {:value owner-id :same-site :strict}}
      :status 302}))
@@ -42,7 +42,7 @@
   [request]
   (let [code (-> request :path-params :code)
         ticket-id (-> request :params :ticket-id)]
-    (refinements/add-ticket code ticket-id)
+    (refinements/add-new-ticket! code ticket-id)
     {:headers {:location (format "/refine/%s/ticket/%s" code ticket-id)}
      :status 302}))
 

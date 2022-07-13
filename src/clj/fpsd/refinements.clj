@@ -1,6 +1,7 @@
 (ns fpsd.refinements
   (:require [cheshire.core :refer [generate-string]]
             [manifold.stream :as s]
+            [fpsd.configuration :refer [config]]
             [fpsd.estimator :as estimator]))
 
 (def default-settings {:max-vote-delta 3
@@ -82,22 +83,31 @@
    :votes {}
    :skips #{}})
 
-(defn add-ticket
+(defn new-ticket
+  [ticket-id]
+  {:id ticket-id
+   :status :unrefined
+   :result nil
+   :current-session (new-empty-session)
+   :sessions []
+   :link-to-original ((:format-link-to-ticket config) ticket-id)})
+
+(defn add-ticket!
+  [code ticket]
+  (swap! refinements_ update-in [code :tickets] assoc (:id ticket) ticket)
+  ticket)
+
+(defn add-new-ticket!
   [code ticket-id]
-  (let [ticket {:id ticket-id
-                :status :unrefined
-                :result nil
-                :current-session (new-empty-session)
-                :sessions []}]
-    (swap! refinements_ update-in [code :tickets] assoc ticket-id ticket)
-    ticket))
+  (add-ticket code (new-ticket ticket-id)))
 
 (defn set-participant
   [code user-id name]
   (swap! refinements_ update-in [code :participants] assoc user-id name))
 
 (comment
-  (add-ticket "OKCAVG" "PE-1234")
+  (add-ticket! "OKCAVG" (new-ticket "PE-1234"))
+  (add-new-ticket! "OKCAVG" "PE-1234")
   (identity (get @refinements_ "OKCAVG"))
   ,)
 
