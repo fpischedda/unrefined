@@ -35,6 +35,13 @@ To create a production build run:
 
 A new version of the standalone jar will be available in the target/ directory.
 
+## Configuration
+
+The server can be configured by setting few environment variables:
+- UNREFINED_HTTP_PORT: the port the web server will listen to
+- UNREFINED_NREPL_PORT: the port to connect with an nrepl client
+- UNREFINED_LINK_TO_TICKET: a format string used to create a link to your ticket system, for ex. http://your.ticketing-system.whatever/ticket/%s
+
 ## License
 
 Copyleft © 2022 Francesco Pischedda
