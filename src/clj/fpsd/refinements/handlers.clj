@@ -16,7 +16,7 @@
 (defn events-stream-handler
   [request]
   (let [code (-> request :path-params :code)
-        ticket-id (-> request :path-params :code)
+        ticket-id (-> request :path-params :ticket-id)
         events-stream (refinements/user-connected code)]
     (reset! test-stream events-stream)
     (when ticket-id

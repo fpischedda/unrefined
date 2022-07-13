@@ -38,22 +38,24 @@ function handle_sse_messages(e) {
   }
 }
 
-function start() {
-
+function init_sse() {
   const code = get_refinement_code();
   const ticket_id = get_ticket_id();
   const url = '/refine/' + code + '/ticket/' + ticket_id + '/events';
+
+  console.log('connecting to SSE endpoint ' + url)
+  connect_to_events(url, handle_sse_messages);
+}
+
+function start() {
 
   google.charts.load('current', {'packages':['corechart']});
   google.charts.setOnLoadCallback( e => {
     const elem = document.getElementById('vote-chart');
     g_chart = new google.visualization.PieChart(elem);
+
+    init_sse();
   });
-
-
-
-  console.log('connecting to SSE endpoint ' + url)
-  connect_to_events(url, handle_sse_messages);
 }
 
 start();
