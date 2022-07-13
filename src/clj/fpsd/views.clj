@@ -1,24 +1,8 @@
 (ns fpsd.views
   (:require [rum.core :as rum]
             [clojure.string :refer [join]]
+            [fpsd.configuration :refer [config]]
             [fpsd.refinements :as refinements]))
-
-(def project-title "Unrefined! (Alpha)")
-
-(rum/defc index
-  []
-  [:html
-   [:head [:title project-title]
-    [:meta {:http-equiv "content-type" :content "text/html; charset=utf-8"}]]
-   [:body
-    [:h2 project-title]
-    [:h4 "The refinement tool no one asked for!"]
-    [:div
-     [:form {:method "POST" :action "/refine"}
-      [:p "HI! Please, write the id of the ticket to refine "
-       [:input {:name "ticket-id"
-                :placeholder "Ticket id here"}]
-       " and " [:button {:name "start-session"} "Start!"]]]]]])
 
 (defn render-settings
   [settings]
@@ -29,7 +13,8 @@
 
 (defn link-to-ticket
   [ticket-id]
-  (format "http://jira.atlassian.com/%s" ticket-id))
+  (when-let [link-template (:link-to-ticket config)]
+    (format link-template ticket-id)))
 
 (defn link-to-results
   [code ticket-id]
@@ -44,36 +29,6 @@
    [:p "Total skipped: " [:span {:id "total-skipped"}
                           (refinements/count-skipped ticket)]]
    [:div {:id "vote-chart" :width 700 :height 600}]])
-
-
-(rum/defc estimate-watch
-  [refinement ticket-id]
-  (let [{:keys [code settings tickets]} refinement
-        ticket (get tickets ticket-id)
-        sessions (:sessions ticket)]
-    [:html
-     [:head [:title project-title]
-      [:link {:rel "stylesheet" :href "/assets/css/style.css"}]
-      [:script {:src "https://www.gstatic.com/charts/loader.js"}]
-      [:script {:src "/assets/sse.js"}]]
-     [:body {:data-refinement code :data-ticket ticket-id}
-      [:h2 project-title]
-      [:h4 "The refinement tool no one asked for!"]
-
-      [:div
-       [:p "Ticket id: " [:a {:href (link-to-ticket ticket-id)} [:strong ticket-id]]
-        [:div [:small [:button {:onclick "copy_estimation_link()"} "Copy link to estimation page"]]]
-
-        (ticket-activity ticket)
-
-        [:a {:href (link-to-results code ticket-id)}
-         [:button "Reveal results"]]]
-
-       (when (empty? sessions)
-         [:p "Previous estimations"])
-
-       (render-settings settings)]
-      [:script {:src "/assets/main.js"}]]]))
 
 (defn resolve-participant-names
   [user-ids participants]
@@ -113,10 +68,10 @@
   (let [{:keys [code settings participants]} refinement
         session (-> ticket :current-session)]
     [:html
-     [:head [:title project-title]
+     [:head [:title (:project-title config)]
       [:script {:src "/assets/sse.js"}]]
      [:body
-      [:h2 project-title]
+      [:h2 (:project-title config)]
       [:h4 "The refinement tool no one asked for!"]
 
       [:p (str "Refinement session code " code)]
@@ -144,45 +99,3 @@
      (for [s (reverse sessions)]
        [:ul (for [[name vote] (:votes s)]
               [:li (str name ": " vote)])])]))
-
-(rum/defc estimate-view
-  [code {:keys [id sessions] :as _ticket} name]
-  [:html
-   [:head [:title project-title]]
-   [:body {:data-refinement code :data-ticket id}
-    [:h2 project-title]
-    [:h4 "The refinement tool no one asked for!"]
-    [:div
-     [:form {:method "POST" :action (format "/refine/%s/ticket/%s/estimate" code id)}
-
-      [:p "HI " [:input {:name "name"
-                         :value name
-                         :placeholder "Insert your name here"}] " !"]
-      [:p "We are estimating ticket " [:a {:href (link-to-ticket id)} [:string id]]
-       [:div [:small [:button {:onclick "copy_estimation_link()"} "Copy link to estimation page"]]]]
-
-      [:p "Please cast your vote "
-       [:input {:type :text :name "vote"}]
-       [:button {:name "estimate"} "Estimate!"]]]]
-
-    (render-ticket-previous-sessions id sessions)]])
-
-(rum/defc estimate-done
-  [code {:keys [id sessions] :as ticket} name]
-  [:html
-   [:head [:title project-title]
-    [:link {:rel "stylesheet" :href "/assets/css/style.css"}]
-    [:script {:src "https://www.gstatic.com/charts/loader.js"}]
-    [:script {:src "/assets/sse.js"}]]
-   [:body {:data-refinement code :data-ticket id}
-    [:h2 project-title]
-    [:h4 "The refinement tool no one asked for!"]
-    [:div
-     [:p (format "Hi %s! Thank you for estimating the ticket %s." name id)]
-
-     (ticket-activity ticket)
-
-     [:p "Wait for a new ticket to estimate, or do whatever you want, I am not your mother..."]]
-
-    (render-ticket-previous-sessions id sessions)
-    [:script {:src "/assets/main.js"}]]])

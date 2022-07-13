@@ -1,0 +1,6 @@
+{% extends "templates/base.html" %}
+{% block body %}
+<form method="POST" action="/refine">
+  <p>HI! Please, write the id of the ticket to refine <input type="text" name="ticket-id" placeholder="Ticket id here"/> and <button name="start-session">Start!</button></p>
+</form>
+{% endblock %}

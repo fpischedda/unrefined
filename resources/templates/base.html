@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Unrefined! (Alpha)</title>
+    <meta http_equiv="content-type" content="text/html; charset=utf-8"></meta>
+    <link rel="stylesheet" href="/assets/css/style.css" />
+    {% block head %}{% endblock %}
+  </head>
+  <body data-refinement="{{refinement.code}}" data-ticket="{{ticket.id}}">
+    <h2>Unrefined!</h2>
+    <h4>The refinement tool no one asked for!</h4>
+    {% block body %}{% endblock %}
+  </body>
+</html>

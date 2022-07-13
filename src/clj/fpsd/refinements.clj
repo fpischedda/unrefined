@@ -17,6 +17,10 @@
   [code]
   (get @refinements_ code))
 
+(defn ticket-details
+  [code ticket-id]
+  (-> code details :tickets (get ticket-id)))
+
 (defn gen-random-code [length]
   (loop []
     (let [code (apply str (take length (repeatedly #(char (+ (rand 26) 65)))))]
@@ -115,6 +119,18 @@
                                :skipped (count-skipped ticket)
                                :ticket-id (:id ticket)
                                :votes (-> ticket :current-session :votes estimator/count-votes)}}))
+
+(defn send-ticket-status-event!
+  "Send an event with the current status of the ticket,
+   usually sent when a user connects for the first time, to refresh
+   ticket stats."
+  [code ticket-id]
+  (let [ticket (ticket-details code ticket-id)]
+    (send-event! code {:event :ticket-status
+                       :payload {:voted (count-voted ticket)
+                                 :skipped (count-skipped ticket)
+                                 :ticket-id ticket-id
+                                 :votes (-> ticket :current-session :votes estimator/count-votes)}})))
 
 (defn vote-ticket
   "Store that a user voted and send an event accordingly"

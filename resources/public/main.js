@@ -4,6 +4,12 @@ function get_refinement_code() {
   return code;
 }
 
+function get_ticket_id() {
+  const ticket = document.getElementsByTagName('body')[0].dataset['ticket'];
+  console.log('ticket id: ' + ticket);
+  return ticket;
+}
+
 // when the google chart library will be loaded this will hold a reference
 // to the chart object, used for rendering
 var g_chart = null;
@@ -27,26 +33,29 @@ function handle_sse_messages(e) {
   const data = JSON.parse(e.data);
   console.log(data);
 
-  if( data.event == 'user-voted' || data.event == 'user-skipped' ) {
+  if( data.event == 'user-voted' || data.event == 'user-skipped' || data.event == 'ticket-status') {
     update_vote_stats(data.payload);
   }
 }
 
-function start() {
-
+function init_sse() {
   const code = get_refinement_code();
-  const url = '/refine/' + code + '/events';
+  const ticket_id = get_ticket_id();
+  const url = '/refine/' + code + '/ticket/' + ticket_id + '/events';
+
+  console.log('connecting to SSE endpoint ' + url)
+  connect_to_events(url, handle_sse_messages);
+}
+
+function start() {
 
   google.charts.load('current', {'packages':['corechart']});
   google.charts.setOnLoadCallback( e => {
     const elem = document.getElementById('vote-chart');
     g_chart = new google.visualization.PieChart(elem);
+
+    init_sse();
   });
-
-
-
-  console.log('connecting to SSE endpoint ' + url)
-  connect_to_events(url, handle_sse_messages);
 }
 
 start();
@@ -97,7 +106,7 @@ function send_vote() {
   return false;
 }
 
-function copy_estimation_link() {
-  var url = document.location.href + '/estimate';
+function copy_estimation_link(suffix='') {
+  var url = document.location.href + suffix;
   navigator.clipboard.writeText(url);
 }
