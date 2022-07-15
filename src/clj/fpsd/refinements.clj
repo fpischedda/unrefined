@@ -99,7 +99,7 @@
 
 (defn add-new-ticket!
   [code ticket-id]
-  (add-ticket code (new-ticket ticket-id)))
+  (add-ticket! code (new-ticket ticket-id)))
 
 (defn set-participant
   [code user-id name]

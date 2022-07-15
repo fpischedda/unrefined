@@ -59,7 +59,8 @@
             (if-let [value (get params item)]
               (assoc acc item value)
               acc))
-          {:points (-> params :points parse-int)}
+          {:points (-> params :points parse-int)
+           :name (or (-> params :name) "Anonymous Coward")}
           [:implementation :tests :risk :pain]))
 
 (defn vote-ticket
