@@ -14,7 +14,7 @@
 
 (defn count-votes
   [votes]
-  (->> (group-by second votes)
+  (->> (group-by (comp :points second) votes)
        (reduce (fn [acc [vote authors]]
                  (conj acc {:vote vote
                             :count (count authors)

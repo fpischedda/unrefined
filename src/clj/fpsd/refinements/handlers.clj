@@ -53,14 +53,23 @@
   (try (Integer/parseInt int-str)
        (catch NumberFormatException _ nil)))
 
+(defn get-vote-from-params
+  [params]
+  (reduce (fn [acc item]
+            (if-let [value (get params item)]
+              (assoc acc item value)
+              acc))
+          {:points (-> params :points parse-int)}
+          [:implementation :tests :risk :pain]))
+
 (defn vote-ticket
   "kind of REST api ready handler...still here just because"
   [request]
   (let [code (-> request :path-params :code)
         ticket-id (-> request :path-params :ticket-id)
         user-id (-> request :common-cookies :user-id)
-        vote (-> request :params :vote parse-int)]
-    (if vote
+        vote (-> request :params get-vote-from-params)]
+    (if (:vote vote)
       (refinements/vote-ticket code ticket-id user-id vote)
       (refinements/skip-ticket code ticket-id user-id))
     {:status 201}))
@@ -121,7 +130,7 @@
         code (-> request :path-params :code)
         ticket-id (-> request :path-params :ticket-id)
         refinement (refinements/details code)
-        vote (-> request :params :vote parse-int)]
+        vote (-> request :params get-vote-from-params)]
     (refinements/set-participant code user-id name)
     (if vote
       (refinements/vote-ticket code ticket-id user-id vote)
