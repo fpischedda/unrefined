@@ -55,13 +55,15 @@
 
 (defn get-vote-from-params
   [params]
-  (reduce (fn [acc item]
-            (if-let [value (get params item)]
-              (assoc acc item value)
-              acc))
-          {:points (-> params :points parse-int)
-           :name (or (-> params :name) "Anonymous Coward")}
-          [:implementation :tests :risk :pain]))
+  {:points (-> params :points parse-int)
+   :name (or (-> params :name) "Anonymous Coward")
+   :breakdown
+   (reduce (fn [acc item]
+             (if-let [value (get params item)]
+               (assoc acc item value)
+               acc))
+           {}
+           [:implementation :refactoring :tests :risk :pain])})
 
 (defn vote-ticket
   "kind of REST api ready handler...still here just because"

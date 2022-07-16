@@ -1,17 +1,22 @@
 {% extends "templates/base.html" %}
 {% block body %}
 <form method="POST" action="/refine/{{refinement.code}}/ticket/{{ticket.id}}/estimate">
-  <p>HI <input type="text" name="name" {% if name %}value="{{name}}"{% endif %} placeholder="Insert your name here" />!</p>
-  <p>We are estimating ticket <a href="{{ticket.original-link}}">{{ticketid}}</a>
+  <p>We are estimating ticket <a href="{{ticket.original-link}}">{{ticket.id}}</a>
     <div>
       <button onclick="copy_estimation_link()">Copy link to estimation page</button>
     </div>
   </p>
-  <p>Please cast your vote <input type="text" name="points"/> <button name="estimate">Estimate!</button></p>
-  <p>Implementation <input type="text" name="implementation"></p>
-  <p>Tests <input type="text" name="tests"></p>
-  <p>Refactoring <input type="text" name="refactoring"></p>
-  <p>Risk <input type="text" name="risk"></p>
-  <p>Pain <input type="text" name="pain"></p>
+  <p>HI <input type="text" name="name" {% if name %}value="{{name}}"{% endif %} placeholder="Insert your name here" />!
+    , please cast your vote <input type="text" size="4" name="points"/> <button name="estimate">Estimate!</button></p>
+  <p>Points breakdown (optional)</p>
+  <table>
+    <tbody style="border-size: 1px">
+      <tr><td>Implementation</td><td><input type="text" size="4" name="implementation"></td></tr>
+      <tr><td>Tests</td><td><input type="text" size="4" name="tests"></td></tr>
+      <tr><td>Refactoring</td><td><input type="text" size="4" name="refactoring"></td></tr>
+      <tr><td>Risk</td><td><input type="text" size="4" name="risk"></td></tr>
+      <tr><td>Pain</td><td><input type="text" size="4" name="pain"></td></tr>
+      </tbody>
+  </table>
 </form>
 {% endblock %}

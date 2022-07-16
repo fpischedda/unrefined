@@ -21,7 +21,7 @@ function update_vote_stats(payload) {
   var raw_data = [['Estimation', 'Number of votes'],];
 
   payload.votes.forEach(i => {
-    raw_data.push(['Vote: ' + i.vote, i.count]);
+    raw_data.push(['Points: ' + i.points, i.count]);
   });
 
   const data = google.visualization.arrayToDataTable(raw_data);
