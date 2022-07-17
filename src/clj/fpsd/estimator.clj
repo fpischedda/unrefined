@@ -14,24 +14,30 @@
 
 (defn count-votes
   [votes]
-  (->> (group-by second votes)
-       (reduce (fn [acc [vote authors]]
-                 (conj acc {:vote vote
-                            :count (count authors)
-                            :authors (mapv first authors)}))
+  (->> (group-by (comp :points second) votes)
+       (reduce (fn [acc [points point-and-authors]]
+                 (conj acc {:points points
+                            :count (count point-and-authors)
+                            :authors (mapv (comp :name second) point-and-authors)}))
                [])
-       (sort-by :vote)
+       (sort-by :points)
        (reverse)
        (into [])))
 
 (comment
+  (group-by (comp :points second) {"id1" {:points 3 :name "Luke"}
+                "id2" {:points 2 :name "Yaroslav"}
+                "id3" {:points 2 :name "Emmanuel"}
+                "id4" {:points 1 :name "Fra"}
+                "id5" {:points 3 :name "Stanislav"}
+                "id6" {:points 5 :name "Nikhil"}})
 
-  (count-votes {"Luke" 3
-                "Yaroslav" 2
-                "Emmanuel" 2
-                "Fra" 1
-                "Stan" 3
-                "Nikhil" 5}) ;; => [{:vote 5, :count 1, :authors ["Nikhil"]} {:vote 3, :count 2, :authors ["Luke" "Stan"]} {:vote 2, :count 2, :authors ["Yaroslav" "Emmanuel"]} {:vote 1, :count 1, :authors ["Fra"]}]
+  (count-votes {"id1" {:points 3 :name "Luke"}
+                "id2" {:points 2 :name "Yaroslav"}
+                "id3" {:points 2 :name "Emmanuel"}
+                "id4" {:points 1 :name "Fra"}
+                "id5" {:points 3 :name "Stanislav"}
+                "id6" {:points 5 :name "Nikhil"}}) ;; => [{:points 5, :count 1, :authors ["Nikhil"]} {:points 3, :count 2, :authors ["Luke" "Stanislav"]} {:points 2, :count 2, :authors ["Yaroslav" "Emmanuel"]} {:points 1, :count 1, :authors ["Fra"]}]
   )
 
 (defn votes-delta
