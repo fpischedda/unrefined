@@ -6,7 +6,7 @@
 
 {% block body %}
 <div class="flex-container">
-  <div>
+  <div style="width: 50%">
     <p>Hi {{name}}!<br/>Thank you for estimating the ticket {{ticket.id}}.</p>
     <p>Your vote: {{vote.points}}</p>
     <p>Breakdown:
@@ -17,11 +17,11 @@
     </p>
   </div>
 
-  <div>
+  <div style="width: 50%">
     <p>Current estimation</p>
     <p>Total voted: <span id="total-voted">{{ticket.current-session.votes|count}}</span></p>
     <p>Total skipped: <span id="total-skipped">{{ticket.current-session.skips|count}}</span></p>
-    <div id="vote-chart" width="700" height="600"></div>
+    <div id="vote-chart" height="600"></div>
   </div>
 </div>
 <script type="text/javascript" src="/assets/sse.js"></script>
