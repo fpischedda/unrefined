@@ -1,6 +1,6 @@
 (ns fpsd.estimator)
 
-(def settings {:max-vote-delta 3
+(def settings {:max-points-delta 3
                :voting-style :linear ;; or :fibonacci
                :max-rediscussions 1
                :suggestion-strategy :majority})
@@ -9,7 +9,7 @@
              :story-points nil
              :sessions [{:story-points nil ;; the final story points of the session
                          :events [] ;; possibly hold a list of events like, voted, skipped, session started/stopped
-                         :votes {"Francesco" 2
+                         :points {"Francesco" 2
                                  "Luke" 2}}]})
 
 (defn count-votes
@@ -45,28 +45,28 @@
   provided sorted seq of vote frequencies; an entry looks like:
   [vote [voters...]]"
   [frequencies]
-  (- (-> frequencies first :vote) (-> frequencies last :vote)))
+  (- (-> frequencies first :points) (-> frequencies last :points)))
 
 (comment
-  (votes-delta [{:vote 5, :count 1, :authors ["Nikhil"]} {:vote 3, :count 2, :authors ["Luke" "Stan"]} {:vote 2, :count 2, :authors ["Yaroslav" "Emmanuel"]} {:vote 1, :count 1, :authors ["Fra"]}] ) ;; => 4
+  (votes-delta [{:points 5, :count 1, :authors ["Nikhil"]} {:points 3, :count 2, :authors ["Luke" "Stan"]} {:points 2, :count 2, :authors ["Yaroslav" "Emmanuel"]} {:points 1, :count 1, :authors ["Fra"]}] ) ;; => 4
   ,)
 
 (defn select-winner
   [counted-votes]
   (let [sorted (reverse (sort-by :count counted-votes))
-        [{first-vote :vote first-voters :authors}
-         {second-vote :vote second-voters :authors} _] sorted]
+        [{first-vote :points first-voters :authors}
+         {second-vote :points second-voters :authors} _] sorted]
     (if (= (count first-voters) (count second-voters))
       {:result :ex-equo
        :suggested (max first-vote second-vote)
-       :same-votes [[first-vote first-voters] [second-vote second-voters]]}
+       :same-points [[first-vote first-voters] [second-vote second-voters]]}
       {:result :winner
-       :vote first-vote})))
+       :points first-vote})))
 
 (comment
-  (select-winner [{:vote 5, :count 1, :authors ["Nikhil"]} {:vote 3, :count 2, :authors ["Luke" "Stan"]} {:vote 2, :count 2, :authors ["Yaroslav" "Emmanuel"]} {:vote 1, :count 1, :authors ["Fra"]}]) ;; => {:result :ex-equo, :suggested 3, :same-votes [2 3]}
+  (select-winner [{:points 5, :count 1, :authors ["Nikhil"]} {:points 3, :count 2, :authors ["Luke" "Stan"]} {:points 2, :count 2, :authors ["Yaroslav" "Emmanuel"]} {:points 1, :count 1, :authors ["Fra"]}]) ;; => {:result :ex-equo, :suggested 3, :same-votes [2 3]}
 
-  (select-winner [{:vote 5, :count 1, :authors ["Nikhil"]} {:vote 3, :count 2, :authors ["Luke" "Stan"]} {:vote 2, :count 3, :authors ["Yaroslav" "Emmanuel" "Julio"]} {:vote 1, :count 1, :authors ["Fra"]}]) ;; => {:result :winner, :vote 2}
+  (select-winner [{:points 5, :count 1, :authors ["Nikhil"]} {:points 3, :count 2, :authors ["Luke" "Stan"]} {:points 2, :count 3, :authors ["Yaroslav" "Emmanuel" "Julio"]} {:points 1, :count 1, :authors ["Fra"]}]) ;; => {:result :winner, :points 2}
   ,)
 
 (defn can-rediscuss
@@ -80,15 +80,15 @@
 
 (defn estimate
   [{:keys [current-session sessions] :as _ticket} settings]
-  (let [votes (-> current-session :votes count-votes)
+  (let [votes (-> current-session :points count-votes)
         delta (votes-delta votes)
         result
-        (if (or (< delta (:max-vote-delta settings))
+        (if (or (< delta (:max-points-delta settings))
                 (not (can-rediscuss sessions settings)))
           (select-winner votes)
 
-          (let [{lowest-vote :vote lowest-voters :authors} (last votes)
-                {highest-vote :vote highest-voters :authors} (first votes)]
+          (let [{lowest-vote :points lowest-voters :authors} (last votes)
+                {highest-vote :points highest-voters :authors} (first votes)]
             {:result :discuss
              :highest-vote highest-vote
              :highest-voters highest-voters
@@ -99,33 +99,33 @@
 
 (comment
 
-  (estimate ticket settings) ;; {:result :winner, :vote 2}
+  (estimate ticket settings) ;; {:result :winner, :points 2}
 
   (estimate {:current-session {:story-points nil
-                               :votes {"Yaroslav" 3
-                                       "Luke" 2
-                                       "Francesco" 2
-                                       "Julio" 3}}
+                               :points {"1" {:points 3 :name "Bob"}
+                                        "2" {:points 2 :name "Alice"}
+                                        "3" {:points 2 :name "Joe"}
+                                        "4" {:points 3 :name "Foo"}}}
              :sessions []}
-            settings) ;; => {:result :ex-equo, :suggested 3, :votes [2 3]}
+            settings) ;; => {:result :ex-equo, :suggested 3, :same-points [[2 ["Alice" "Joe"]] [3 ["Bob" "Foo"]]], :votes [{:points 3, :count 2, :authors ["Bob" "Foo"]} {:points 2, :count 2, :authors ["Alice" "Joe"]}]}
 
   (estimate {:current-session {:story-points nil
-                               :votes {"Stan" 0
-                                       "Luke" 2
-                                       "Francesco" 4
-                                       "Julio" 3}}
+                               :points {"1" {:points 0 :name "Bob"}
+                                        "2" {:points 1 :name "Alice"}
+                                        "3" {:points 4 :name "Joe"}
+                                        "4" {:points 3 :name "Foo"}}}
              :sessions []}
-            settings) ;; => {:result :discuss, :highest-vote 4, :highest-voters ["Francesco"], :lowest-vote 0, :lowest-voters ["Stan"]}
+            settings) ;; {:result :discuss, :highest-vote 4, :highest-voters ["Joe"], :lowest-vote 0, :lowest-voters ["Bob"], :votes [{:points 4, :count 1, :authors ["Joe"]} {:points 3, :count 1, :authors ["Foo"]} {:points 1, :count 1, :authors ["Alice"]} {:points 0, :count 1, :authors ["Bob"]}]}
 
   (estimate {:current-session {:story-points nil
-                               :votes {"Stan" 3
-                                       "Luke" 2
-                                       "Francesco" 4
-                                       "Julio" 3}}
+                               :points {"1" {:points 3 :name "Bob"}
+                                        "2" {:points 2 :name "Alice"}
+                                        "3" {:points 1 :name "Joe"}
+                                        "4" {:points 3 :name "Foo"}}}
              :sessions [{:story-points nil
-                         :votes {"Stan" 4
-                                 "Luke" 2
-                                 "Francesco" 3
-                                 "Julio" 0}}]}
-            settings) ;; => {:result :winner, :vote 3}
+                         :points {"1" {:points 4 :name "Bob"}
+                                  "2" {:points 2 :name "Alice"}
+                                  "3" {:points 2 :name "Joe"}
+                                  "4" {:points 0 :name "Foo"}}}]}
+            settings) ;; => {:result :winner, :points 3, :votes [{:points 3, :count 2, :authors ["Bob" "Foo"]} {:points 2, :count 1, :authors ["Alice"]} {:points 1, :count 1, :authors ["Joe"]}]}
   )

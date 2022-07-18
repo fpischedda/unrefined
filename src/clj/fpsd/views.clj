@@ -4,32 +4,6 @@
             [fpsd.configuration :refer [config]]
             [fpsd.refinements :as refinements]))
 
-(defn render-settings
-  [settings]
-  [:p "Settings"
-   [:ul
-    [:li (str "Max delta: " (:max-vote-delta settings))]
-    [:li (str "Max rediscussions: " (:max-rediscussions settings))]]])
-
-(defn link-to-ticket
-  [ticket-id]
-  (when-let [link-template (:link-to-ticket config)]
-    (format link-template ticket-id)))
-
-(defn link-to-results
-  [code ticket-id]
-  (format "/reveal/%s/ticket/%s/reveal" code ticket-id))
-
-(defn ticket-activity
-  [ticket]
-  [:div
-   [:p "Current activity"]
-   [:p "Total voted: " [:span {:id "total-voted"}
-                        (refinements/count-voted ticket)]]
-   [:p "Total skipped: " [:span {:id "total-skipped"}
-                          (refinements/count-skipped ticket)]]
-   [:div {:id "vote-chart" :width 700 :height 600}]])
-
 (defn resolve-participant-names
   [user-ids participants]
   (for [user-id user-ids]
@@ -83,19 +57,8 @@
        [:p "Total skipped: " (refinements/count-skipped ticket)]
        [:p "Votes"
         [:ul
-         (for [{:keys [vote count authors]} (:votes estimation)]
-           [:li "Vote " vote " selected " count " times by "
-            (join ", " (resolve-participant-names authors participants))])]]
-       (when (:skips session)
-         [:p "Skipped by " (join ", " (resolve-participant-names (:skips session) participants))])
+         (for [{:keys [points count authors]} (:votes estimation)]
+           [:li "Points " points " selected " count " times by "
+            (join ", " authors)])]]]
 
-       (render-settings settings)]
       ]]))
-
-(defn render-ticket-previous-sessions
-  [id sessions]
-  (when-not (empty? sessions)
-    [:p (str "Previous voting sessions for ticket " id)
-     (for [s (reverse sessions)]
-       [:ul (for [[name vote] (:votes s)]
-              [:li (str name ": " vote)])])]))
