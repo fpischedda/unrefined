@@ -1,7 +1,7 @@
 {% extends "templates/base.html" %}
 {% block body %}
 <form method="POST" action="/refine/{{refinement.code}}/ticket/{{ticket.id}}/estimate">
-  <p>We are estimating ticket <a href="{{ticket.original-link}}">{{ticket.id}}</a>
+  <p>We are estimating ticket <a href="{{ticket.link-to-original}}">{{ticket.id}}</a>
     <div>
       <button onclick="copy_estimation_link()">Copy link to estimation page</button>
     </div>
