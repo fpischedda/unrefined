@@ -1,11 +1,18 @@
+body {
+  background-color: #fbfbf8;
+}
+
+.header {
+  background-color: #9acde0;
+  padding: 8px;
+}
+
 .flex-container {
   display: flex;
-  background-color: #e6ffe6;
+  background-color: #cbe1ef;
 }
 
 .flex-container > div {
-  background-color: #f1f1f1;
-  margin: 10px;
-  padding: 20px;
+  padding: 8px;
   font-size: 30px;
 }

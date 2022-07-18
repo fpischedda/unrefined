@@ -7,8 +7,10 @@
     {% block head %}{% endblock %}
   </head>
   <body data-refinement="{{refinement.code}}" data-ticket="{{ticket.id}}">
-    <h2>Unrefined!</h2>
-    <h4>The refinement tool no one asked for!</h4>
+    <div class="header">
+      <h2>Unrefined!</h2>
+      <h4>The refinement tool no one asked for!</h4>
+    </div>
     {% block body %}{% endblock %}
   </body>
 </html>
