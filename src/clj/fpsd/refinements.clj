@@ -84,13 +84,13 @@
    :skips #{}})
 
 (defn new-ticket
-  [ticket-id]
+  [ticket-id ticket-url]
   {:id ticket-id
    :status :unrefined
    :result nil
    :current-session (new-empty-session)
    :sessions []
-   :link-to-original ((:format-link-to-ticket config) ticket-id)})
+   :link-to-original ticket-url})
 
 (defn add-ticket!
   [code ticket]
@@ -98,8 +98,8 @@
   ticket)
 
 (defn add-new-ticket!
-  [code ticket-id]
-  (add-ticket! code (new-ticket ticket-id)))
+  [code ticket-id ticket-url]
+  (add-ticket! code (new-ticket ticket-id ticket-url)))
 
 (defn set-participant
   [code user-id name]
