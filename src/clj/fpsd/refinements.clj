@@ -10,8 +10,11 @@
 
 (def refinements_ (atom {}))
 
-(identity @refinements_)
-(identity (get @refinements_ "OKCAVG"))
+(comment
+  (identity @refinements_)
+  (identity (get @refinements_ "OKCAVG"))
+  (identity (get @refinements_ "YEMJVQ" "asdf"))
+  ,)
 
 (defn details
   [code]
@@ -163,3 +166,26 @@
                (update :votes dissoc user-id))))
   (let [ticket (get-in @refinements_ [code :tickets ticket-id])]
     (send-vote-event! :user-skipped code user-id ticket)))
+
+(defn new-estimation-for-ticket
+  "Given a ticket, move the current estimation to the :sessions list
+   and set :current-session to an empty session.
+   Returns the updated ticket."
+  [ticket]
+  (-> ticket
+      (update :sessions conj (:current-session ticket)
+      (assoc :current-session (new-empty-session))) )
+
+(defn send-re-estimate-event!
+  "Send an event to signal that a new estimation for a ticket is starting"
+  [code ticket-id]
+  (send-event! code {:event :re-estimate-ticket
+                     :payload {:code code
+                               :ticket-id ticket-id}}))
+
+(defn re-estimate-ticket
+  "Updates the ticket to start a new estimation and send an event to clients"
+  [code ticket-id]
+  (swap! refinements_ update-in [code :tickets ticket-id]
+         new-estimation-for-ticket)
+  (send-re-estimate-event! code ticket-id))

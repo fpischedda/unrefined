@@ -171,3 +171,11 @@
      :cookies {"user-id" {:value user-id :same-site :strict}
                "name" {:value name :same-site :strict}}
      :status 200}))
+
+(defn estimate-again
+  [request]
+  (let [code (-> request :path-params :code)
+        ticket-id (-> request :path-params :ticket-id)]
+    (refinements/re-estimate-ticket code ticket-id)
+    {:headers {:location (format "/refine/%s/ticket/%s" code ticket-id)}
+     :status 302}))

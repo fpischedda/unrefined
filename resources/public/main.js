@@ -29,12 +29,19 @@ function update_vote_stats(payload) {
   g_chart.draw(data, {title: 'Distribution of votes'});
 }
 
+function goto_estimation_page(code, ticket_id) {
+  document.location.href = '/refine/' + code + '/ticket/' + ticket_id + '/estimate';
+}
+
 function handle_sse_messages(e) {
   const data = JSON.parse(e.data);
   console.log(data);
 
   if( data.event == 'user-voted' || data.event == 'user-skipped' || data.event == 'ticket-status') {
     update_vote_stats(data.payload);
+  }
+  else if( data.event == 're-estimate-ticket' && document.location.href.includes('estimate')) {
+    goto_estimation_page(data.payload.code, data.payload.ticket_id);
   }
 }
 
