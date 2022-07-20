@@ -113,14 +113,16 @@
      :headers {:content-type "text/html"}
      :status 200}))
 
-(defn estimate-reveal
+(defn estimate-results
   [request]
   (let [refinement (refinements/details (-> request :path-params :code))
         ticket-id (-> request :path-params :ticket-id)
         ticket (-> refinement :tickets (get ticket-id))
         estimation (estimator/estimate ticket (:settings refinement))]
     {:body
-     (rum/render-static-markup (views/estimate-reveal refinement ticket estimation))
+     (render-file "templates/estimate-results.html" {:refinement refinement
+                                                     :ticket ticket
+                                                     :estimation estimation})
      :headers {:content-type "text/html"}
      :status 200}))
 

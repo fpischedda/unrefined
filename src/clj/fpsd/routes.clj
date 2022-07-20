@@ -52,7 +52,7 @@
            :post handlers/create-refinement}]
 
       ["/:code/ticket/:ticket-id" {:get handlers/estimate-watch}]
-      ["/:code/ticket/:ticket-id/reveal" {:get handlers/estimate-reveal}]
+      ["/:code/ticket/:ticket-id/results" {:get handlers/estimate-results}]
 
       ["/:code/ticket/:ticket-id/estimate" {:get handlers/estimate-view
                                             :post handlers/estimate-done}]
