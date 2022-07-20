@@ -4,20 +4,12 @@
             [muuntaja.core :as m]
             [aleph.http :as http]
             [mount.core :as mount]
-            [portal.api :as portal]
             [ring.middleware.cookies :refer [wrap-cookies]]
             [ring.middleware.keyword-params :refer [wrap-keyword-params]]
             [ring.middleware.params :refer [wrap-params]]
             [ring.middleware.session :refer [wrap-session]]
             [fpsd.configuration :refer [config]]
             [fpsd.refinements.handlers :as handlers]))
-
-(comment
-  (def p (portal/open))
-  (add-tap #'portal/submit)
-
-  (portal/close p)
-  ,)
 
 (defn add-headers [handler fixed-headers]
   (fn [request]
@@ -52,7 +44,7 @@
            :post handlers/create-refinement}]
 
       ["/:code/ticket/:ticket-id" {:get handlers/estimate-watch}]
-      ["/:code/ticket/:ticket-id/reveal" {:get handlers/estimate-reveal}]
+      ["/:code/ticket/:ticket-id/results" {:get handlers/estimate-results}]
 
       ["/:code/ticket/:ticket-id/estimate" {:get handlers/estimate-view
                                             :post handlers/estimate-done}]

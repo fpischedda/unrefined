@@ -1,11 +1,17 @@
 (ns fpsd.refinements.handlers
   (:require
-   [rum.core :as rum]
+   [portal.api :as portal]
    [selmer.parser :refer [render-file]]
    [fpsd.configuration :refer [config]]
    [fpsd.estimator :as estimator]
-   [fpsd.refinements :as refinements]
-   [fpsd.views :as views]))
+   [fpsd.refinements :as refinements]))
+
+(comment
+  (def p (portal/open))
+  (add-tap #'portal/submit)
+
+  (portal/close p)
+  ,)
 
 (def test-stream (atom nil))
 (comment
@@ -113,14 +119,17 @@
      :headers {:content-type "text/html"}
      :status 200}))
 
-(defn estimate-reveal
+(defn estimate-results
   [request]
   (let [refinement (refinements/details (-> request :path-params :code))
         ticket-id (-> request :path-params :ticket-id)
         ticket (-> refinement :tickets (get ticket-id))
         estimation (estimator/estimate ticket (:settings refinement))]
+
     {:body
-     (rum/render-static-markup (views/estimate-reveal refinement ticket estimation))
+     (render-file "templates/estimate-results.html" {:refinement refinement
+                                                     :ticket ticket
+                                                     :estimation estimation})
      :headers {:content-type "text/html"}
      :status 200}))
 

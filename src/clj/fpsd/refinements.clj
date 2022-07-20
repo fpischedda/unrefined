@@ -1,10 +1,9 @@
 (ns fpsd.refinements
   (:require [cheshire.core :refer [generate-string]]
             [manifold.stream :as s]
-            [fpsd.configuration :refer [config]]
             [fpsd.estimator :as estimator]))
 
-(def default-settings {:max-vote-delta 3
+(def default-settings {:max-points-delta 3
                        :voting-style :linear ;; or :fibonacci
                        :max-rediscussions 1
                        :suggestion-strategy :majority})
@@ -106,8 +105,7 @@
   (swap! refinements_ update-in [code :participants] assoc user-id name))
 
 (comment
-  (add-ticket! "OKCAVG" (new-ticket "PE-1234"))
-  (add-new-ticket! "OKCAVG" "PE-1234")
+  (add-ticket! "OKCAVG" "PE-1234")
   (identity (get @refinements_ "OKCAVG"))
   ,)
 
