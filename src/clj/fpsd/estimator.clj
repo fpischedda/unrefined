@@ -60,7 +60,8 @@
     (if (= (count first-voters) (count second-voters))
       {:result :ex-equo
        :suggested (max first-vote second-vote)
-       :same-points [[first-vote first-voters] [second-vote second-voters]]}
+       :same-points [{:points first-vote :authors first-voters}
+                     {:points second-vote :authors second-voters}]}
       {:result :winner
        :points first-vote})))
 
