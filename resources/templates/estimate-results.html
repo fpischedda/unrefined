@@ -10,29 +10,42 @@
       <div><button onclick="copy_estimation_link('/estimate')">Copy link to estimation page</button></div>
     </p>
 
-  {% if estimation.result == :winner %}
+  {% ifequal estimation.result :winner %}
     <p>Ticket estimated with a score of <strong>{{estimation.points}}</strong></p>
-  {% elif estimation.result == :ex-equo %}
-    <p>We have a tie!</p>
-    <p>I suggest {{estimation.points}} story points but you may have a different opinion, so here are the points with the same amout of votes</p>
-    <ul>
-      {% for item in estimation.same-votes %}
-      <li>{{item.points}}: {{item.authors|join ", "}}</li>
-      {% endfor %}
-    </ul>
-  {% elif estimation.result == :discuss %}
-    <p>Oh no! The difference between story points is too big! I guess you have to discuss now...</p>
-    <p>Highest points {{estimation.highest-vote}}, selected by {{estimation.highest-voters|join ", "}}</p>
-    <p>Lowest points {{estimation.lowest-vote}}, selected by {{estimation.lowest-voters|join ", "}}</p>
-  {% endif%}
-
     <p>Points and voters
       <ul>
 	{% for item in estimation.votes %}
-	<li>{{item.points}}, selected by {{item.authors|join ", "}}
+	<li>{{item.points}}, selected by {{item.authors}}
 	{% endfor %}
       </ul>
     </p>
+  {% endifequal %}
+
+  {% ifequal estimation.result :ex-equo %}
+    <p>We have a tie!</p>
+    <p>I suggest <strong>{{estimation.suggested}}</strong> story points but you may have a different opinion, so here are the points with the same amout of votes</p>
+    <ul>
+      {% for item in estimation.same-votes %}
+      <li>{{item.points}}: {{item.authors}}</li>
+      {% endfor %}
+    </ul>
+  {% endifequal %}
+
+  {% ifequal estimation.result :discuss %}
+    <p>Oh no! The difference between story points is too big! I guess you have to discuss now...</p>
+    <p>Highest points {{estimation.highest-vote}}, selected by
+      <ul>{% for voter in estimation.highest-voters %}
+	<li>{{voter}}</li>
+	{% endfor %}
+      </ul>
+    </p>
+    <p>Lowest points {{estimation.lowest-vote}}, selected by
+      <ul>{% for voter in estimation.lowest-voters %}
+	<li>{{voter}}</li>
+	{% endfor %}
+      </ul>
+    </p>
+  {% endifequal %}
   </div>
   <div style="width: 50%">
     <p>Current activity</p>

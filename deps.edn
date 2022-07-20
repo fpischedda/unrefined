@@ -6,7 +6,6 @@
         metosin/malli {:mvn/version "0.8.4"}
         metosin/reitit {:mvn/version "0.5.18"}
         mount/mount {:mvn/version "0.1.16"}
-        rum/rum {:mvn/version "0.12.9"}
         selmer/selmer {:mvn/version "1.12.53"}
         environ/environ {:mvn/version "1.2.0"}
         nrepl/nrepl {:mvn/version "0.9.0"}}

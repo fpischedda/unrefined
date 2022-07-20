@@ -1,11 +1,17 @@
 (ns fpsd.refinements.handlers
   (:require
-   [rum.core :as rum]
+   [portal.api :as portal]
    [selmer.parser :refer [render-file]]
    [fpsd.configuration :refer [config]]
    [fpsd.estimator :as estimator]
-   [fpsd.refinements :as refinements]
-   [fpsd.views :as views]))
+   [fpsd.refinements :as refinements]))
+
+(comment
+  (def p (portal/open))
+  (add-tap #'portal/submit)
+
+  (portal/close p)
+  ,)
 
 (def test-stream (atom nil))
 (comment
@@ -119,6 +125,7 @@
         ticket-id (-> request :path-params :ticket-id)
         ticket (-> refinement :tickets (get ticket-id))
         estimation (estimator/estimate ticket (:settings refinement))]
+
     {:body
      (render-file "templates/estimate-results.html" {:refinement refinement
                                                      :ticket ticket

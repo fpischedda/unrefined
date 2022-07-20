@@ -8,9 +8,8 @@
 (def ticket {:id "PE-12345"
              :story-points nil
              :sessions [{:story-points nil ;; the final story points of the session
-                         :events [] ;; possibly hold a list of events like, voted, skipped, session started/stopped
-                         :points {"Francesco" 2
-                                 "Luke" 2}}]})
+                         :points {"id1" {:points 2 :name "Bob"}
+                                  "id2" {:points 3 :name "Alice"}}}]})
 
 (defn count-votes
   [votes]
@@ -101,9 +100,12 @@
 
 (comment
 
-  (count-votes (-> fpsd.refinements/refinements_ deref (get "DXREAW") :tickets (get "asdf") :current-session))
-  (-> fpsd.refinements/refinements_ deref (get "DXREAW") :tickets (get "asdf") :current-session) ;; {:status :open, :result nil, :votes {"8645c7b2-2049-4346-b75e-196d2ad98ae1" {:points 3, :name "bob", :breakdown {:implementation "", :refactoring "", :tests "", :risk "", :pain ""}}, "b7efd909-a2b4-4d1f-83d1-75fd0ff3190b" {:points 3, :name "alice", :breakdown {:implementation "", :refactoring "", :tests "", :risk "", :pain ""}}}, :skips #{}}
-  (estimate (-> fpsd.refinements/refinements_ deref (get "DXREAW") :tickets (get "asdf") :current-session) settings)
+  (count-votes (-> fpsd.refinements/refinements_ deref (get "HUHGJF") :tickets (get "asdf") :current-session :votes))
+
+  (votes-delta (count-votes (-> fpsd.refinements/refinements_ deref (get "HUHGJF") :tickets (get "asdf") :current-session :votes)))
+
+  (-> fpsd.refinements/refinements_ deref (get "HUHGJF") :tickets (get "asdf") :current-session) ;; {:status :open, :result nil, :votes {"eb550ebf-e206-471f-850c-e9e80443a235" {:points 3, :name "bob", :breakdown {:implementation "", :refactoring "", :tests "", :risk "", :pain ""}}, "4196502c-edb5-4c23-8861-4f042d8ecfed" {:points 3, :name "alice", :breakdown {:implementation "", :refactoring "", :tests "", :risk "", :pain ""}}}, :skips #{}}
+  (estimate (-> fpsd.refinements/refinements_ deref (get "HUHGJF") :tickets (get "asdf")) settings) ;; {:result :winner, :points 3, :votes [{:points 3, :count 2, :authors ["bob" "alice"]}]}
 
   (estimate ticket settings) ;; {:result :winner, :points 2}
 
