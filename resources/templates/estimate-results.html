@@ -53,6 +53,11 @@
 	{% endfor %}
       </ul>
     </p>
+    <p>
+      <form method="POST" action="/refine/{{refinement.code}}/ticket/{{ticket.id}}/re-estimate">
+	<button>Re-estimate ticket</button>
+      </form>
+    </p>
   {% endifequal %}
   </div>
   <div style="width: 50%">
