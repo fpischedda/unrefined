@@ -173,15 +173,15 @@
    Returns the updated ticket."
   [ticket]
   (-> ticket
-      (update :sessions conj (:current-session ticket)
-      (assoc :current-session (new-empty-session))) )
+      (update :sessions conj (:current-session ticket))
+      (assoc :current-session (new-empty-session))))
 
 (defn send-re-estimate-event!
   "Send an event to signal that a new estimation for a ticket is starting"
   [code ticket-id]
   (send-event! code {:event :re-estimate-ticket
                      :payload {:code code
-                               :ticket-id ticket-id}}))
+                               :ticket_id ticket-id}}))
 
 (defn re-estimate-ticket
   "Updates the ticket to start a new estimation and send an event to clients"
