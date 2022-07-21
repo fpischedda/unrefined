@@ -15,6 +15,10 @@
       Reveal results
       </a>
     </button>
+
+    <form method="POST" action="/refine/{{refinement.code}}">
+      <input type="text" name="ticket-url" placeholder="Ticket URL here"/><button>Estimate new ticket</button>
+    </form>
   </div>
   <div style="width: 50%">
     <p>Current activity</p>
