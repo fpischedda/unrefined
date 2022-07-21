@@ -16,3 +16,8 @@ body {
   padding: 8px;
   font-size: 30px;
 }
+
+button a {
+  text-decoration: none;
+  color: black;
+}
