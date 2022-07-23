@@ -64,7 +64,7 @@
         ticket-url (-> request :params :ticket-url)
         ticket-id (extract-ticket-id-from-url ticket-url)]
 
-    (refinements/add-new-ticket! code ticket-id)
+    (refinements/add-new-ticket! code ticket-id ticket-url)
     {:headers {:location (format "/refine/%s/ticket/%s" code ticket-id)}
      :status 302}))
 
