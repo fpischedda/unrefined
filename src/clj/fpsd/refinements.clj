@@ -13,7 +13,6 @@
 (comment
   (identity @refinements_)
   (identity (get @refinements_ "OKCAVG"))
-  (identity (get @refinements_ "YEMJVQ" "asdf"))
   ,)
 
 (defn details
@@ -94,9 +93,17 @@
    :sessions []
    :link-to-original ticket-url})
 
+(defn send-ticket-added-event!
+  "Send an event to signal that a new ticket is being estimated"
+  [code ticket-id]
+  (send-event! code {:event :added-ticket
+                     :payload {:code code
+                               :ticket_id ticket-id}}))
+
 (defn add-ticket!
   [code ticket]
   (swap! refinements_ update-in [code :tickets] assoc (:id ticket) ticket)
+  (send-ticket-added-event! code (:id ticket))
   ticket)
 
 (defn add-new-ticket!

@@ -10,11 +10,19 @@ function get_ticket_id() {
   return ticket;
 }
 
+function copy_estimation_link(suffix='') {
+  var url = document.location.href + suffix;
+  navigator.clipboard.writeText(url);
+}
+
 // when the google chart library will be loaded this will hold a reference
 // to the chart object, used for rendering
 var g_chart = null;
 
 function update_vote_stats(payload) {
+
+  if( g_chart == null) { return; }
+
   document.getElementById('total-voted').textContent = payload.voted;
   document.getElementById('total-skipped').textContent = payload.skipped;
 
@@ -43,6 +51,11 @@ function handle_sse_messages(e) {
   else if( data.event == 're-estimate-ticket' && document.location.href.includes('estimate')) {
     goto_estimation_page(data.payload.code, data.payload.ticket_id);
   }
+  else if( data.event == 'added-ticket') {
+    if(data.payload.ticket_id != get_ticket_id()) {
+      goto_estimation_page(data.payload.code, data.payload.ticket_id);
+    }
+  }
 }
 
 function init_sse() {
@@ -63,57 +76,4 @@ function start() {
 
     init_sse();
   });
-}
-
-start();
-
-async function post_data(url, data) {
-
-  const post = {method: 'POST',
-	      credentials: 'same-origin',
-	      headers: {'Content-Type': 'application/json'},
-	      body: JSON.stringify(data)}
-
-  const response = await fetch(url, post);
-
-  return response.json();
-}
-
-function create_ticket() {
-  var code = get_refinement_code();
-  var ticket_id = document.getElementById('new-ticket-id');
-  var data = {ticket_id: ticket_id.value,
-	      code: code}
-
-  var url = '/api/refinement/' + code + '/ticket';
-
-  post_data(url, data).then( data => {
-    console.log('create ticket response');
-    console.log(data);
-    ticket_id.value(null);
-  })
-
-  return false;
-}
-
-function send_vote() {
-  var code = get_refinement_code();
-  var ticket_id = document.getElementById('current-ticket');
-  var vote = document.getElementById('vote');
-  var data = {vote: vote.value}
-
-  var url = '/api/refinement/' + code + '/ticket/vote';
-
-  post_data(url, data).then( data => {
-    console.log('vote response');
-    console.log(data);
-    ticket_id.value(null);
-  })
-
-  return false;
-}
-
-function copy_estimation_link(suffix='') {
-  var url = document.location.href + suffix;
-  navigator.clipboard.writeText(url);
 }
