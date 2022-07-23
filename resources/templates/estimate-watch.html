@@ -15,6 +15,13 @@
       Reveal results
       </a>
     </button>
+
+    <p>
+      Estimate a new ticket:
+      <form method="POST" action="/refine/{{refinement.code}}/ticket">
+	<input type="text" name="ticket-url" placeholder="Ticket URL here"/><button>Start!</button>
+      </form>
+    </p>
   </div>
   <div style="width: 50%">
     <p>Current activity</p>
@@ -26,4 +33,5 @@
 
 <script type="text/javascript" src="/assets/sse.js"></script>
 <script type="text/javascript" src="/assets/main.js"></script>
+<script type="text/javascript">start();</script>
 {% endblock %}
