@@ -3,7 +3,7 @@
      [clojure.test :refer [deftest is testing]]
      [fpsd.estimator :as estimator]))
 
-(testing "Estimator"
+(testing "Estimator utils"
   (deftest count-votes
     (is (= (estimator/count-votes {"id1" {:points 3 :name "Bob"}
                                    "id2" {:points 2 :name "Alice"}
@@ -22,7 +22,18 @@
               [{:points 5, :count 1, :authors ["Bar"]}
                {:points 3, :count 2, :authors ["Bob" "Foo"]}
                {:points 2, :count 2, :authors ["Alice" "Mario"]}
-               {:points 1, :count 1, :authors ["Frank"]}] )))))
+               {:points 1, :count 1, :authors ["Frank"]}] ))))
+
+  (deftest max-rediscussions-not-reached
+    (is (not (estimator/max-rediscussions-reached
+              []
+              {:max-rediscussions 1}))))
+
+  (deftest max-rediscussions-reached
+    (is (estimator/max-rediscussions-reached
+              [{:votes {"1" {:points 1 :name "Bob"}
+                        "2" {:points 4 :name "Alice"}}}]
+              {:max-rediscussions 1}))))
 
 (testing "Select winner"
   (deftest winner-case
@@ -74,5 +85,42 @@
                                        "3" {:points 2 :name "Joe"}
                                        "4" {:points 3 :name "Foo"}}}
              :sessions []}
+            {:max-rediscussions 1
+             :max-points-delta 3}))))
+
+  (deftest discuss-case
+    (is (= {:result :discuss
+            :highest-vote 4
+            :highest-voters ["Joe"]
+            :lowest-vote 1
+            :lowest-voters ["Bob"]
+            :votes [{:points 4 :count 1 :authors ["Joe"]}
+                    {:points 3 :count 1 :authors ["Foo"]}
+                    {:points 2 :count 1 :authors ["Alice"]}
+                    {:points 1 :count 1 :authors ["Bob"]}]}
+           (estimator/estimate
+            {:current-session {:votes {"1" {:points 1 :name "Bob"}
+                                       "2" {:points 2 :name "Alice"}
+                                       "3" {:points 4 :name "Joe"}
+                                       "4" {:points 3 :name "Foo"}}}
+             :sessions []}
+            {:max-rediscussions 1
+             :max-points-delta 3}))))
+
+  (deftest select-most-voted-after-discussion-case
+    (is (= {:result :winner
+            :points 3
+            :votes [{:authors ["Joe"] :points 4 :count 1}
+                    {:authors ["Alice" "Foo"] :points 3 :count 2}
+                    {:authors ["Bob"] :points 1 :count 1}]}
+           (estimator/estimate
+            {:current-session {:votes {"1" {:points 1 :name "Bob"}
+                                       "2" {:points 3 :name "Alice"}
+                                       "3" {:points 4 :name "Joe"}
+                                       "4" {:points 3 :name "Foo"}}}
+             :sessions [{:votes {"1" {:points 1 :name "Bob"}
+                                 "2" {:points 2 :name "Alice"}
+                                 "3" {:points 4 :name "Joe"}
+                                 "4" {:points 3 :name "Foo"}}}]}
             {:max-rediscussions 1
              :max-points-delta 3})))))

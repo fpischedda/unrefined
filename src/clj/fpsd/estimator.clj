@@ -1,17 +1,16 @@
 (ns fpsd.estimator)
 
-(def settings {:max-points-delta 3
-               :voting-style :linear ;; or :fibonacci
-               :max-rediscussions 1
-               :suggestion-strategy :majority})
-
-(def ticket {:id "PE-12345"
-             :story-points nil
-             :sessions [{:story-points nil ;; the final story points of the session
-                         :points {"id1" {:points 2 :name "Bob"}
-                                  "id2" {:points 3 :name "Alice"}}}]})
-
 (defn count-votes
+  "Return a vector of maps of the result of grouping story points
+   and the vote authors, given a map of `votes`.
+   Each item of the resulting grouping looks like the following map:
+   {:points <some-number>
+    :count <how many times voters selected this story points>
+    :authors <a vector of strings of the author names>}
+
+   `votes` map looks like the following:
+   {<author1-id> {:points <some-int> :name <author1-name-string>}
+    ...}"
   [votes]
   (->> (group-by (comp :points second) votes)
        (reduce (fn [acc [points point-and-authors]]
@@ -24,7 +23,7 @@
        (into [])))
 
 (defn votes-delta
-  "Returns the difference between the maximum and minumum value in the
+  "Return the difference between the maximum and minumum value in the
   provided sorted seq of vote frequencies; an entry looks like:
   [vote [voters...]]"
   [frequencies]
@@ -44,14 +43,9 @@
       {:result :winner
        :points first-vote})))
 
-(defn can-rediscuss
+(defn max-rediscussions-reached
   [sessions settings]
-  (<= (count sessions) (:max-rediscussions settings)))
-
-(comment
-  (can-rediscuss (-> ticket :sessions) settings) ;; true
-  (can-rediscuss (-> ticket :sessions) (update settings :max-rediscussions dec)) ;;false
- ,)
+  (>= (count sessions) (:max-rediscussions settings)))
 
 (defn estimate
   [{:keys [current-session sessions] :as _ticket} settings]
@@ -59,10 +53,8 @@
         delta (votes-delta votes)
         result
         (if (or (< delta (:max-points-delta settings))
-                (not (can-rediscuss sessions settings)))
-          (do
-            (println votes)
-            (select-winner votes))
+                (max-rediscussions-reached sessions settings))
+          (select-winner votes)
 
           (let [{lowest-vote :points lowest-voters :authors} (last votes)
                 {highest-vote :points highest-voters :authors} (first votes)]
@@ -73,15 +65,3 @@
              :lowest-voters lowest-voters}))]
     (-> result
         (assoc :votes votes))))
-
-(comment
-
-  (estimate {:current-session {:story-points nil
-                               :votes {"1" {:points 0 :name "Bob"}
-                                        "2" {:points 1 :name "Alice"}
-                                        "3" {:points 4 :name "Joe"}
-                                        "4" {:points 3 :name "Foo"}}}
-             :sessions []}
-            settings) ;; {:result :discuss, :highest-vote 4, :highest-voters ["Joe"], :lowest-vote 0, :lowest-voters ["Bob"], :votes [{:points 4, :count 1, :authors ["Joe"]} {:points 3, :count 1, :authors ["Foo"]} {:points 1, :count 1, :authors ["Alice"]} {:points 0, :count 1, :authors ["Bob"]}]}
-
-  )
