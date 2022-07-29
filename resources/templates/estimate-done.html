@@ -8,6 +8,9 @@
 <div class="flex-container">
   <div style="width: 50%">
     <p>Hi {{name}}!<br/>Thank you for estimating the ticket {{ticket.id}}.</p>
+    {% if skipped %}
+    <p>You skipped</p>
+    {% else %}
     <p>Your vote: {{vote.points}}</p>
     <p>Breakdown:
       <ul>{% for item in vote.breakdown %}
@@ -15,6 +18,7 @@
 	{% endfor %}
       </ul>
     </p>
+    {% endif %}
   </div>
 
   <div style="width: 50%">

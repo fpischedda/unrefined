@@ -1,7 +1,7 @@
 {% extends "templates/base.html" %}
 {% block body %}
 <form method="POST" action="/refine/{{refinement.code}}/ticket/{{ticket.id}}/estimate">
-  <input type="hidden" name="points" id="points"/>
+  <input type="hidden" name="points" id="points" value="0"/>
   <div class="flex-container">
     <div style="width: 50%">
       <p>We are estimating ticket <a href="{{ticket.link-to-original}}">{{ticket.id}}</a>
@@ -22,10 +22,10 @@
     </div>
     <div style="width: 50%">
       <p>Total story points <span id="total-story-points">0</span></p>
-      <div><button name="estimate">Estimate!</button> or <button name="name">Skip...</button></div>
-      <div>
+      <p><button name="estimate-button">Estimate!</button> or <button name="skip-button">Skip...</button></p>
+      <p>
 	<button onclick="copy_estimation_link()">Copy link to estimation page</button>
-      </div>
+      </p>
     </div>
   </div>
 </form>
