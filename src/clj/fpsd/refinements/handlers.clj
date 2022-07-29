@@ -85,18 +85,18 @@
                (assoc acc item value)
                acc))
            {}
-           [:implementation :refactoring :tests :risk :pain])})
+           [:implementation :tests :migrations :refactoring :risk :pain])})
 
 (defn vote-ticket
   "kind of REST api ready handler...still here just because"
   [request]
   (let [code (-> request :path-params :code)
         ticket-id (-> request :path-params :ticket-id)
-        user-id (-> request :common-cookies :user-id)
-        vote (-> request :params get-vote-from-params)]
-    (if (:vote vote)
-      (refinements/vote-ticket code ticket-id user-id vote)
-      (refinements/skip-ticket code ticket-id user-id))
+        user-id (-> request :common-cookies :user-id)]
+
+    (if (-> request :params :skip-button)
+      (refinements/skip-ticket code ticket-id user-id)
+      (refinements/vote-ticket code ticket-id user-id (-> request :params get-vote-from-params)))
     {:status 201}))
 
 (defn index
@@ -158,15 +158,20 @@
         code (-> request :path-params :code)
         ticket-id (-> request :path-params :ticket-id)
         refinement (refinements/details code)
-        vote (-> request :params get-vote-from-params)]
+        skipped (some? (-> request :params :skip-button))
+        vote (when-not skipped (-> request :params get-vote-from-params))]
+
     (refinements/set-participant code user-id name)
-    (if vote
-      (refinements/vote-ticket code ticket-id user-id vote)
-      (refinements/skip-ticket code ticket-id user-id))
+
+    (if skipped
+      (refinements/skip-ticket code ticket-id user-id)
+      (refinements/vote-ticket code ticket-id user-id vote))
+
     {:body (render-file "templates/estimate-done.html" {:refinement refinement
                                                         :ticket (-> refinement :tickets (get ticket-id))
                                                         :name name
-                                                        :vote (or vote "Skipped")})
+                                                        :skipped skipped
+                                                        :vote vote})
      :headers {:content-type "text/html"}
      :cookies {"user-id" {:value user-id :same-site :strict}
                "name" {:value name :same-site :strict}}

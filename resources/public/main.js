@@ -77,3 +77,29 @@ function start() {
     init_sse();
   });
 }
+
+function update_total() {
+  const breakdowns = [...document.getElementsByClassName('breakdown-entry')];
+
+  total = 0;
+
+  breakdowns.forEach( b => {
+    total += parseInt(b.value || 0);
+  });
+
+  document.getElementById('points').value = total;
+
+  document.getElementById('total-story-points').innerText = total;
+}
+
+function start_voting_page() {
+
+  const breakdowns = [...document.getElementsByClassName('breakdown-entry')];
+
+  breakdowns.forEach( b => {
+    b.onchange = update_total;
+    b.keypress = update_total;
+  });
+
+  init_sse();
+}
