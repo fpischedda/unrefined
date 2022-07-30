@@ -5,7 +5,8 @@
    [fpsd.configuration :refer [config]]
    [fpsd.estimator :as estimator]
    [fpsd.refinements :as refinements]
-   [fpsd.refinements.events :as events]))
+   [fpsd.refinements.events :as events]
+   [fpsd.refinements.helpers :as helpers]))
 
 (comment
   (def p (portal/open))
@@ -31,25 +32,11 @@
                "X-Accel-Buffering" "no"}
      :body events-stream}))
 
-(def jira-re #"https://.*/browse/(.*)")
-
-(defn extract-ticket-id-from-url
-  "Return the ticket id extracted from the URL of the ticketing system,
-   if the format is not recognized then return the full URL"
-  [url]
-  (if-let [m (re-matches jira-re url)]
-    (second m)
-    url))
-
-(comment
-  (extract-ticket-id-from-url "https://cargo-one.atlassian.net/browse/PE-1234") ;; => "PE-1234"
-  ,)
-
 (defn create-refinement
   [request]
   (let [owner-id (or (-> request :common-cookies :user-id) (str (random-uuid)))
         ticket-url (-> request :params :ticket-url)
-        ticket-id (extract-ticket-id-from-url ticket-url)
+        ticket-id (or (helpers/extract-ticket-id-from-url ticket-url) ticket-url)
         refinement (refinements/create! owner-id {})
         _ticket (refinements/add-new-ticket!
                  (:code refinement) ticket-id ticket-url)
