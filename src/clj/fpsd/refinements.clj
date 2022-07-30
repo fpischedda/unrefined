@@ -1,6 +1,5 @@
 (ns fpsd.refinements
-  (:require [manifold.stream :as s]
-            [fpsd.estimator :as estimator]))
+  (:require [fpsd.estimator :as estimator]))
 
 (def default-settings {:max-points-delta 3
                        :voting-style :linear ;; or :fibonacci
@@ -29,18 +28,6 @@
         (recur)
         code))))
 
-(defn user-connected
-  "Every refinement session have an event-sink (a stream in manifold,
-   or chan in core.async);
-   once users land to a refinement page a stream is created to send them events,
-   this stream is connected to the event-synk so, every message sent to it will
-   be dispatched to user streams."
-  [code]
-  (let [user-stream (s/stream)
-        {event-sink :event-sink} (details code)]
-    (s/connect event-sink user-stream)
-    user-stream))
-
 ;; refinements code
 (defn create!
   "Return a new refinement with its own unique code, the provided
@@ -52,8 +39,7 @@
                     :settings (merge default-settings settings)
                     :tickets {}
                     :owner owner-id
-                    :participants {}
-                    :event-sink (s/stream)}]
+                    :participants {}}]
     (swap! refinements_ assoc code refinement)
     refinement))
 

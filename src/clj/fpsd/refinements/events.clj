@@ -2,7 +2,29 @@
   (:require [cheshire.core :refer [generate-string]]
             [manifold.stream :as s]
             [fpsd.estimator :as estimator]
-            [fpsd.reminements :as refinements]))
+            [fpsd.refinements :as refinements]))
+
+(def refinement-sinks_ (atom {}))
+
+(defn create-refinement-sink!
+  [code]
+  (swap! refinement-sinks_ assoc code (s/stream)))
+
+(defn get-sink
+  [code]
+  (get @refinement-sinks_ code))
+
+(defn user-connected!
+  "Every refinement session have an event-sink (a stream in manifold,
+   or chan in core.async);
+   once users land to a refinement page a stream is created to send them events,
+   this stream is connected to the event-synk so, every message sent to it will
+   be dispatched to user streams."
+  [code]
+  (let [user-stream (s/stream)
+        event-sink (get-sink code)]
+    (s/connect event-sink user-stream)
+    user-stream))
 
 (defn serialize-event
   "Return a one line string with the event serialized to JSON,
@@ -17,7 +39,7 @@
    at your own risk."
   [code event]
   (let [serialized (serialize-event event)
-        {event-sink :event-sink} (details code)]
+        {event-sink :event-sink} (get-sink code)]
     (s/put! event-sink serialized)))
 
 (defn send-ticket-added-event!
@@ -42,13 +64,12 @@
   "Send an event with the current status of the ticket,
    usually sent when a user connects for the first time, to refresh
    ticket stats."
-  [code ticket-id]
-  (let [ticket (ticket-details code ticket-id)]
-    (send-event! code {:event :ticket-status
-                       :payload {:voted (refinements/count-voted ticket)
-                                 :skipped (refinements/count-skipped ticket)
-                                 :ticket-id ticket-id
-                                 :votes (-> ticket :current-session :votes estimator/count-votes)}})))
+  [code ticket]
+  (send-event! code {:event :ticket-status
+                     :payload {:voted (refinements/count-voted ticket)
+                               :skipped (refinements/count-skipped ticket)
+                               :ticket-id (:id ticket)
+                               :votes (-> ticket :current-session :votes estimator/count-votes)}}))
 
 (defn send-re-estimate-event!
   "Send an event to signal that a new estimation for a ticket is starting"

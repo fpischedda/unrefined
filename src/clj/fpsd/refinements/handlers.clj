@@ -18,12 +18,12 @@
   [request]
   (let [code (-> request :path-params :code)
         ticket-id (-> request :path-params :ticket-id)
-        events-stream (refinements/user-connected code)]
+        events-stream (events/user-connected! code)]
 
     (events/send-event! code {:event "ping"})
 
     (when ticket-id
-      (events/send-ticket-status-event! code ticket-id))
+      (events/send-ticket-status-event! code (refinements/ticket-details code ticket-id)))
 
     {:status 200
      :headers {:content-type "text/event-stream"
@@ -34,6 +34,8 @@
 (def jira-re #"https://.*/browse/(.*)")
 
 (defn extract-ticket-id-from-url
+  "Return the ticket id extracted from the URL of the ticketing system,
+   if the format is not recognized then return the full URL"
   [url]
   (if-let [m (re-matches jira-re url)]
     (second m)
@@ -50,7 +52,8 @@
         ticket-id (extract-ticket-id-from-url ticket-url)
         refinement (refinements/create! owner-id {})
         _ticket (refinements/add-new-ticket!
-                 (:code refinement) ticket-id ticket-url)]
+                 (:code refinement) ticket-id ticket-url)
+        _ (events/create-refinement-sink! (:code refinement))]
 
     {:headers {:location (format "/refine/%s/ticket/%s" (:code refinement) ticket-id)}
      :cookies {"user-id" {:value owner-id :same-site :strict}}
@@ -90,9 +93,9 @@
 
 (defn index
   [request]
-  (let [user-id (or (-> request :common-cookies :user-id) (str (random-uuid)))
-        ctx {:project-title (:project-title config)}]
-    {:body (render-file "templates/index.html" ctx)
+  (let [user-id (or (-> request :common-cookies :user-id) (str (random-uuid)))]
+
+    {:body (render-file "templates/index.html")
      :headers {:content-type "text/html"}
      :cookies {"user-id" {:value user-id
                           :same-site :strict}}}))
@@ -102,6 +105,7 @@
   (let [refinement (refinements/details (-> request :path-params :code))
         ticket-id (-> request :path-params :ticket-id)
         ticket (-> refinement :tickets (get ticket-id))]
+
     {:body
      (render-file "templates/estimate-watch.html" {:refinement refinement
                                                    :ticket ticket})
@@ -135,7 +139,8 @@
                                                           :ticket ticket
                                                           :name name})
        :headers {:content-type "text/html"}
-       :cookies {"user-id" {:value user-id :same-site :strict}}
+       :cookies {"user-id" {:value user-id :same-site :strict}
+                 "name" {:value name :same-site :strict}}
        :status 200}
       {:headers {:location "/"}
        :status 302})))
