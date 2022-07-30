@@ -142,8 +142,6 @@
         skipped (some? (-> request :params :skip-button))
         vote (when-not skipped (-> request :params get-vote-from-params))]
 
-    (refinements/set-participant code user-id name)
-
     (if skipped
       (do
         (refinements/skip-ticket code ticket-id user-id)

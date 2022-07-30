@@ -38,8 +38,7 @@
         refinement {:code code
                     :settings (merge default-settings settings)
                     :tickets {}
-                    :owner owner-id
-                    :participants {}}]
+                    :owner owner-id}]
     (swap! refinements_ assoc code refinement)
     refinement))
 
@@ -67,10 +66,6 @@
 (defn add-new-ticket!
   [code ticket-id ticket-url]
   (add-ticket! code (new-ticket ticket-id ticket-url)))
-
-(defn set-participant
-  [code user-id name]
-  (swap! refinements_ update-in [code :participants] assoc user-id name))
 
 (comment
   (add-ticket! "OKCAVG" "PE-1234")
