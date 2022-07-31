@@ -59,25 +59,6 @@
     {:headers {:location (format "/refine/%s/ticket/%s" code ticket-id)}
      :status 302}))
 
-(defn parse-int
-  "Return the integer value represented by the string int-str
-   or nil if it is not possible to parse the number"
-  [int-str]
-  (try (Integer/parseInt int-str)
-       (catch NumberFormatException _ nil)))
-
-(defn get-vote-from-params
-  [params]
-  {:points (-> params :points parse-int)
-   :name (or (-> params :name) "Anonymous Coward")
-   :breakdown
-   (reduce (fn [acc item]
-             (if-let [value (get params item)]
-               (assoc acc item value)
-               acc))
-           {}
-           [:implementation :tests :migrations :refactoring :risk :pain])})
-
 (defn index
   [request]
   (let [user-id (or (-> request :common-cookies :user-id) (str (random-uuid)))]
@@ -140,7 +121,7 @@
         ticket-id (-> request :path-params :ticket-id)
         refinement (refinements/details code)
         skipped (some? (-> request :params :skip-button))
-        vote (when-not skipped (-> request :params get-vote-from-params))]
+        vote (when-not skipped (-> request :params helpers/get-vote-from-params))]
 
     (if skipped
       (do
