@@ -8,11 +8,6 @@
 
 (def refinements_ (atom {}))
 
-(comment
-  (identity @refinements_)
-  (identity (get @refinements_ "OKCAVG"))
-  ,)
-
 (defn details
   [code]
   (get @refinements_ code))
@@ -30,30 +25,27 @@
 
 ;; refinements code
 (defn create!
-  "Return a new refinement with its own unique code, the provided
-   settings, the owner name and id; the newly created refinement
-   is atomically added to the global list of active refinements."
-  [owner-id settings]
-  (let [code (gen-random-code 6)
-        refinement {:code code
-                    :settings (merge default-settings settings)
-                    :tickets {}
-                    :owner owner-id}]
-    (swap! refinements_ assoc code refinement)
-    refinement))
+  "Return a new refinement with its own unique code and the provided
+   settings; the newly created refinement is atomically added to the
+   global map of active refinements."
+  ([]
+   (create! {}))
+  ([settings]
+   (let [code (gen-random-code 6)
+         refinement {:code code
+                     :settings (merge default-settings settings)
+                     :tickets {}}]
+     (swap! refinements_ assoc code refinement)
+     refinement)))
 
 (defn new-empty-session
   []
-  {:status :open
-   :result nil
-   :votes {}
+  {:votes {}
    :skips #{}})
 
 (defn new-ticket
   [ticket-id ticket-url]
   {:id ticket-id
-   :status :unrefined
-   :result nil
    :current-session (new-empty-session)
    :sessions []
    :link-to-original ticket-url})
@@ -66,11 +58,6 @@
 (defn add-new-ticket!
   [code ticket-id ticket-url]
   (add-ticket! code (new-ticket ticket-id ticket-url)))
-
-(comment
-  (add-ticket! "OKCAVG" "PE-1234")
-  (identity (get @refinements_ "OKCAVG"))
-  ,)
 
 (defn count-voted
   [ticket]

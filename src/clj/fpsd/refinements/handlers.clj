@@ -34,16 +34,16 @@
 
 (defn create-refinement
   [request]
-  (let [owner-id (or (-> request :common-cookies :user-id) (str (random-uuid)))
+  (let [user-id (or (-> request :common-cookies :user-id) (str (random-uuid)))
         ticket-url (-> request :params :ticket-url)
         ticket-id (or (helpers/extract-ticket-id-from-url ticket-url) ticket-url)
-        refinement (refinements/create! owner-id {})
+        refinement (refinements/create!)
         _ticket (refinements/add-new-ticket!
                  (:code refinement) ticket-id ticket-url)
         _ (events/create-refinement-sink! (:code refinement))]
 
     {:headers {:location (format "/refine/%s/ticket/%s" (:code refinement) ticket-id)}
-     :cookies {"user-id" {:value owner-id :same-site :strict}}
+     :cookies {"user-id" {:value user-id :same-site :strict}}
      :status 302}))
 
 (defn add-ticket
