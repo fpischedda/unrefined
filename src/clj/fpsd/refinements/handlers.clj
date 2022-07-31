@@ -4,7 +4,9 @@
    [selmer.parser :refer [render-file]]
    [fpsd.configuration :refer [config]]
    [fpsd.estimator :as estimator]
-   [fpsd.refinements :as refinements]))
+   [fpsd.refinements :as refinements]
+   [fpsd.refinements.events :as events]
+   [fpsd.refinements.helpers :as helpers]))
 
 (comment
   (def p (portal/open))
@@ -13,20 +15,16 @@
   (portal/close p)
   ,)
 
-(def test-stream (atom nil))
-(comment
-  (s/put! @test-stream (str "data: {\"k\": 1}\n\n"))
-  (s/put! (:event-sink (refinements/details "UZFMVJ")) (str "data: {\"k\": 1}\n\n"))
-  ,)
-
 (defn events-stream-handler
   [request]
   (let [code (-> request :path-params :code)
         ticket-id (-> request :path-params :ticket-id)
-        events-stream (refinements/user-connected code)]
-    (reset! test-stream events-stream)
+        events-stream (events/user-connected! code)]
+
+    (events/send-event! code {:event "ping"})
+
     (when ticket-id
-      (refinements/send-ticket-status-event! code ticket-id))
+      (events/send-ticket-status-event! code (refinements/ticket-details code ticket-id)))
 
     {:status 200
      :headers {:content-type "text/event-stream"
@@ -34,76 +32,38 @@
                "X-Accel-Buffering" "no"}
      :body events-stream}))
 
-(def jira-re #"https://.*/browse/(.*)")
-
-(defn extract-ticket-id-from-url
-  [url]
-  (if-let [m (re-matches jira-re url)]
-    (second m)
-    url))
-
-(comment
-  (extract-ticket-id-from-url "https://cargo-one.atlassian.net/browse/PE-1234") ;; => "PE-1234"
-  ,)
-
 (defn create-refinement
   [request]
-  (let [owner-id (or (-> request :common-cookies :user-id) (str (random-uuid)))
+  (let [user-id (or (-> request :common-cookies :user-id) (str (random-uuid)))
         ticket-url (-> request :params :ticket-url)
-        ticket-id (extract-ticket-id-from-url ticket-url)
-        refinement (refinements/create! owner-id {})
+        ticket-id (or (helpers/extract-ticket-id-from-url ticket-url) ticket-url)
+        refinement (refinements/create!)
         _ticket (refinements/add-new-ticket!
-                 (:code refinement) ticket-id ticket-url)]
+                 (:code refinement) ticket-id ticket-url)
+        _ (events/create-refinement-sink! (:code refinement))]
+
     {:headers {:location (format "/refine/%s/ticket/%s" (:code refinement) ticket-id)}
-     :cookies {"user-id" {:value owner-id :same-site :strict}}
+     :cookies {"user-id" {:value user-id :same-site :strict}}
      :status 302}))
 
 (defn add-ticket
   [request]
   (let [code (-> request :path-params :code)
         ticket-url (-> request :params :ticket-url)
-        ticket-id (extract-ticket-id-from-url ticket-url)]
+        ticket-id (helpers/extract-ticket-id-from-url ticket-url)]
 
     (refinements/add-new-ticket! code ticket-id ticket-url)
+
+    (events/send-ticket-added-event! code ticket-id)
+
     {:headers {:location (format "/refine/%s/ticket/%s" code ticket-id)}
      :status 302}))
 
-(defn parse-int
-  "Return the integer value represented by the string int-str
-   or nil if it is not possible to parse the number"
-  [int-str]
-  (try (Integer/parseInt int-str)
-       (catch NumberFormatException _ nil)))
-
-(defn get-vote-from-params
-  [params]
-  {:points (-> params :points parse-int)
-   :name (or (-> params :name) "Anonymous Coward")
-   :breakdown
-   (reduce (fn [acc item]
-             (if-let [value (get params item)]
-               (assoc acc item value)
-               acc))
-           {}
-           [:implementation :tests :migrations :refactoring :risk :pain])})
-
-(defn vote-ticket
-  "kind of REST api ready handler...still here just because"
-  [request]
-  (let [code (-> request :path-params :code)
-        ticket-id (-> request :path-params :ticket-id)
-        user-id (-> request :common-cookies :user-id)]
-
-    (if (-> request :params :skip-button)
-      (refinements/skip-ticket code ticket-id user-id)
-      (refinements/vote-ticket code ticket-id user-id (-> request :params get-vote-from-params)))
-    {:status 201}))
-
 (defn index
   [request]
-  (let [user-id (or (-> request :common-cookies :user-id) (str (random-uuid)))
-        ctx {:project-title (:project-title config)}]
-    {:body (render-file "templates/index.html" ctx)
+  (let [user-id (or (-> request :common-cookies :user-id) (str (random-uuid)))]
+
+    {:body (render-file "templates/index.html" {})
      :headers {:content-type "text/html"}
      :cookies {"user-id" {:value user-id
                           :same-site :strict}}}))
@@ -113,6 +73,7 @@
   (let [refinement (refinements/details (-> request :path-params :code))
         ticket-id (-> request :path-params :ticket-id)
         ticket (-> refinement :tickets (get ticket-id))]
+
     {:body
      (render-file "templates/estimate-watch.html" {:refinement refinement
                                                    :ticket ticket})
@@ -146,7 +107,8 @@
                                                           :ticket ticket
                                                           :name name})
        :headers {:content-type "text/html"}
-       :cookies {"user-id" {:value user-id :same-site :strict}}
+       :cookies {"user-id" {:value user-id :same-site :strict}
+                 "name" {:value name :same-site :strict}}
        :status 200}
       {:headers {:location "/"}
        :status 302})))
@@ -159,13 +121,15 @@
         ticket-id (-> request :path-params :ticket-id)
         refinement (refinements/details code)
         skipped (some? (-> request :params :skip-button))
-        vote (when-not skipped (-> request :params get-vote-from-params))]
-
-    (refinements/set-participant code user-id name)
+        vote (when-not skipped (-> request :params helpers/get-vote-from-params))]
 
     (if skipped
-      (refinements/skip-ticket code ticket-id user-id)
-      (refinements/vote-ticket code ticket-id user-id vote))
+      (do
+        (refinements/skip-ticket code ticket-id user-id)
+        (events/send-vote-event! :user-skipped code user-id ticket-id))
+      (do
+        (refinements/vote-ticket code ticket-id user-id vote)
+        (events/send-vote-event! :user-voted code user-id ticket-id)))
 
     {:body (render-file "templates/estimate-done.html" {:refinement refinement
                                                         :ticket (-> refinement :tickets (get ticket-id))
@@ -181,6 +145,9 @@
   [request]
   (let [code (-> request :path-params :code)
         ticket-id (-> request :path-params :ticket-id)]
+
     (refinements/re-estimate-ticket code ticket-id)
+    (events/send-re-estimate-event! code ticket-id)
+
     {:headers {:location (format "/refine/%s/ticket/%s" code ticket-id)}
      :status 302}))
