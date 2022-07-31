@@ -50,7 +50,7 @@
   [request]
   (let [code (-> request :path-params :code)
         ticket-url (-> request :params :ticket-url)
-        ticket-id (extract-ticket-id-from-url ticket-url)]
+        ticket-id (helpers/extract-ticket-id-from-url ticket-url)]
 
     (refinements/add-new-ticket! code ticket-id ticket-url)
 
@@ -63,7 +63,7 @@
   [request]
   (let [user-id (or (-> request :common-cookies :user-id) (str (random-uuid)))]
 
-    {:body (render-file "templates/index.html")
+    {:body (render-file "templates/index.html" {})
      :headers {:content-type "text/html"}
      :cookies {"user-id" {:value user-id
                           :same-site :strict}}}))

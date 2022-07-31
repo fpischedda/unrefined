@@ -21,9 +21,8 @@
    this stream is connected to the event-synk so, every message sent to it will
    be dispatched to user streams."
   [code]
-  (let [user-stream (s/stream)
-        event-sink (get-sink code)]
-    (s/connect event-sink user-stream)
+  (let [user-stream (s/stream)]
+    (s/connect (get-sink code) user-stream)
     user-stream))
 
 (defn serialize-event
@@ -38,9 +37,7 @@
    Returns the result of s/put! but this is subject to change so use it
    at your own risk."
   [code event]
-  (let [serialized (serialize-event event)
-        {event-sink :event-sink} (get-sink code)]
-    (s/put! event-sink serialized)))
+  (s/put! (get-sink code) (serialize-event event)))
 
 (defn send-ticket-added-event!
   "Send an event to signal that a new ticket is being estimated"
