@@ -1,7 +1,7 @@
-# unrefined
+# Unrefined
 A simple ticket estimation tool
 
-__Unrefined_ aims to provide a dead simple flow to estimate tickets
+_Unrefined_ aims to provide a dead simple flow to estimate tickets
 
 ## Overview
 
@@ -37,18 +37,27 @@ You will need clojure build tools and a editor that support REPL driven developm
 - Cursive
 - Others...
 
+### Create a standalone jar
+
 To create a production build run:
 
 	clj -T:build uber
 
 A new version of the standalone jar will be available in the target/ directory.
 
+### Running the server locally
+
+To run the server locally (including nrepl):
+
+	clj -M:run
+
+It will start the http server (default port 8080) and the nrepl server (default port 1667), happy hacking!
+
 ## Configuration
 
 The server can be configured by setting few environment variables:
 - UNREFINED_HTTP_PORT: the port the web server will listen to
 - UNREFINED_NREPL_PORT: the port to connect with an nrepl client
-- UNREFINED_LINK_TO_TICKET: a format string used to create a link to your ticket system, for ex. http://your.ticketing-system.whatever/ticket/%s
 
 ## License
 
