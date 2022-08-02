@@ -10,6 +10,10 @@
       <div><button onclick="copy_estimation_link('/estimate')">Copy link to estimation page</button></div>
     </p>
 
+  {% ifequal estimation.result :not-enough-votes %}
+    <p>Unfortunately we havent reached the minimum number of votes ({{settings.reasonable-minimum-votes}}).</p>
+    <p>You may want to estimate a new ticket or wait for more votes.</p>
+  {% endifequal %}
   {% ifequal estimation.result :winner %}
     <p>Ticket estimated with a score of <strong>{{estimation.points}}</strong></p>
     <p>Points and voters

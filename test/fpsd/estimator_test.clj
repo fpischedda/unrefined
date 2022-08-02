@@ -1,7 +1,8 @@
 (ns fpsd.estimator-test
     (:require
      [clojure.test :refer [deftest is testing]]
-     [fpsd.estimator :as estimator]))
+     [fpsd.estimator :as estimator]
+     [fpsd.refinements :as refinements]))
 
 (testing "Estimator utils"
   (deftest count-votes
@@ -69,8 +70,7 @@
                "id5" {:points 3 :name "Foo"}
                "id6" {:points 3 :name "Bar"}}}
              :sessions []}
-            {:max-rediscussions 1
-             :max-points-delta 3}))))
+            refinements/default-settings))))
 
   (deftest ex-æquo-case
     (is (= {:result :ex-equo
@@ -85,8 +85,7 @@
                                        "3" {:points 2 :name "Joe"}
                                        "4" {:points 3 :name "Foo"}}}
              :sessions []}
-            {:max-rediscussions 1
-             :max-points-delta 3}))))
+            refinements/default-settings))))
 
   (deftest discuss-case
     (is (= {:result :discuss
@@ -104,8 +103,7 @@
                                        "3" {:points 4 :name "Joe"}
                                        "4" {:points 3 :name "Foo"}}}
              :sessions []}
-            {:max-rediscussions 1
-             :max-points-delta 3}))))
+            refinements/default-settings))))
 
   (deftest select-most-voted-after-discussion-case
     (is (= {:result :winner
@@ -122,5 +120,10 @@
                                  "2" {:points 2 :name "Alice"}
                                  "3" {:points 4 :name "Joe"}
                                  "4" {:points 3 :name "Foo"}}}]}
-            {:max-rediscussions 1
-             :max-points-delta 3})))))
+            refinements/default-settings))))
+
+  (deftest not-enough-voters
+    (is (= {:result :not-enough-votes}
+           (estimator/estimate
+            {:current-session {:votes {"1" {:points 2 :name "Foo"}}}}
+            refinements/default-settings)))))
