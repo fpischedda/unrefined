@@ -49,19 +49,22 @@
 
 (defn estimate
   [{:keys [current-session sessions] :as _ticket} settings]
-  (let [votes (-> current-session :votes count-votes)
-        delta (votes-delta votes)
-        result
-        (if (or (< delta (:max-points-delta settings))
-                (max-rediscussions-reached sessions settings))
-          (select-winner votes)
+  (if (> (:reasonable-minimum-votes settings)
+         (-> current-session :votes count))
+      {:result :not-enough-votes}
+      (let [votes (-> current-session :votes count-votes)
+            delta (votes-delta votes)
+            result
+            (if (or (< delta (:max-points-delta settings))
+                    (max-rediscussions-reached sessions settings))
+              (select-winner votes)
 
-          (let [{lowest-vote :points lowest-voters :authors} (last votes)
-                {highest-vote :points highest-voters :authors} (first votes)]
-            {:result :discuss
-             :highest-vote highest-vote
-             :highest-voters highest-voters
-             :lowest-vote lowest-vote
-             :lowest-voters lowest-voters}))]
-    (-> result
-        (assoc :votes votes))))
+              (let [{lowest-vote :points lowest-voters :authors} (last votes)
+                    {highest-vote :points highest-voters :authors} (first votes)]
+                {:result :discuss
+                 :highest-vote highest-vote
+                 :highest-voters highest-voters
+                 :lowest-vote lowest-vote
+                 :lowest-voters lowest-voters}))]
+        (-> result
+            (assoc :votes votes)))))

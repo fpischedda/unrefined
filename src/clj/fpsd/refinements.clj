@@ -2,7 +2,7 @@
   (:require [fpsd.estimator :as estimator]))
 
 (def default-settings {:max-points-delta 3
-                       :voting-style :linear ;; or :fibonacci
+                       :reasonable-minimum-votes 3
                        :max-rediscussions 1
                        :suggestion-strategy :majority})
 
