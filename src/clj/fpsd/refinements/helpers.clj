@@ -16,14 +16,11 @@
   (try (Integer/parseInt int-str)
        (catch NumberFormatException _ nil)))
 
+(def supported-breakdowns [:implementation :tests :migrations :refactoring :risk :pain])
+
 (defn get-vote-from-params
   [params]
   {:points (-> params :points try-parse-int)
    :name (or (-> params :name) "Anonymous Coward")
    :breakdown
-   (reduce (fn [acc item]
-             (if-let [value (get params item)]
-               (assoc acc item value)
-               acc))
-           {}
-           [:implementation :tests :migrations :refactoring :risk :pain])})
+   (select-keys params supported-breakdowns)})

@@ -19,3 +19,32 @@
 
   (deftest try-parse-int-fail
     (is (nil? (helpers/try-parse-int "five")))))
+
+(testing "get-vote-from-params extract vote, name and breakdown from request body"
+  (deftest all-defaults-when-empty-params
+    (is (= {:points nil
+            :name "Anonymous Coward"
+            :breakdown {}}
+           (helpers/get-vote-from-params
+            {}))))
+
+  (deftest get-partial-supported-breakdowns
+    (is (= {:points nil
+            :name "Bob"
+            :breakdown {:tests "1"
+                         :pain "2"}}
+           (helpers/get-vote-from-params
+            {:name "Bob"
+             :tests "1"
+             :pain "2"}))))
+
+  (deftest parse-points-correctly
+    (is (= {:points 3
+            :name "Bob"
+            :breakdown {:tests "1"
+                         :pain "2"}}
+           (helpers/get-vote-from-params
+            {:name "Bob"
+             :points "3"
+             :tests "1"
+             :pain "2"})))))
