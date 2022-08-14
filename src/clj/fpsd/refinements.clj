@@ -1,6 +1,6 @@
 (ns fpsd.refinements
   (:require [fpsd.estimator :as estimator]
-            [fpsd.refinements.utils :refer [utc-now]]))
+            [fpsd.refinements.helpers :refer [utc-now]]))
 
 (def default-settings {:max-points-delta 3
                        :reasonable-minimum-votes 3
