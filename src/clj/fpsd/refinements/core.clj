@@ -1,8 +1,8 @@
 (ns fpsd.refinements.core
   (:require [fpsd.refinements.events :as events]
             [fpsd.refinements :as refinements]
-            [fpsd.refinements.helpers :refer [uct-now] :as helpers]
-            [fpsd.refinements.state :as state]))
+            [fpsd.refinements.helpers :refer [utc-now] :as helpers]
+            [fpsd.unrefined.state :as state]))
 
 
 (defn get-refinement

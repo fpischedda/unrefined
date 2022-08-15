@@ -1,6 +1,6 @@
 (ns fpsd.unrefined.mr-clean
   (:require [fpsd.refinements.helpers :refer [utc-now]]
-            [fpsd.refinements.state :as state]))
+            [fpsd.unrefined.state :as state]))
 
 (defn filter-expired-refinements
   [refinements oldest-time]

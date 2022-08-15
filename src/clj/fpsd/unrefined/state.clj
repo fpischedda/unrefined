@@ -1,4 +1,4 @@
-(ns fpsd.refinements.state)
+(ns fpsd.unrefined.state)
 
 (def state_ (atom {:refinements {}
                    :refinements-sink {}

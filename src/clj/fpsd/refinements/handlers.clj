@@ -8,7 +8,7 @@
    [fpsd.refinements.core :as core]
    [fpsd.refinements.events :as events]
    [fpsd.refinements.helpers :as helpers]
-   [fpsd.refinements.state :as state]))
+   [fpsd.unrefined.state :as state]))
 
 (comment
   (def p (portal/open))
