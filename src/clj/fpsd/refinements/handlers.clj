@@ -5,8 +5,10 @@
    [fpsd.configuration :refer [config]]
    [fpsd.estimator :as estimator]
    [fpsd.refinements :as refinements]
+   [fpsd.refinements.core :as core]
    [fpsd.refinements.events :as events]
-   [fpsd.refinements.helpers :as helpers]))
+   [fpsd.refinements.helpers :as helpers]
+   [fpsd.unrefined.state :as state]))
 
 (comment
   (def p (portal/open))
@@ -19,12 +21,7 @@
   [request]
   (let [code (-> request :path-params :code)
         ticket-id (-> request :path-params :ticket-id)
-        events-stream (events/user-connected! code)]
-
-    (events/send-event! code {:event "ping"})
-
-    (when ticket-id
-      (events/send-ticket-status-event! code (refinements/ticket-details code ticket-id)))
+        events-stream (core/user-connected! code ticket-id)]
 
     {:status 200
      :headers {:content-type "text/event-stream"
@@ -36,13 +33,9 @@
   [request]
   (let [user-id (or (-> request :common-cookies :user-id) (str (random-uuid)))
         ticket-url (-> request :params :ticket-url)
-        ticket-id (or (helpers/extract-ticket-id-from-url ticket-url) ticket-url)
-        refinement (refinements/create!)
-        _ticket (refinements/add-new-ticket!
-                 (:code refinement) ticket-id ticket-url)
-        _ (events/create-refinement-sink! (:code refinement))]
+        {:keys [code ticket-id]} (core/create-refinement ticket-url)]
 
-    {:headers {:location (format "/refine/%s/ticket/%s" (:code refinement) ticket-id)}
+    {:headers {:location (format "/refine/%s/ticket/%s" code ticket-id)}
      :cookies {"user-id" {:value user-id :same-site :strict}}
      :status 302}))
 
@@ -50,13 +43,9 @@
   [request]
   (let [code (-> request :path-params :code)
         ticket-url (-> request :params :ticket-url)
-        ticket-id (helpers/extract-ticket-id-from-url ticket-url)]
+        ticket (core/add-ticket code ticket-url)]
 
-    (refinements/add-new-ticket! code ticket-id ticket-url)
-
-    (events/send-ticket-added-event! code ticket-id)
-
-    {:headers {:location (format "/refine/%s/ticket/%s" code ticket-id)}
+    {:headers {:location (format "/refine/%s/ticket/%s" code (:id ticket))}
      :status 302}))
 
 (defn index
@@ -70,9 +59,9 @@
 
 (defn estimate-watch
   [request]
-  (let [refinement (refinements/details (-> request :path-params :code))
+  (let [refinement (core/get-refinement (-> request :path-params :code))
         ticket-id (-> request :path-params :ticket-id)
-        ticket (-> refinement :tickets (get ticket-id))]
+        ticket (core/get-refinement-ticket refinement ticket-id)]
 
     {:body
      (render-file "templates/estimate-watch.html" {:refinement refinement
@@ -82,9 +71,9 @@
 
 (defn estimate-results
   [request]
-  (let [refinement (refinements/details (-> request :path-params :code))
+  (let [refinement (core/get-refinement (-> request :path-params :code))
         ticket-id (-> request :path-params :ticket-id)
-        ticket (-> refinement :tickets (get ticket-id))
+        ticket (core/get-refinement-ticket refinement ticket-id)
         estimation (estimator/estimate ticket (:settings refinement))]
 
     {:body
@@ -100,9 +89,9 @@
         name (-> request :common-cookies :name)
         code (-> request :path-params :code)
         ticket-id (-> request :path-params :ticket-id)
-        refinement (refinements/details code)]
+        refinement (core/get-refinement code)]
 
-    (if-let [ticket (-> refinement :tickets (get ticket-id))]
+    (if-let [ticket (core/get-refinement-ticket refinement ticket-id)]
       {:body (render-file "templates/estimate-view.html" {:refinement refinement
                                                           :ticket ticket
                                                           :name name})
@@ -119,23 +108,18 @@
         name (-> request :params :name)
         code (-> request :path-params :code)
         ticket-id (-> request :path-params :ticket-id)
-        refinement (refinements/details code)
+        refinement (core/get-refinement code)
         skipped (some? (-> request :params :skip-button))
         vote (when-not skipped (-> request :params helpers/get-vote-from-params))]
 
-    (if skipped
-      (do
-        (refinements/skip-ticket code ticket-id user-id)
-        (events/send-vote-event! :user-skipped code user-id ticket-id))
-      (do
-        (refinements/vote-ticket code ticket-id user-id vote)
-        (events/send-vote-event! :user-voted code user-id ticket-id)))
+    (core/vote-ticket code ticket-id user-id skipped vote)
 
-    {:body (render-file "templates/estimate-done.html" {:refinement refinement
-                                                        :ticket (-> refinement :tickets (get ticket-id))
-                                                        :name name
-                                                        :skipped skipped
-                                                        :vote vote})
+    {:body (render-file "templates/estimate-done.html"
+                        {:refinement refinement
+                         :ticket (core/get-refinement-ticket refinement ticket-id)
+                         :name name
+                         :skipped skipped
+                         :vote vote})
      :headers {:content-type "text/html"}
      :cookies {"user-id" {:value user-id :same-site :strict}
                "name" {:value name :same-site :strict}}
@@ -146,8 +130,7 @@
   (let [code (-> request :path-params :code)
         ticket-id (-> request :path-params :ticket-id)]
 
-    (refinements/re-estimate-ticket code ticket-id)
-    (events/send-re-estimate-event! code ticket-id)
+    (core/re-estimate-ticket code ticket-id)
 
     {:headers {:location (format "/refine/%s/ticket/%s" code ticket-id)}
      :status 302}))

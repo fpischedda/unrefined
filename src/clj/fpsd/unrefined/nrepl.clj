@@ -1,4 +1,4 @@
-(ns fpsd.nrepl
+(ns fpsd.unrefined.nrepl
   (:require
    [mount.core :as mount]
    [nrepl.server :as nrepl]

@@ -24,3 +24,7 @@
    :name (or (-> params :name) "Anonymous Coward")
    :breakdown
    (select-keys params supported-breakdowns)})
+
+(defn utc-now
+  []
+  (java.time.LocalDateTime/now))
