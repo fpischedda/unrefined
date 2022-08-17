@@ -10,6 +10,10 @@
   (deftest extract-github-id
     (is (= "12" (helpers/extract-ticket-id-from-url "https://github.com/fpischedda/unrefined/issues/12"))))
 
+  (deftest extract-trello-id
+    (is (= "parse trellos card url to extract description and id"
+           (helpers/extract-ticket-id-from-url "https://trello.com/c/xAaL7xNa/3-parse-trellos-card-url-to-extract-description-and-id"))))
+
   (deftest extract-id-fails
     (is (nil? (helpers/extract-ticket-id-from-url "https://some-garbage")))))
 

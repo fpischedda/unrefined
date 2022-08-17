@@ -1,13 +1,17 @@
-(ns fpsd.refinements.helpers)
+(ns fpsd.refinements.helpers
+  (:require [clojure.string :as str]))
 
-(def url-regexes [#"https://.*/issues/(.*)" #"https://.*/browse/(.*)"])
+(def url-parsers [[#"https://.*/issues/(.*)" second]
+                  [#"https://.*/browse/(.*)" second]
+                  [#"https://trello.com/c/\w+/\d+-(.*)" (fn [match] (-> match second (str/replace #"-" " ")))]])
 
 (defn extract-ticket-id-from-url
   "Return the ticket id extracted from the URL of the ticketing system,
    if the format is not recognized then return nil"
   [url]
   (when url
-    (some #(second (re-matches % url)) url-regexes)))
+    (some (fn [[regex transform-fn]] (some->> url (re-matches regex) transform-fn))
+          url-parsers)))
 
 (defn try-parse-int
   "Return the integer value represented by the string int-str
