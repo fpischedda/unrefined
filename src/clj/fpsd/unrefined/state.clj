@@ -6,7 +6,7 @@
 
 (comment
   (:refinements @state_)
-  (-> @state_ :refinements (get "ZPUAKO"))
+  (-> @state_ :refinements (get "SDYFFD") :tickets (get "asdf"))
   (-> @state_ :refinements-sink (get "MJXHBI"))
   (get-refinement-sink "MJXHBI")
 
@@ -32,5 +32,15 @@
   (get-by-code_ :refinements-sink code))
 
 (defn transact!
-  [update-fn]
-  (swap! state_ update-fn))
+  ([update-fn]
+   (swap! state_ update-fn))
+  ([update-fn arg]
+   (swap! state_ update-fn arg))
+  ([update-fn arg1 arg2]
+   (swap! state_ update-fn arg1 arg2))
+  ([update-fn arg1 arg2 arg3]
+   (swap! state_ update-fn arg1 arg2 arg3))
+  ([update-fn arg1 arg2 arg3 arg4]
+   (swap! state_ update-fn arg1 arg2 arg3 arg4))
+  ([update-fn arg1 arg2 arg3 arg4 arg5]
+   (swap! state_ update-fn arg1 arg2 arg3 arg4 arg5)))
