@@ -94,10 +94,11 @@
 
 (defn re-estimate-ticket
   [code ticket-id]
-  (state/transact!
-   (fn [state]
-     (->
-      (update-in [:refinements code] refinements/re-estimate-ticket ticket-id)
-      (update-in [:refinements code] assoc :updated-at (utc-now)))))
+  (state/transact! update-in [:refinements code]
+                   (fn [refinement]
+                     (-> refinement
+                         (refinements/re-estimate-ticket ticket-id)
+                         (assoc :updated-at (utc-now)))))
+
   (events/send-re-estimate-event! (state/get-refinement-sink code)
                                   code ticket-id))
