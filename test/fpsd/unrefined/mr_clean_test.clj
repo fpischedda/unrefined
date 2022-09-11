@@ -23,7 +23,7 @@
              (mr-clean/clean-expired-refinements state oldest-time))))))
 
 (testing "Update the state removing refinements past ttl"
-  (deftest statefu-filter-expired-refinements
+  (deftest stateful-filter-expired-refinements
     (let [_ (state/transact! (fn [state] {:refinements {"REF1" (refinements/create "REF1")}
                                           :refinements-sink {"REF1" (s/stream)}}))
           _ (mr-clean/remove-old-refinements! -50)]
