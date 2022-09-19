@@ -1,7 +1,7 @@
 {:deps {org.clojure/clojure {:mvn/version "1.11.1"}
         aleph/aleph {:mvn/version "0.4.6"}
         cheshire/cheshire {:mvn/version "5.11.0"}
-        http-kit/http-kit {:mvs/version "2.3.0"}
+        http-kit/http-kit {:mvn/version "2.3.0"}
         djblue/portal {:mvn/version "0.27.0"}
         metosin/malli {:mvn/version "0.8.4"}
         metosin/reitit {:mvn/version "0.5.18"}
