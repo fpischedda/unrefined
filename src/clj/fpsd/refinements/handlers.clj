@@ -29,13 +29,17 @@
                "X-Accel-Buffering" "no"}
      :body events-stream}))
 
+(defn safe-ticket-url
+  [code ticket-id]
+  (format "/refine/%s/ticket/%s" code ticket-id))
+
 (defn create-refinement
   [request]
   (let [user-id (or (-> request :common-cookies :user-id) (str (random-uuid)))
         ticket-url (-> request :params :ticket-url)
         {:keys [code ticket-id]} (core/create-refinement ticket-url)]
 
-    {:headers {:location (format "/refine/%s/ticket/%s" code ticket-id)}
+    {:headers {:location (safe-ticket-url code ticket-id)}
      :cookies {"user-id" {:value user-id :same-site :strict}}
      :status 302}))
 
@@ -45,7 +49,7 @@
         ticket-url (-> request :params :ticket-url)
         ticket (core/add-ticket code ticket-url)]
 
-    {:headers {:location (format "/refine/%s/ticket/%s" code (:id ticket))}
+    {:headers {:location (safe-ticket-url code (:id ticket))}
      :status 302}))
 
 (defn index
@@ -132,5 +136,5 @@
 
     (core/re-estimate-ticket code ticket-id)
 
-    {:headers {:location (format "/refine/%s/ticket/%s" code ticket-id)}
+    {:headers {:location (safe-ticket-url code ticket-id)}
      :status 302}))
