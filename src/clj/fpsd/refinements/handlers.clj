@@ -1,6 +1,5 @@
 (ns fpsd.refinements.handlers
   (:require
-   [portal.api :as portal]
    [selmer.parser :refer [render-file]]
    [fpsd.configuration :refer [config]]
    [fpsd.estimator :as estimator]
@@ -9,13 +8,6 @@
    [fpsd.refinements.events :as events]
    [fpsd.refinements.helpers :as helpers]
    [fpsd.unrefined.state :as state]))
-
-(comment
-  (def p (portal/open))
-  (add-tap #'portal/submit)
-
-  (portal/close p)
-  ,)
 
 (defn events-stream-handler
   [request]
