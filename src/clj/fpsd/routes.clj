@@ -50,7 +50,8 @@
          ["/estimate" {:get handlers/estimate-view
                        :post handlers/estimate-done}]
          ["/re-estimate" {:post handlers/estimate-again}]
-         ["/events" {:get handlers/events-stream-handler}]]]
+         ["/events" {:get handlers/events-stream-handler}]
+         ["/preview" {:get handlers/ticket-preview}]]]
 
        ["events" {:get handlers/events-stream-handler}]]]]
 

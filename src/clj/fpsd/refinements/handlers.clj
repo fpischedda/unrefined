@@ -130,3 +130,11 @@
 
     {:headers {:location (safe-ticket-url code ticket-id)}
      :status 302}))
+
+(defn ticket-preview
+  [request]
+  (let [{:keys [code ticket-id]} (:path-params request)
+        preview-future (core/get-ticket-preview code ticket-id)]
+
+    {:body (render-file "templates/ticket-preview.html" @preview-future)
+     :status 200}))

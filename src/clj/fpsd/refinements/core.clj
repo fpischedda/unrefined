@@ -2,7 +2,8 @@
   (:require [fpsd.refinements.events :as events]
             [fpsd.refinements :as refinements]
             [fpsd.refinements.helpers :refer [utc-now] :as helpers]
-            [fpsd.unrefined.state :as state]))
+            [fpsd.unrefined.state :as state]
+            [fpsd.unrefined.ticket-parser :refer [fetch-jira-ticket]]))
 
 
 (defn get-refinement
@@ -102,3 +103,12 @@
 
   (events/send-re-estimate-event! (state/get-refinement-sink code)
                                   code ticket-id))
+
+(defn ticket-preview
+  [code ticket-id]
+  (state/transact! update-in [:refinements code :tickets ticket-id]
+                   (fn [ticekt]
+                     (if-not (:preview ticket)
+                       (assoc ticket :preview (delay (fetch-jira-ticket ticket-id)))
+                       ticket)))
+  (:preview (get-ticket code ticket-id)))
