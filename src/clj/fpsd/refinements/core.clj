@@ -107,7 +107,7 @@
 (defn ticket-preview
   [code ticket-id]
   (state/transact! update-in [:refinements code :tickets ticket-id]
-                   (fn [ticekt]
+                   (fn [ticket]
                      (if-not (:preview ticket)
                        (assoc ticket :preview (delay (fetch-jira-ticket ticket-id)))
                        ticket)))

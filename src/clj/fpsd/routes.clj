@@ -6,6 +6,7 @@
             [aleph.http :as http]
             [mount.core :as mount]
             [ring.middleware.cookies :refer [wrap-cookies]]
+            [ring.middleware.params :refer [wrap-params]]
             [ring.middleware.keyword-params :refer [wrap-keyword-params]]
             [ring.middleware.session :refer [wrap-session]]
             [fpsd.configuration :refer [config]]
@@ -58,6 +59,7 @@
     {:data {:muuntaja m/instance
             :middleware [muuntaja/format-middleware
                          wrap-cookies
+                         wrap-params
                          wrap-keyword-params
                          common-cookies]}})))
 
