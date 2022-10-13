@@ -1,2 +1,6 @@
-<div><a href={{url}}>{{summary}}</a></div>
-<div>{{description}}</div>
+<div>
+  <p><strong>Summary</strong></p>
+  <a href={{url}}>{{summary}}</a>
+  <p><strong>Description</strong></p>
+  {{description|safe}}
+</div>
