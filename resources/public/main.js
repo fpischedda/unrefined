@@ -15,26 +15,22 @@ function copy_estimation_link(suffix='') {
   navigator.clipboard.writeText(url);
 }
 
-// when the google chart library will be loaded this will hold a reference
-// to the chart object, used for rendering
-var g_chart = null;
-
 function update_vote_stats(payload) {
-
-  if( g_chart == null) { return; }
 
   document.getElementById('total-voted').textContent = payload.voted;
   document.getElementById('total-skipped').textContent = payload.skipped;
 
-  var raw_data = [['Estimation', 'Number of votes'],];
+  var html = '<ul>';
+  const heart = '\u{2665}';
 
   payload.votes.forEach(i => {
-    raw_data.push(['Points: ' + i.points, i.count]);
+    const votes = heart.repeat(i.count);
+    html += `<li >${i.points} Story points ${votes}</li>`
   });
 
-  const data = google.visualization.arrayToDataTable(raw_data);
+  html += '</ul>'
 
-  g_chart.draw(data, {title: 'Distribution of votes'});
+  document.getElementById('vote-chart').innerHTML = html;
 }
 
 function goto_estimation_page(code, ticket_id) {
@@ -68,14 +64,7 @@ function init_sse() {
 }
 
 function start() {
-
-  google.charts.load('current', {'packages':['corechart']});
-  google.charts.setOnLoadCallback( e => {
-    const elem = document.getElementById('vote-chart');
-    g_chart = new google.visualization.PieChart(elem);
-
-    init_sse();
-  });
+  init_sse();
 }
 
 function update_total() {
