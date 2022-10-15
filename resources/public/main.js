@@ -103,3 +103,17 @@ function start_voting_page() {
 
   init_sse();
 }
+
+function load_ticket_preview(refinement_code, ticket_id) {
+
+  const url = '/refine/' + refinement_code + '/ticket/' + ticket_id + '/preview';
+  console.log('feching preview from ', url);
+
+  fetch(url)
+    .then(response => { return response.text()})
+    .then(preview => {
+      console.log('preview:');
+      console.log(preview);
+      document.getElementById('ticket-preview').innerHTML = preview
+    });
+}

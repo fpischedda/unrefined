@@ -6,6 +6,7 @@
             [aleph.http :as http]
             [mount.core :as mount]
             [ring.middleware.cookies :refer [wrap-cookies]]
+            [ring.middleware.params :refer [wrap-params]]
             [ring.middleware.keyword-params :refer [wrap-keyword-params]]
             [ring.middleware.session :refer [wrap-session]]
             [fpsd.configuration :refer [config]]
@@ -50,13 +51,15 @@
          ["/estimate" {:get handlers/estimate-view
                        :post handlers/estimate-done}]
          ["/re-estimate" {:post handlers/estimate-again}]
-         ["/events" {:get handlers/events-stream-handler}]]]
+         ["/events" {:get handlers/events-stream-handler}]
+         ["/preview" {:get handlers/ticket-preview}]]]
 
        ["events" {:get handlers/events-stream-handler}]]]]
 
     {:data {:muuntaja m/instance
             :middleware [muuntaja/format-middleware
                          wrap-cookies
+                         wrap-params
                          wrap-keyword-params
                          common-cookies]}})))
 
