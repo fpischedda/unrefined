@@ -86,8 +86,7 @@ function start_voting_page() {
   const breakdowns = [...document.getElementsByClassName('breakdown-entry')];
 
   breakdowns.forEach( b => {
-    b.onchange = update_total;
-    b.keypress = update_total;
+    b.oninput = update_total;
   });
 
   init_sse();
