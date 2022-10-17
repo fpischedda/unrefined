@@ -17,7 +17,10 @@ function copy_estimation_link(suffix='') {
 
 function update_vote_stats(payload) {
 
-  document.getElementById('total-voted').textContent = payload.voted;
+  var total_voted = document.getElementById('total-voted');
+  if(total_voted == null) return;  // not in result page
+
+  total_voted.textContent = payload.voted;
   document.getElementById('total-skipped').textContent = payload.skipped;
 
   var html = '<ul>';
