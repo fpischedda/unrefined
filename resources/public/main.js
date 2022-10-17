@@ -37,6 +37,10 @@ function goto_estimation_page(code, ticket_id) {
   document.location.href = '/refine/' + code + '/ticket/' + ticket_id + '/estimate';
 }
 
+function goto_watch_page(code, ticket_id) {
+  document.location.href = '/refine/' + code + '/ticket/' + ticket_id;
+}
+
 function handle_sse_messages(e) {
   const data = JSON.parse(e.data);
   console.log(data);
@@ -49,7 +53,12 @@ function handle_sse_messages(e) {
   }
   else if( data.event == 'added-ticket') {
     if(data.payload.ticket_id != get_ticket_id()) {
-      goto_estimation_page(data.payload.code, data.payload.ticket_id);
+      if(document.location.href.indexOf('/estimate') >= 0) {
+        goto_estimation_page(data.payload.code, data.payload.ticket_id);
+      }
+      else {
+        goto_watch_page(data.payload.code, data.payload.ticket_id);
+      }
     }
   }
 }
