@@ -1,13 +1,13 @@
 (ns fpsd.refinements.handlers
   (:require
    [selmer.parser :refer [render-file]]
-   [fpsd.configuration :refer [config]]
    [fpsd.estimator :as estimator]
-   [fpsd.refinements :as refinements]
    [fpsd.refinements.core :as core]
-   [fpsd.refinements.events :as events]
-   [fpsd.refinements.helpers :as helpers]
-   [fpsd.unrefined.state :as state]))
+   [fpsd.refinements.helpers :as helpers]))
+
+(defn cookie-value
+  [value]
+  {:value value :same-site :strict :path "/"})
 
 (defn events-stream-handler
   [request]
@@ -32,7 +32,7 @@
         {:keys [code ticket-id]} (core/create-refinement ticket-url)]
 
     {:headers {:location (safe-ticket-url code ticket-id)}
-     :cookies {"user-id" {:value user-id :same-site :strict}}
+     :cookies {"user-id" (cookie-value user-id)}
      :status 302}))
 
 (defn add-ticket
@@ -50,8 +50,7 @@
 
     {:body (render-file "templates/index.html" {})
      :headers {:content-type "text/html"}
-     :cookies {"user-id" {:value user-id
-                          :same-site :strict}}}))
+     :cookies {"user-id" (cookie-value user-id)}}))
 
 (defn estimate-watch
   [request]
@@ -92,8 +91,8 @@
                                                           :ticket ticket
                                                           :name name})
        :headers {:content-type "text/html"}
-       :cookies {"user-id" {:value user-id :same-site :strict}
-                 "name" {:value name :same-site :strict}}
+       :cookies {"user-id" (cookie-value user-id)
+                 "name" (cookie-value name)}
        :status 200}
       {:headers {:location "/"}
        :status 302})))
@@ -117,8 +116,8 @@
                          :skipped skipped
                          :vote vote})
      :headers {:content-type "text/html"}
-     :cookies {"user-id" {:value user-id :same-site :strict}
-               "name" {:value name :same-site :strict}}
+     :cookies {"user-id" (cookie-value user-id)
+               "name" (cookie-value name)}
      :status 200}))
 
 (defn estimate-again
