@@ -11,7 +11,8 @@ function get_ticket_id () {
 }
 
 function copy_estimation_link (suffix='') {
-  var url = document.location.href + suffix
+  const base_url = document.location.href.replace('/results', '')
+  var url = base_url + suffix
   navigator.clipboard.writeText(url)
 }
 
@@ -97,8 +98,8 @@ function start_voting_page () {
 
   const estimationTable = document.querySelector('.estimationTopicsContainer')
   /**
-   * 
-   * @param {InputEvent & { target: HTMLInputElement }} e 
+   *
+   * @param {InputEvent & { target: HTMLInputElement }} e
    */
   const onInputCallback = (e) => {
     update_total()
