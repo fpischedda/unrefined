@@ -1,29 +1,5 @@
 body {
-  background-color: #fbfbf8;
-}
-
-.header {
-  background-color: #9acde0;
-  padding: 8px;
-}
-
-.flex-container {
-  display: flex;
-  background-color: #cbe1ef;
-}
-
-.flex-container > div {
-  padding: 8px;
-  font-size: 24px;
-}
-
-button {
-  font-size: 16px;
-}
-
-button a {
-  text-decoration: none;
-  color: black;
+  font-family: 'Source Sans Pro', sans-serif;
 }
 
 .preview-container {
