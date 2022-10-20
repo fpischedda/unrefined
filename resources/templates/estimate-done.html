@@ -1,27 +1,29 @@
 {% extends "templates/base.html" %}
 
 {% block body %}
-<div class="flex-container">
-  <div style="width: 50%">
-    <p>Hi {{name}}!<br/>Thank you for estimating the ticket {{ticket.id}}.</p>
-    {% if skipped %}
-    <p>You skipped</p>
-    {% else %}
-    <p>Your vote: {{vote.points}}</p>
-    <p>Breakdown:
-      <ul>{% for item in vote.breakdown %}
-	<li>{{item|first|name}}: {{item|last}}</li>
-	{% endfor %}
-      </ul>
-    </p>
-    {% endif %}
-  </div>
-
-  <div style="width: 50%">
-    <p>Current estimation</p>
-    <p>Total voted: <span id="total-voted">{{ticket.current-session.votes|count}}</span></p>
-    <p>Total skipped: <span id="total-skipped">{{ticket.current-session.skips|count}}</span></p>
-    <div id="vote-chart" height="600"></div>
+<div class="container">
+  <div class="row">
+    <div class="col">
+      <p>Hi {{name}}!<br/>Thank you for estimating the ticket {{ticket.id}}.</p>
+      {% if skipped %}
+      <p>You skipped</p>
+      {% else %}
+      <p>Your vote: {{vote.points}}</p>
+      <p>Breakdown:
+        <ul>{% for item in vote.breakdown %}
+    <li>{{item|first|name}}: {{item|last}}</li>
+    {% endfor %}
+        </ul>
+      </p>
+      {% endif %}
+    </div>
+  
+    <div class="col">
+      <p>Current estimation</p>
+      <p>Total voted: <span id="total-voted">{{ticket.current-session.votes|count}}</span></p>
+      <p>Total skipped: <span id="total-skipped">{{ticket.current-session.skips|count}}</span></p>
+      <div id="vote-chart" height="600"></div>
+    </div>
   </div>
 </div>
 <script type="text/javascript" src="/assets/sse.js"></script>

@@ -1,29 +1,31 @@
 {% extends "templates/base.html" %}
 {% block body %}
-<div class="flex-container">
-  <div style="width: 50%">
-    <p> Ticket:  <a href="{{ticket.link-to-original}}">{{ticket.id}}</a>
-      <div><button onclick="copy_estimation_link('/estimate')">Copy link to estimation page</button></div>
-    </p>
-
-    <button>
-      <a href="/refine/{{refinement.code}}/ticket/{{ticket.id}}/results">
-      Reveal results
-      </a>
-    </button>
-
-    <p>
-      Estimate a new ticket:
-      <form method="POST" action="/refine/{{refinement.code}}/ticket">
-	<input type="text" name="ticket-url" placeholder="Ticket URL here"/><button>Start!</button>
+<div class="container">
+  <div class="row">
+    <div class="col">
+      <p>
+        Current ticket: <a href="{{ticket.link-to-original}}">{{ticket.id}}</a>
+        <div><button type="button" class="btn btn-primary" onclick="copy_estimation_link('/estimate')">Copy link to estimation page</button></div>
+      </p>
+  
+        <a class="btn btn-primary" href="/refine/{{refinement.code}}/ticket/{{ticket.id}}/results">
+          Reveal results
+        </a>
+  
+      <p>
+        Estimate a new ticket:
+      </p>
+      <form method="POST" action="/refine/{{refinement.code}}/ticket" class="input-group">
+        <input class="form-control" type="text" name="ticket-url" placeholder="Ticket URL here"/>
+        <button type="submit" class="btn btn-primary">Start!</button>
       </form>
-    </p>
-  </div>
-  <div style="width: 50%">
-    <p>Current activity</p>
-    <p>Total voted: <span id="total-voted">{{ticket.current-session.votes|count}}</span></p>
-    <p>Total skipped: <span id="total-skipped">{{ticket.current-session.skips|count}}</span></p>
-    <div id="vote-chart"></div>
+    </div>
+    <div class="col">
+      <h4>Current activity</h4>
+      <p>Total voted: <span id="total-voted">{{ticket.current-session.votes|count}}</span></p>
+      <p>Total skipped: <span id="total-skipped">{{ticket.current-session.skips|count}}</span></p>
+      <div id="vote-chart"></div>
+    </div>
   </div>
 </div>
 

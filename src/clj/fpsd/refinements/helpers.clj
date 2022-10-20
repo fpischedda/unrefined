@@ -20,7 +20,7 @@
   (try (Integer/parseInt int-str)
        (catch NumberFormatException _ nil)))
 
-(def supported-breakdowns [:implementation :tests :migrations :refactoring :risk :pain])
+(def supported-breakdowns [:implementation :backend :migrations :data_migrations :testing :manual_testing :risk :complexity])
 
 (defn get-vote-from-params
   [params]
