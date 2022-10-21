@@ -10,10 +10,25 @@ function get_ticket_id () {
   return ticket
 }
 
-function copy_estimation_link (suffix='') {
-  const base_url = document.location.href.replace('/results', '')
-  var url = base_url + suffix
+function get_ticket_path (code, ticket_id) {
+  return '/refine/' + code + '/ticket/' + ticket_id
+}
+
+function get_ticket_estimation_path (code, ticket_id) {
+  return get_ticket_path(code, ticket_id) + '/estimate'
+}
+
+function copy_estimation_link (code, ticket_id) {
+  var url = document.location.origin + get_ticket_estimation_path(code, ticket_id)
   navigator.clipboard.writeText(url)
+}
+
+function goto_estimation_page (code, ticket_id) {
+  document.location.href = get_ticket_estimation_path(code, ticket_id)
+}
+
+function goto_watch_page (code, ticket_id) {
+  document.location.href = get_ticket_path(code, ticket_id)
 }
 
 function update_vote_stats (payload) {
@@ -35,14 +50,6 @@ function update_vote_stats (payload) {
   html += '</ul>'
 
   document.getElementById('vote-chart').innerHTML = html
-}
-
-function goto_estimation_page (code, ticket_id) {
-  document.location.href = '/refine/' + code + '/ticket/' + ticket_id + '/estimate'
-}
-
-function goto_watch_page (code, ticket_id) {
-  document.location.href = '/refine/' + code + '/ticket/' + ticket_id
 }
 
 function handle_sse_messages (e) {

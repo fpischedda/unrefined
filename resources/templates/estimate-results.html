@@ -7,7 +7,7 @@
 <div class="flex-container">
   <div style="width: 50%">
     <p> Ticket:  <a href="{{ticket.link-to-original}}">{{ticket.id}}</a>
-      <div><button onclick="copy_estimation_link('/estimate')">Copy link to estimation page</button></div>
+      <div><button onclick="copy_estimation_link('{{refinement.code}}', '{{ticket.id}}')">Copy link to estimation page</button></div>
     </p>
 
   {% ifequal estimation.result :not-enough-votes %}
