@@ -12,14 +12,15 @@
 (defn events-stream-handler
   [request]
   (let [code (-> request :path-params :code)
-        ticket-id (-> request :path-params :ticket-id)
-        events-stream (core/user-connected! code ticket-id)]
+        ticket-id (-> request :path-params :ticket-id)]
 
-    {:status 200
-     :headers {:content-type "text/event-stream"
-               :cache-control "no-cache"
-               "X-Accel-Buffering" "no"}
-     :body events-stream}))
+    (if-let [events-stream (core/user-connected! code ticket-id)]
+      {:status 200
+       :headers {:content-type "text/event-stream"
+                 :cache-control "no-cache"
+                 "X-Accel-Buffering" "no"}
+       :body events-stream}
+      {:status 404})))
 
 (defn safe-ticket-url
   [code ticket-id]
@@ -52,31 +53,40 @@
      :headers {:content-type "text/html"}
      :cookies {"user-id" (cookie-value user-id)}}))
 
+(defn refinement-or-ticket-not-found-error
+  []
+  {:status 404
+       :headers {:content-type "text/html"}
+       :body (render-file "templates/index.html"
+                          {:error "Unable to find rifenement session or ticket"})})
+
 (defn estimate-watch
   [request]
   (let [refinement (core/get-refinement (-> request :path-params :code))
-        ticket-id (-> request :path-params :ticket-id)
-        ticket (core/get-refinement-ticket refinement ticket-id)]
+        ticket-id (-> request :path-params :ticket-id)]
 
-    {:body
-     (render-file "templates/estimate-watch.html" {:refinement refinement
-                                                   :ticket ticket})
-     :headers {:content-type "text/html"}
-     :status 200}))
+    (if-let [ticket (core/get-refinement-ticket refinement ticket-id)]
+      {:body
+       (render-file "templates/estimate-watch.html" {:refinement refinement
+                                                     :ticket ticket})
+       :headers {:content-type "text/html"}
+       :status 200}
+      (refinement-or-ticket-not-found-error))))
 
 (defn estimate-results
   [request]
   (let [refinement (core/get-refinement (-> request :path-params :code))
-        ticket-id (-> request :path-params :ticket-id)
-        ticket (core/get-refinement-ticket refinement ticket-id)
-        estimation (estimator/estimate ticket (:settings refinement))]
-
-    {:body
-     (render-file "templates/estimate-results.html" {:refinement refinement
-                                                     :ticket ticket
-                                                     :estimation estimation})
-     :headers {:content-type "text/html"}
-     :status 200}))
+        ticket-id (-> request :path-params :ticket-id)]
+    (if-let [ticket (core/get-refinement-ticket refinement ticket-id)]
+      {:body
+       (render-file
+        "templates/estimate-results.html"
+        {:refinement refinement
+         :ticket ticket
+         :estimation (estimator/estimate ticket (:settings refinement))})
+       :headers {:content-type "text/html"}
+       :status 200}
+      (refinement-or-ticket-not-found-error))))
 
 (defn estimate-view
   [request]
@@ -94,8 +104,7 @@
        :cookies {"user-id" (cookie-value user-id)
                  "name" (cookie-value name)}
        :status 200}
-      {:headers {:location "/"}
-       :status 302})))
+      (refinement-or-ticket-not-found-error))))
 
 (defn estimate-done
   [request]
