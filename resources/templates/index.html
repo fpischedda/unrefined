@@ -3,6 +3,9 @@
   <div class="row">
     <div class="col">
       <form method="POST" action="/refine">
+	{% if error %}
+	<p>Oh no! {{error}}</p>
+	{% endif %}
         <p>Enter the URL of the ticket to refine and press Start!</p>
         <div class="input-group">
           <input
