@@ -1,7 +1,6 @@
 (ns fpsd.routes
   (:require [reitit.ring :as ring]
             [reitit.ring.middleware.muuntaja :as muuntaja]
-            [reitit.core :as r]
             [muuntaja.core :as m]
             [aleph.http :as http]
             [mount.core :as mount]
@@ -9,6 +8,7 @@
             [ring.middleware.params :refer [wrap-params]]
             [ring.middleware.keyword-params :refer [wrap-keyword-params]]
             [ring.middleware.session :refer [wrap-session]]
+            [com.brunobonacci.mulog :as u]
             [fpsd.configuration :refer [config]]
             [fpsd.refinements.handlers :as handlers]))
 
@@ -20,6 +20,22 @@
                                       (merge headers fixed-headers)
                                       fixed-headers))))))
 
+(defn request->endpoint-name
+  [request]
+  (-> request :reitit.core/match :data (get (:request-method request)) :name))
+
+(defn request->log-context
+  [request]
+  (-> request
+      (select-keys [:request-method :path-params :params :uri :cookies])
+      (assoc :endpoint-name (request->endpoint-name request))))
+
+(defn wrap-log-context
+  [handler]
+  (fn [request]
+    (u/with-context (request->log-context request)
+      (handler request))))
+
 (defn common-cookies [handler]
   (fn [request]
     (let [user-id (-> request :cookies (get "user-id") :value)
@@ -30,7 +46,8 @@
 (def app
   (ring/ring-handler
    (ring/router
-    [["/" {:get handlers/index}]
+    [["/" {:get {:handler handlers/index
+                 :name :unrefined/index}}]
      ["/assets/*" (ring/create-resource-handler)]
 
      ["/refine"
@@ -47,12 +64,18 @@
         ["/:ticket-id"
          ["" {:get {:handler handlers/estimate-watch
                     :name :unrefined/estimate-watch}}]
-         ["/results" {:get handlers/estimate-results}]
-         ["/estimate" {:get handlers/estimate-view
-                       :post handlers/estimate-done}]
-         ["/re-estimate" {:post handlers/estimate-again}]
-         ["/events" {:get handlers/events-stream-handler}]
-         ["/preview" {:get handlers/ticket-preview}]]]
+         ["/results" {:get {:handler handlers/estimate-results
+                            :name :unrefined/estimate-results}}]
+         ["/estimate" {:get {:handler handlers/estimate-view
+                             :name :unrefined/estimate-view}
+                       :post {:handler handlers/estimate-done
+                              :name :unrefined/estimate-done}}]
+         ["/re-estimate" {:post {:handler handlers/estimate-again
+                                 :name :unrefined/estimate-again}}]
+         ["/events" {:get {:handler handlers/events-stream-handler
+                           :name :unrefined/estimate-stream-handler}}]
+         ["/preview" {:get {:handler handlers/ticket-preview
+                            :name :unrefined/ticket-preview}}]]]
 
        ["events" {:get handlers/events-stream-handler}]]]]
 
@@ -61,16 +84,19 @@
                          wrap-cookies
                          wrap-params
                          wrap-keyword-params
+                         wrap-log-context
                          common-cookies]}})))
 
 (comment
-  (#'app {:request-method :post
-        :uri "/refine"
-        :form-params {:ticket-url "abc"}})
+  (#'app {:request-method :get
+          :uri "/"
+          :form-params {:ticket-url "abc"}})
   ,)
 
 (mount/defstate http-server
-  :start (http/start-server #'app {:port (-> config :http :port)})
+  :start (do
+           (u/start-publisher! (:logging config))
+           (http/start-server #'app {:port (-> config :http :port)}))
   :stop (.close http-server))
 
 (comment

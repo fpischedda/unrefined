@@ -1,5 +1,6 @@
 (ns fpsd.refinements.handlers
   (:require
+   [com.brunobonacci.mulog :as u]
    [selmer.parser :refer [render-file]]
    [fpsd.estimator :as estimator]
    [fpsd.refinements.core :as core]
@@ -15,12 +16,19 @@
         ticket-id (-> request :path-params :ticket-id)]
 
     (if-let [events-stream (core/user-connected! code ticket-id)]
-      {:status 200
-       :headers {:content-type "text/event-stream"
-                 :cache-control "no-cache"
-                 "X-Accel-Buffering" "no"}
-       :body events-stream}
-      {:status 404})))
+      (do
+        (u/log ::events-stream-handler :refinement code :ticket-id ticket-id)
+        {:status 200
+         :headers {:content-type "text/event-stream"
+                   :cache-control "no-cache"
+                   "X-Accel-Buffering" "no"}
+         :body events-stream})
+      (do
+        (u/log ::events-stream-handler
+               :refinement code
+               :ticket-id ticket-id
+               :error "Could not find requested ticket or refinement session")
+        {:status 404}))))
 
 (defn safe-ticket-url
   [code ticket-id]
@@ -32,6 +40,8 @@
         ticket-url (-> request :params :ticket-url)
         {:keys [code ticket-id]} (core/create-refinement ticket-url)]
 
+    (u/log ::create-refinement :user-id user-id :ticket-url ticket-url :refinement code :ticket-id ticket-id)
+
     {:headers {:location (safe-ticket-url code ticket-id)}
      :cookies {"user-id" (cookie-value user-id)}
      :status 302}))
@@ -42,6 +52,10 @@
         ticket-url (-> request :params :ticket-url)
         ticket (core/add-ticket code ticket-url)]
 
+    (u/log ::add-ticket
+           :ticket-url ticket-url
+           :refinement code
+           :ticket-id (:id ticket))
     {:headers {:location (safe-ticket-url code (:id ticket))}
      :status 302}))
 
@@ -54,7 +68,11 @@
      :cookies {"user-id" (cookie-value user-id)}}))
 
 (defn refinement-or-ticket-not-found-error
-  []
+  [code ticket-id]
+  (u/log ::refinement-or-ticket-not-found-error
+         :refinement code
+         :ticket-id ticket-id
+         :error "Could not find requested ticket or refinement session")
   {:status 404
        :headers {:content-type "text/html"}
        :body (render-file "templates/index.html"
@@ -62,7 +80,8 @@
 
 (defn estimate-watch
   [request]
-  (let [refinement (core/get-refinement (-> request :path-params :code))
+  (let [code (-> request :path-params :code)
+        refinement (core/get-refinement code)
         ticket-id (-> request :path-params :ticket-id)]
 
     (if-let [ticket (core/get-refinement-ticket refinement ticket-id)]
@@ -71,11 +90,12 @@
                                                      :ticket ticket})
        :headers {:content-type "text/html"}
        :status 200}
-      (refinement-or-ticket-not-found-error))))
+      (refinement-or-ticket-not-found-error code ticket-id))))
 
 (defn estimate-results
   [request]
-  (let [refinement (core/get-refinement (-> request :path-params :code))
+  (let [code (-> request :path-params :code)
+        refinement (core/get-refinement code)
         ticket-id (-> request :path-params :ticket-id)]
     (if-let [ticket (core/get-refinement-ticket refinement ticket-id)]
       {:body
@@ -86,7 +106,7 @@
          :estimation (estimator/estimate ticket (:settings refinement))})
        :headers {:content-type "text/html"}
        :status 200}
-      (refinement-or-ticket-not-found-error))))
+      (refinement-or-ticket-not-found-error code ticket-id))))
 
 (defn estimate-view
   [request]
@@ -104,7 +124,7 @@
        :cookies {"user-id" (cookie-value user-id)
                  "name" (cookie-value name)}
        :status 200}
-      (refinement-or-ticket-not-found-error))))
+      (refinement-or-ticket-not-found-error code ticket-id))))
 
 (defn estimate-done
   [request]
