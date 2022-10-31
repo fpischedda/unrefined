@@ -1,0 +1,48 @@
+  {% ifequal estimation.result :not-enough-votes %}
+    <p>Unfortunately we haven't reached the minimum number of votes ({{refinement.settings.reasonable-minimum-votes}}).</p>
+    <p>You may want to estimate a new ticket or wait for more votes.</p>
+  {% endifequal %}
+  {% ifequal estimation.result :winner %}
+    <p>Ticket estimated with a score of <strong>{{estimation.points}}</strong></p>
+    <p><h5>Points and voters</h5>
+      {% for item in estimation.votes %}
+      <div>Story points <strong>{{item.points}}</strong>, selected by
+	<ul>
+	  {% for author in item.authors %}
+	  <li>{{author}}</li>
+	  {% endfor %}
+	</ul>
+      </div>
+      {% endfor %}
+    </p>
+  {% endifequal %}
+
+  {% ifequal estimation.result :ex-equo %}
+    <p>We have a tie!</p>
+    <p>I suggest <strong>{{estimation.suggested}}</strong> story points but you may have a different opinion, so here are the points with the same amout of votes</p>
+    {% for item in estimation.same-points %}
+    <div>Story points <strong>{{item.points}}</strong>, selected by
+      <ul>
+	{% for author in item.authors %}
+	<li>{{author}}</li>
+	{% endfor %}
+      </ul>
+    </div>
+    {% endfor %}
+  {% endifequal %}
+
+  {% ifequal estimation.result :discuss %}
+    <p>Oh no! The difference between story points is too big! I guess you have to discuss now...</p>
+    <p>Highest points {{estimation.highest-vote}}, selected by
+      <ul>{% for voter in estimation.highest-voters %}
+	<li>{{voter}}</li>
+	{% endfor %}
+      </ul>
+    </p>
+    <p>Lowest points {{estimation.lowest-vote}}, selected by
+      <ul>{% for voter in estimation.lowest-voters %}
+	<li>{{voter}}</li>
+	{% endfor %}
+      </ul>
+    </p>
+  {% endifequal %}

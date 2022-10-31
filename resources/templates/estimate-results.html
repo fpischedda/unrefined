@@ -1,81 +1,36 @@
 {% extends "templates/base.html" %}
-{% block head %}
-<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-{% endblock %}
 
 {% block body %}
-<div class="flex-container">
-  <div style="width: 50%">
-    <p> Ticket:  <a href="{{ticket.link-to-original}}">{{ticket.id}}</a>
-      <div><button onclick="copy_estimation_link('{{refinement.code}}', '{{ticket.id}}')">Copy link to estimation page</button></div>
-    </p>
+<div class="container">
+  <div class="row">
+    <div style="width: 50%">
+      <h5> Ticket:  <a href="{{ticket.link-to-original}}">{{ticket.id}}</a>
+	<div><button class="btn btn-primary" onclick="copy_estimation_link('{{refinement.code}}', '{{ticket.id}}')">Copy link to estimation page</button></div>
+      </h5>
 
-  {% ifequal estimation.result :not-enough-votes %}
-    <p>Unfortunately we havent reached the minimum number of votes ({{refinement.settings.reasonable-minimum-votes}}).</p>
-    <p>You may want to estimate a new ticket or wait for more votes.</p>
-  {% endifequal %}
-  {% ifequal estimation.result :winner %}
-    <p>Ticket estimated with a score of <strong>{{estimation.points}}</strong></p>
-    <p>Points and voters
-      {% for item in estimation.votes %}
-      <div>Story points <strong>{{item.points}}</strong>, selected by
-	<ul>
-	  {% for author in item.authors %}
-	  <li>{{author}}</li>
-	  {% endfor %}
-	</ul>
-      </div>
-      {% endfor %}
-    </p>
-  {% endifequal %}
+      {% include "templates/estimation-result-fragment.html" with estimation=estimation refinement=refinement %}
 
-  {% ifequal estimation.result :ex-equo %}
-    <p>We have a tie!</p>
-    <p>I suggest <strong>{{estimation.suggested}}</strong> story points but you may have a different opinion, so here are the points with the same amout of votes</p>
-    {% for item in estimation.same-points %}
-    <div>Story points <strong>{{item.points}}</strong>, selected by
-      <ul>
-	{% for author in item.authors %}
-	<li>{{author}}</li>
-	{% endfor %}
-      </ul>
+      <p>
+	<h5>Estimate a new ticket</h5>
+	<form method="POST" action="/refine/{{refinement.code}}/ticket">
+	  <input class="form-control"
+		 type="text"
+		 name="ticket-url"
+		 placeholder="Ticket URL here"/>
+	  <button class="btn btn-primary">Start!</button>
+	</form>
+      </p>
+      <p>
+	<button class="btn btn-primary" onclick="getPermalink('{{refinement.code}}','{{ticket.id}}')">Get permalink</button>
+	<lable id="permalink"></lable>
+      </p>
     </div>
-    {% endfor %}
-  {% endifequal %}
-
-  {% ifequal estimation.result :discuss %}
-    <p>Oh no! The difference between story points is too big! I guess you have to discuss now...</p>
-    <p>Highest points {{estimation.highest-vote}}, selected by
-      <ul>{% for voter in estimation.highest-voters %}
-	<li>{{voter}}</li>
-	{% endfor %}
-      </ul>
-    </p>
-    <p>Lowest points {{estimation.lowest-vote}}, selected by
-      <ul>{% for voter in estimation.lowest-voters %}
-	<li>{{voter}}</li>
-	{% endfor %}
-      </ul>
-    </p>
-    <p>
-      <form method="POST" action="/refine/{{refinement.code}}/ticket/{{ticket.id}}/re-estimate">
-	<button>Re-estimate ticket</button>
-      </form>
-    </p>
-  {% endifequal %}
-
-    <p>
-      Estimate a new ticket:
-      <form method="POST" action="/refine/{{refinement.code}}/ticket">
-	<input type="text" name="ticket-url" placeholder="Ticket URL here"/><button>Start!</button>
-      </form>
-    </p>
-  </div>
-  <div style="width: 50%">
-    <p>Current activity</p>
-    <p>Total voted: <span id="total-voted">{{ticket.current-session.votes|count}}</span></p>
-    <p>Total skipped: <span id="total-skipped">{{ticket.current-session.skips|count}}</span></p>
-    <div id="vote-chart"></div>
+    <div class="col">
+      <p>Current activity</p>
+      <p>Total voted: <span id="total-voted">{{ticket.current-session.votes|count}}</span></p>
+      <p>Total skipped: <span id="total-skipped">{{ticket.current-session.skips|count}}</span></p>
+      <div id="vote-chart"></div>
+    </div>
   </div>
 </div>
 

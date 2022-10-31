@@ -7,4 +7,5 @@
           :nrepl {:port (:unrefined-nrepl-port env 1667)}
           :logging {:type :simple-file
                     :filename (:unrefined-log-file env "/tmp/unrefined.log")}
+          :persistence {:path (:unrefined-tickets-path env "/tmp/")}
           :mr-clean {:ttl (:unrefined-refinement-ttl env (* 60 60 12))}})

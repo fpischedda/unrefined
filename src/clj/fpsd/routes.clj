@@ -51,8 +51,7 @@
      ["/assets/*" (ring/create-resource-handler)]
 
      ["/refine"
-      ["" {:get handlers/index
-           :post {:handler handlers/create-refinement
+      ["" {:post {:handler handlers/create-refinement
                   :name :unrefined/create-refinement}}]
 
       ["/:code"
@@ -74,6 +73,10 @@
                                  :name :unrefined/estimate-again}}]
          ["/events" {:get {:handler handlers/events-stream-handler
                            :name :unrefined/estimate-stream-handler}}]
+         ["/permalink" {:get {:handler handlers/render-stored-ticket
+                              :name :unrefined/render-stored-ticket}
+                        :post {:handler handlers/store-ticket
+                               :name :unrefined/store-ticket}}]
          ["/preview" {:get {:handler handlers/ticket-preview
                             :name :unrefined/ticket-preview}}]]]
 

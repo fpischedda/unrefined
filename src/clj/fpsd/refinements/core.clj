@@ -1,7 +1,9 @@
 (ns fpsd.refinements.core
-  (:require [fpsd.refinements.events :as events]
+  (:require [fpsd.estimator :as estimator]
+            [fpsd.refinements.events :as events]
             [fpsd.refinements :as refinements]
             [fpsd.refinements.helpers :refer [utc-now] :as helpers]
+            [fpsd.unrefined.persistence :as persistence]
             [fpsd.unrefined.state :as state]
             [fpsd.unrefined.ticket-parser :refer [fetch-jira-ticket]]))
 
@@ -103,6 +105,24 @@
 
   (events/send-re-estimate-event! (state/get-refinement-sink code)
                                   code ticket-id))
+
+(defn store-ticket
+  [code ticket-id]
+  (let [refinement (get-refinement code)
+        ticket (get-ticket code ticket-id)]
+    (cond
+      (nil? refinement) (format "Unable to find refinement %s" code)
+      (nil? ticket) (format "Unable to find ticket %s in refinement %s" ticket-id code)
+      :else (persistence/store-ticket-to-file! refinement
+                                               ticket
+                                               (estimator/estimate ticket (:settings refinement))))))
+
+(defn get-stored-ticket
+  [code ticket-id]
+  (try
+    (persistence/get-stored-ticket code ticket-id)
+    (catch Throwable t
+      {:error (format "Unable to retrieve ticket %s for refinement %s: %s" ticket-id code t)})))
 
 (defn ticket-preview
   [code ticket-id]
