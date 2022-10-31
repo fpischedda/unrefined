@@ -159,6 +159,33 @@
     {:headers {:location (safe-ticket-url code ticket-id)}
      :status 302}))
 
+(defn store-ticket
+  [request]
+  (let [{:keys [code ticket-id]} (:path-params request)
+        error (core/store-ticket code ticket-id)]
+
+    (u/log ::store-ticket :refinement code :ticket ticket-id :error error)
+    (if error
+      {:status 500
+       :body error}
+      {:status 201})))
+
+(defn render-stored-ticket
+  [request]
+  (let [{:keys [code ticket-id]} (:path-params request)
+        data (core/get-stored-ticket code ticket-id)]
+
+    (u/log ::get-stored-ticket
+           :refinement code
+           :ticket ticket-id
+           :refinement-data (:refinement data)
+           :ticket-data (:ticket data)
+           :estimation-data (:estimation data)
+           :error (:error data))
+
+    {:status 200
+     :body (render-file "templates/estimate-permalink.html" data)}))
+
 (defn ticket-preview
   [request]
   (let [{:keys [code ticket-id]} (:path-params request)

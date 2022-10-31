@@ -11,15 +11,24 @@ function get_ticket_id () {
 }
 
 function get_ticket_path (code, ticket_id) {
-  return '/refine/' + code + '/ticket/' + ticket_id
+  return `/refine/${code}/ticket/${ticket_id}`
 }
 
 function get_ticket_estimation_path (code, ticket_id) {
   return get_ticket_path(code, ticket_id) + '/estimate'
 }
 
+function get_ticket_permalink_path (code, ticket_id) {
+  return get_ticket_path(code, ticket_id) + '/permalink'
+}
+
 function copy_estimation_link (code, ticket_id) {
   var url = document.location.origin + get_ticket_estimation_path(code, ticket_id)
+  navigator.clipboard.writeText(url)
+}
+
+function copy_permalink (code, ticket_id) {
+  var url = document.location.origin + get_ticket_permalink_path(code, ticket_id)
   navigator.clipboard.writeText(url)
 }
 
@@ -259,4 +268,23 @@ const estimationTopics = [
 const getEstimationTopicExample = (topicName, estimation) => {
   console.log(topicName, estimation)
   return estimationTopics.find(t => t.name === topicName).examples[estimation]
+}
+
+const createPermalink = (code, ticketId) => {
+  const permalink = `/refine/${code}/ticket/${ticketId}/permalink`
+
+  fetch(permalink, {method: 'POST'})
+    .then(response => {
+      if (response.status == 201) {
+	return permalink;
+      }
+    })
+    .catch(err => console.log(err))
+}
+
+const getPermalink = (code, ticketId) => {
+  const permalink = createPermalink(code, ticketId)
+
+  copy_permalink(code, ticketId)
+  document.getElementById('permalink').innerText = "Link copied to the clipboard"
 }
