@@ -113,9 +113,13 @@
     (cond
       (nil? refinement) (format "Unable to find refinement %s" code)
       (nil? ticket) (format "Unable to find ticket %s in refinement %s" ticket-id code)
-      :else (persistence/store-ticket-to-file! refinement
-                                               ticket
-                                               (estimator/estimate ticket (:settings refinement))))))
+      :else
+      (persistence/store-ticket!
+       code
+       ticket-id
+       {:refinement (dissoc refinement :tickets)
+        :ticket ticket
+        :estimation (estimator/estimate ticket (:settings refinement))}))))
 
 (defn get-stored-ticket
   [code ticket-id]
