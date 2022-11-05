@@ -39,24 +39,26 @@
    :link-to-original ticket-url})
 
 (defn add-ticket
+  "Returns a new refinement adding the provided ticket to the tickets map"
   [refinement ticket]
-  (-> refinement
-      (update :tickets assoc (:id ticket) ticket)))
+  (update refinement :tickets assoc (:id ticket) ticket))
 
 (defn add-new-ticket
   [refinement ticket-id ticket-url]
   (add-ticket refinement (new-ticket ticket-id ticket-url)))
 
 (defn count-voted
+  "Returns the numbers of users who voted"
   [ticket]
   (count (-> ticket :current-session :votes)))
 
 (defn count-skipped
+  "Returns the numbers of users who skipped voting"
   [ticket]
   (count (-> ticket :current-session :skips)))
 
 (defn vote-ticket
-  "Store that a user voted and send an event accordingly"
+  "Return un updated refinement adding or changing a user's vote for a ticket"
   [refinement ticket-id user-id vote]
   (update-in refinement [:tickets ticket-id :current-session]
              (fn [session]
@@ -65,7 +67,7 @@
                    (update :votes assoc user-id vote)))))
 
 (defn skip-ticket
-  "Store that a user skipped voting and send an event accordingly"
+  "Return un updated refinement adding or changing a user's skip for a ticket"
   [refinement ticket-id user-id]
   (update-in refinement [:tickets ticket-id :current-session]
              (fn [session]
@@ -74,15 +76,15 @@
                    (update :votes dissoc user-id)))))
 
 (defn new-estimation-for-ticket
-  "Given a ticket, move the current estimation to the :sessions list
-   and set :current-session to an empty session.
-   Returns the updated ticket."
+  "Given a ticket, return a new ticket where the current estimation is
+   moved to the :sessions list and set :current-session to an empty session."
   [ticket]
   (-> ticket
       (update :sessions conj (:current-session ticket))
       (assoc :current-session (new-empty-session))))
 
 (defn re-estimate-ticket
-  "Updates the ticket to start a new estimation"
+  "Return an updated refinement starting a new session for the
+   ticket identified by ticket-id"
   [refinement ticket-id]
   (update-in refinement [:tickets ticket-id] new-estimation-for-ticket))
