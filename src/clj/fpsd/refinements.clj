@@ -5,7 +5,8 @@
 (def default-settings {:max-points-delta 3
                        :reasonable-minimum-votes 3
                        :max-rediscussions 1
-                       :suggestion-strategy :majority})
+                       :suggestion-strategy :majority
+                       :estimation-cheatsheet "cargo-one"})
 
 (defn ticket-details
   [refinement ticket-id]
