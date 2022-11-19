@@ -20,5 +20,4 @@
   [configuration code ticket-id]
   (-> (get-ticket-path configuration code ticket-id)
       slurp
-      (json/parse-string true)
-      (update-in [:estimation :result] keyword)))
+      (json/parse-string true)))
