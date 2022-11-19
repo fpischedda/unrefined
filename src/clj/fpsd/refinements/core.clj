@@ -9,7 +9,6 @@
             [fpsd.unrefined.state :as state]
             [fpsd.unrefined.ticket-parser :refer [fetch-jira-ticket]]))
 
-
 (defn get-refinement
   [code]
   (state/get-refinement code))
@@ -37,19 +36,22 @@
                                           (refinements/ticket-details ticket-id)))
     stream))
 
-(defn gen-random-code [length existing-refinements]
-  (loop []
-    (let [code (apply str (take length (repeatedly #(char (+ (rand 26) 65)))))]
-      (if (get existing-refinements code)
-        (recur)
-        code))))
+(defn gen-random-code
+  "Generate a random code/id using nano-id lib.
+   By default (no-params) returns a code of length 21
+   but smaller codes can be generated with a higher
+   chances of collision."
+  ([]
+   (gen-random-code 21))
+  ([length]
+   (nano-id length)))
 
 (defn create-refinement
   [ticket-url]
 
   (let [ticket-id (or (helpers/extract-ticket-id-from-url ticket-url)
                       ticket-url)
-        code (gen-random-code 6 (state/get-refinements))]
+        code (gen-random-code)]
     (state/transact!
      (fn [state]
        (let [refinement (-> code
