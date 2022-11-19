@@ -10,8 +10,11 @@
         environ/environ {:mvn/version "1.2.0"}
         nrepl/nrepl {:mvn/version "0.9.0"}
         com.brunobonacci/mulog {:mvn/version "0.9.0"}
-        nano-id/nano-id {:mvn/version "1.0.0"}}
+        nano-id/nano-id {:mvn/version "1.0.0"}
+        io.replikativ/datahike {:mvn/version "0.6.1522"}}
+
  :paths ["src/clj" "resources"]
+
  :aliases {:build {:deps {io.github.clojure/tools.build {:git/tag "v0.8.3" :git/sha "0d20256"}}
                    :ns-default build}
            :run {:main-opts ["-m" "fpsd.unrefined.server"]}

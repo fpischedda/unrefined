@@ -15,6 +15,12 @@
           :nrepl {:port (safe-to-int (:unrefined-nrepl-port env 1667))}
           :logging {:type :simple-file
                     :filename (:unrefined-log-file env "/tmp/unrefined.log")}
+          ;; use the filesystem as storage medium
+          :datahike {:store {:backend :file
+                             :path "/tmp/unrefined.datahike"}
+                     :name "unrefined"
+                     :schema-flexibility :write
+                     :keep-history? true}
           :persistence {:backend :json-file
                         :path (:unrefined-tickets-path env "/tmp/")}
           :mr-clean {:ttl (safe-to-int (:unrefined-refinement-ttl env default-ttl))}})
