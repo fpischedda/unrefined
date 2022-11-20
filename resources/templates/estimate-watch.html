@@ -8,9 +8,19 @@
         <div><button type="button" class="btn btn-primary" onclick="copy_estimation_link('{{refinement.code}}', '{{ticket.id}}')">Copy link to estimation page</button></div>
       </p>
 
+      <p>
         <a class="btn btn-primary" href="/refine/{{refinement.code}}/ticket/{{ticket.id}}/results">
           Reveal results
         </a>
+      </p>
+
+      <p>
+	<form method="POST" action="/refine/{{refinement.code}}/ticket/{{ticket.id}}/re-estimate">
+	  <button class="btn btn-primary">
+	    Reset current estimation
+	  </button>
+	</form>
+      </p>
 
       <p>
         Estimate a new ticket:

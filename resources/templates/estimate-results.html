@@ -11,6 +11,14 @@
       {% include "templates/estimation-result-fragment.html" with estimation=estimation refinement=refinement %}
 
       <p>
+	<form method="POST" action="/refine/{{refinement.code}}/ticket/{{ticket.id}}/re-estimate">
+	  <button class="btn btn-primary">
+	    Re-estimate ticket
+	  </button>
+	</form>
+      </p>
+
+      <p>
 	<h5>Estimate a new ticket</h5>
 	<form method="POST" action="/refine/{{refinement.code}}/ticket">
 	  <input class="form-control"
