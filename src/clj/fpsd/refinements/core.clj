@@ -1,5 +1,6 @@
 (ns fpsd.refinements.core
-  (:require [fpsd.configuration :refer [config]]
+  (:require [nano-id.core :refer [nano-id]]
+            [fpsd.configuration :refer [config]]
             [fpsd.estimator :as estimator]
             [fpsd.refinements.events :as events]
             [fpsd.refinements :as refinements]
