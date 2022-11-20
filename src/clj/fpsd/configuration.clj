@@ -2,11 +2,19 @@
   (:require [mount.core :as mount]
             [environ.core :refer [env]]))
 
+(def default-ttl (* 60 60 12))
+
+(defn safe-to-int
+  [maybe-int]
+  (if (string? maybe-int)
+    (Integer/parseInt maybe-int)
+    maybe-int))
+
 (mount/defstate config
-  :start {:http  {:port (:unrefined-http-port env 8080)}
-          :nrepl {:port (:unrefined-nrepl-port env 1667)}
+  :start {:http  {:port (safe-to-int (:unrefined-http-port env 8080))}
+          :nrepl {:port (safe-to-int (:unrefined-nrepl-port env 1667))}
           :logging {:type :simple-file
                     :filename (:unrefined-log-file env "/tmp/unrefined.log")}
           :persistence {:backend :json-file
                         :path (:unrefined-tickets-path env "/tmp/")}
-          :mr-clean {:ttl (:unrefined-refinement-ttl env (* 60 60 12))}})
+          :mr-clean {:ttl (safe-to-int (:unrefined-refinement-ttl env default-ttl))}})
