@@ -62,6 +62,9 @@
              (update :refinements assoc code refinement)
              (update :refinements-sink assoc code (events/new-stream))))))
 
+    (state/insert-refinement (state/get-refinement code))
+    (state/insert-ticket code (-> (state/get-refinement code) :tickets first))
+
     {:code code
      :ticket-id ticket-id}))
 
@@ -75,6 +78,8 @@
        (-> state
            (update-in [:refinements code] refinements/add-new-ticket ticket-id ticket-url)
            (update-in [:refinemets code] assoc :updated-at (utc-now)))))
+
+    (state/insert-ticket code (-> (state/get-refinement code) :tickets (get ticket-id)))
 
     (events/send-ticket-added-event! (state/get-refinement-sink code) code ticket-id)
 

@@ -170,36 +170,33 @@
 
   ;; add some data
   (do
-    ;; lets create a refinement session
     (d/transact db
-                [{:refinement/id _refinement
+                [
+    ;; lets create a refinement session
+                 {:refinement/id _refinement
                   :refinement/created-at (str (utc-now))
                   :refinement/updated-at (str (utc-now))
-                  :refinement/voting-mode :voting.mode/linear}])
-
+                  :refinement/voting-mode :voting.mode/linear}
     ;; adding some settings to it
-    (d/transact db
-                [{:voting.mode.linear/refinement [:refinement/id _refinement]
+                 {:voting.mode.linear/refinement [:refinement/id _refinement]
                   :voting.mode.linear/max-points-delta 3
                   :voting.mode.linear/minimum-votes 3
                   :voting.mode.linear/max-rediscussions 1
-                  :voting.mode.linear/suggestion-strategy :suggestion.strategy/majority}])
-
+                  :voting.mode.linear/suggestion-strategy :suggestion.strategy/majority}
     ;; now add a ticket to the refinement session
-    (d/transact db
-                [{:refinement/_tickets [:refinement/id _refinement]
+                 {:refinement/_tickets [:refinement/id _refinement]
                   :ticket/refinement _refinement
                   :ticket/id _ticket-id
-                  :ticket/link-to-original "asdf"}])
+                  :ticket/link-to-original "asdf"}
 
     ;; to estimate a ticket we start with a non estimated session
-    (d/transact db
-                [{:ticket/_sessions [:ticket/refinement+id [_refinement _ticket-id]]
+                 {:ticket/_sessions [:ticket/refinement+id [_refinement _ticket-id]]
                   :estimation-session/refinement _refinement
                   :estimation-session/ticket _ticket-id
                   :estimation-session/num 0
                   :estimation-session/status :estimation.session.status/not-estimated
-                  }])
+                  }
+                 ])
 
     ;; and then we add some votes to it
     (d/transact db
