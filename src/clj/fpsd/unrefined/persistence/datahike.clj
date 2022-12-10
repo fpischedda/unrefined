@@ -71,67 +71,59 @@
     :db/cardinality :db.cardinality/many}
    ])
 
-(def voting-session-status-enum-schema
-  [{:db/ident :voting.session.status/not-estimated}
-   {:db/ident :voting.session.status/estimated}
-   {:db/ident :voting.session.status/re-estimated}])
+(def estimation-session-status-enum-schema
+  [{:db/ident :estimation.session.status/not-estimated}
+   {:db/ident :estimation.session.status/estimated}
+   {:db/ident :estimation.session.status/re-estimated}])
 
-(def voting-session-result-enum-schema
-  [{:db/ident :voting.session.result/winner}
-   {:db/ident :voting.session.result/discuss}
-   {:db/ident :voting.session.result/ex-equo}])
+(def estimation-session-result-enum-schema
+  [{:db/ident :estimation.session.result/winner}
+   {:db/ident :estimation.session.result/discuss}
+   {:db/ident :estimation.session.result/ex-equo}])
 
 ;; the composite ref is based on this
 ;; https://docs.datomic.com/cloud/schema/schema-reference.html#composite-tuples
 ;; it is useful to efficiently get a session by refinement+ticket and status
-(def voting-session-schema
-  [{:db/ident :voting-session/refinement
+(def estimation-session-schema
+  [{:db/ident :estimation-session/refinement
     :db/cardinality :db.cardinality/one
     :db/valueType :db.type/string}
-   {:db/ident :voting-session/ticket
+   {:db/ident :estimation-session/ticket
     :db/cardinality :db.cardinality/one
     :db/valueType :db.type/string}
-   {:db/ident :voting-session/num
+   {:db/ident :estimation-session/num
     :db/cardinality :db.cardinality/one
     :db/valueType :db.type/long}
 
-   {:db/ident :voting-session/refinement+ticket+num
+   {:db/ident :estimation-session/refinement+ticket+num
     :db/valueType :db.type/tuple
-    :db/tupleAttrs [:voting-session/refinement
-                    :voting-session/ticket
-                    :voting-session/num]
+    :db/tupleAttrs [:estimation-session/refinement
+                    :estimation-session/ticket
+                    :estimation-session/num]
     :db/unique :db.unique/identity
     :db/cardinality :db.cardinality/one}
 
-   {:db/ident :voting-session/votes
+   {:db/ident :estimation-session/votes
     :db/valueType :db.type/ref
     :db/cardinality :db.cardinality/many}
-   {:db/ident :voting-session/status
+   {:db/ident :estimation-session/status
     :db/valueType :db.type/ref
     :db/cardinality :db.cardinality/one}
-   {:db/ident :voting-session/result
+   {:db/ident :estimation-session/result
     :db/valueType :db.type/ref
     :db/cardinality :db.cardinality/one}])
 
 (def estimation-schema
-  [{:db/ident :estimation/refinement
+  [{:db/ident :estimation/session
     :db/cardinality :db.cardinality/one
-    :db/valueType :db.type/string}
-   {:db/ident :estimation/ticket
-    :db/cardinality :db.cardinality/one
-    :db/valueType :db.type/string}
-   {:db/ident :estimation/num
-    :db/cardinality :db.cardinality/one
-    :db/valueType :db.type/long}
+    :db/valueType :db.type/ref}
    {:db/ident :estimation/author-id
     :db/valueType :db.type/string
     :db/cardinality :db.cardinality/one}
 
-   {:db/ident :estimation/refinement+ticket+num+author
+   {:db/ident :estimation/session+author
     :db/valueType :db.type/tuple
-    :db/tupleAttrs [:estimation/refinement
-                    :estimation/ticket
-                    :estimation/num
+    :db/tupleAttrs [:estimation/session
                     :estimation/author-id]
     :db/unique :db.unique/identity
     :db/cardinality :db.cardinality/one}
@@ -150,8 +142,9 @@
           suggestion-strategy-enum-schema
           voting-mode-linear-schema
           ticket-schema
-          voting-session-result-enum-schema
-          voting-session-schema
+          estimation-session-status-enum-schema
+          estimation-session-result-enum-schema
+          estimation-session-schema
           estimation-schema))
 
 (mount/defstate db
@@ -202,23 +195,22 @@
     ;; to estimate a ticket we start with a non estimated session
     (d/transact db
                 [{:ticket/_sessions [:ticket/refinement+id [_refinement _ticket-id]]
-                  :voting-session/refinement _refinement
-                  :voting-session/ticket _ticket-id
-                  :voting-session/num 0
-                  ;; :voting-session/status :voting.session.status/not-estimated
+                  :estimation-session/refinement _refinement
+                  :estimation-session/ticket _ticket-id
+                  :estimation-session/num 0
+                  :estimation-session/status :estimation.session.status/not-estimated
                   }])
 
     ;; and then we add some votes to it
     (d/transact db
-                [{:voting-session/_votes [:voting-session/refinement+ticket+num [_refinement _ticket-id 0]]
-                  :estimation/refinement _refinement
-                  :estimation/ticket _ticket-id
-                  :estimation/num 0
+                [{:estimation-session/_votes [:estimation-session/refinement+ticket+num [_refinement _ticket-id 0]]
+                  :estimation/session [:estimation-session/refinement+ticket+num [_refinement _ticket-id 0]]
                   :estimation/author-id "person-1"
                   :estimation/author-name "Bob"
                   :estimation/score 4}])
 
     ,)
+
 
   ;; queries
   (d/pull @db '[*] [:refinement/id _refinement])
