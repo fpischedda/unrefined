@@ -85,16 +85,20 @@
 ;; https://docs.datomic.com/cloud/schema/schema-reference.html#composite-tuples
 ;; it is useful to efficiently get a session by refinement+ticket and status
 (def voting-session-schema
-  [{:db/ident :voting-session/refinement+ticket
+  [{:db/ident :voting-session/refinement
     :db/cardinality :db.cardinality/one
-    :db/valueType :db.type/ref}
+    :db/valueType :db.type/string}
+   {:db/ident :voting-session/ticket
+    :db/cardinality :db.cardinality/one
+    :db/valueType :db.type/string}
    {:db/ident :voting-session/num
     :db/cardinality :db.cardinality/one
     :db/valueType :db.type/long}
 
    {:db/ident :voting-session/refinement+ticket+num
     :db/valueType :db.type/tuple
-    :db/tupleAttrs [:voting-session/refinement+ticket
+    :db/tupleAttrs [:voting-session/refinement
+                    :voting-session/ticket
                     :voting-session/num]
     :db/unique :db.unique/identity
     :db/cardinality :db.cardinality/one}
@@ -109,14 +113,33 @@
     :db/valueType :db.type/ref
     :db/cardinality :db.cardinality/one}])
 
-(def ticket-vote-schema
-  [{:db/ident :ticket-vote/author-id
+(def estimation-schema
+  [{:db/ident :estimation/refinement
+    :db/cardinality :db.cardinality/one
+    :db/valueType :db.type/string}
+   {:db/ident :estimation/ticket
+    :db/cardinality :db.cardinality/one
+    :db/valueType :db.type/string}
+   {:db/ident :estimation/num
+    :db/cardinality :db.cardinality/one
+    :db/valueType :db.type/long}
+   {:db/ident :estimation/author-id
     :db/valueType :db.type/string
     :db/cardinality :db.cardinality/one}
-   {:db/ident :ticket-vote/author-name
+
+   {:db/ident :estimation/refinement+ticket+num+author
+    :db/valueType :db.type/tuple
+    :db/tupleAttrs [:estimation/refinement
+                    :estimation/ticket
+                    :estimation/num
+                    :estimation/author-id]
+    :db/unique :db.unique/identity
+    :db/cardinality :db.cardinality/one}
+
+   {:db/ident :estimation/author-name
     :db/valueType :db.type/string
     :db/cardinality :db.cardinality/one}
-   {:db/ident :ticket-vote/score
+   {:db/ident :estimation/score
     :db/valueType :db.type/long
     :db/cardinality :db.cardinality/one}])
 
@@ -129,7 +152,7 @@
           ticket-schema
           voting-session-result-enum-schema
           voting-session-schema
-          ticket-vote-schema))
+          estimation-schema))
 
 (mount/defstate db
   :start (do
@@ -152,29 +175,63 @@
     (def _refinement (nano-id))
     (def _ticket-id "asdf"))
 
-  ;; lets create a refinement session
-  (d/transact db
-              [{:refinement/id _refinement
-                :refinement/created-at (str (utc-now))
-                :refinement/updated-at (str (utc-now))
-                :refinement/voting-mode :voting.mode/linear}])
+  ;; add some data
+  (do
+    ;; lets create a refinement session
+    (d/transact db
+                [{:refinement/id _refinement
+                  :refinement/created-at (str (utc-now))
+                  :refinement/updated-at (str (utc-now))
+                  :refinement/voting-mode :voting.mode/linear}])
 
+    ;; adding some settings to it
+    (d/transact db
+                [{:voting.mode.linear/refinement [:refinement/id _refinement]
+                  :voting.mode.linear/max-points-delta 3
+                  :voting.mode.linear/minimum-votes 3
+                  :voting.mode.linear/max-rediscussions 1
+                  :voting.mode.linear/suggestion-strategy :suggestion.strategy/majority}])
+
+    ;; now add a ticket to the refinement session
+    (d/transact db
+                [{:refinement/_tickets [:refinement/id _refinement]
+                  :ticket/refinement _refinement
+                  :ticket/id _ticket-id
+                  :ticket/link-to-original "asdf"}])
+
+    ;; to estimate a ticket we start with a non estimated session
+    (d/transact db
+                [{:ticket/_sessions [:ticket/refinement+id [_refinement _ticket-id]]
+                  :voting-session/refinement _refinement
+                  :voting-session/ticket _ticket-id
+                  :voting-session/num 0
+                  ;; :voting-session/status :voting.session.status/not-estimated
+                  }])
+
+    ;; and then we add some votes to it
+    (d/transact db
+                [{:voting-session/_votes [:voting-session/refinement+ticket+num [_refinement _ticket-id 0]]
+                  :estimation/refinement _refinement
+                  :estimation/ticket _ticket-id
+                  :estimation/num 0
+                  :estimation/author-id "person-1"
+                  :estimation/author-name "Bob"
+                  :estimation/score 4}])
+
+    ,)
+
+  ;; queries
   (d/pull @db '[*] [:refinement/id _refinement])
 
-  ;; adding some settings to it
-  (d/transact db
-              [{:voting.mode.linear/refinement [:refinement/id _refinement]
-                :voting.mode.linear/max-points-delta 3
-                :voting.mode.linear/minimum-votes 3
-                :voting.mode.linear/max-rediscussions 1
-                :voting.mode.linear/suggestion-strategy :suggestion.strategy/majority}])
+  (d/pull @db
+          '[* {:refinement/_tickets [*]
+               :ticket/sessions [*]}]
+          [:ticket/refinement+id [_refinement _ticket-id]])
 
-  ;; now add a ticket to the refinement session
-  (d/transact db
-              [{:refinement/_tickets [:refinement/id _refinement]
-                :ticket/refinement _refinement
-                :ticket/id _ticket-id
-                :ticket/link-to-original "asdf"}])
+  (d/pull @db
+          '[*]
+          [:voting-session/refinement+ticket+num [_refinement _ticket-id 0]])
+
 
   (d/pull @db
           '[* {:refinement/tickets [*]
@@ -186,26 +243,7 @@
           [:ticket/refinement+id [_refinement _ticket-id]])
 
   (d/pull @db
-          '[* {:ticket/refinement [*]}]
-          [:ticket/refinement+id [33 _ticket-id]])
-  ;; to estimate a ticket we start with a non estimated session
-  (d/transact db
-              [{:voting-session/ticket [:refinement/id _refinement
-                                        :ticket/id _ticket-id]
-                :voting-session/num 0
-                :voting-session/status :voting.session.status/not-estimated}])
-
-  ;; and then we add some votes to it
-  (d/transact db
-              [{:voting-session/_votes [:ticket/id _ticket-id]
-                :ticket-vote/author-id "person-1"
-                :ticket-vote/author-name "Bob"
-                :ticket-vote/score 4}])
-
-  (d/transact db
-              [{:voting-session/_votes [:ticket/id _ticket-id]
-                :ticket-vote/author-id "person-2"
-                :ticket-vote/author-name "Alice"
-                :ticket-vote/score 4}])
+          '[* {:voting-session/votes [*]}]
+          [:voting-session/refinement+ticket+num [_refinement _ticket-id 0]])
 
   ,)
