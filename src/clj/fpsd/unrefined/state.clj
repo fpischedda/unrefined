@@ -89,3 +89,63 @@
        :estimation-session/num 0
        :estimation-session/status :estimation.session.status/not-estimated}
       ])))
+
+(defmulti db->voting-mode-settings (fn [voting-mode _settings] voting-mode))
+
+(defmethod db->voting-mode-settings :voting.mode/linear
+  [voting-mode
+   {:voting.mode.linear/keys [max-points-delta minimum-votes max-rediscussions suggestion-strategy]
+    :as settings}]
+  {:voting-mode voting-mode
+   :max-points-delta max-points-delta
+   :minimum-votes minimum-votes
+   :max-rediscussions max-rediscussions
+   :suggestion-strategy suggestion-strategy})
+
+(defn db->refinement
+  [{:refinement/keys [id created-at updated-at voting-mode settings] :as refinement}]
+  {:code id
+   :created-at created-at
+   :updated-at updated-at
+   :settings (db->voting-mode-settings (:db/ident voting-mode) settings)})
+
+(defn db->estimation
+  [{:estimation/keys [author-id author-name score] :as estimation}]
+  {:author-id author-id
+   :author-name author-name
+   :score score})
+
+(defn db->session
+  [{:estimation-session/keys [num votes status result] :as session}]
+  {:num num
+   :status (:db/ident status)
+   :result (:db/ident result)
+   :votes (mapv db->estimation votes)})
+
+(defn db->ticket
+  [{:ticket/keys [id link-to-original sessions] :as ticket}]
+  {:id id
+   :link-to-original link-to-original
+   :sessions (mapv db->session sessions)})
+
+(defn get-ticket
+  [code ticket-id]
+  (let [res (d/pull @db
+                    '[* {:refinement/_tickets [* {:refinement/voting-mode [:db/ident]
+                                                  :refinement/settings [*]}]
+                         :ticket/sessions [* {:estimation-session/status [:db/ident]
+                                              :estimation-session/votes [*]}]}]
+                    [:ticket/refinement+id [code ticket-id]])]
+    {:refinement (db->refinement (-> res :refinement/_tickets first))
+     :ticket (db->ticket res)}))
+
+(comment
+  (get-ticket  "Lw5h_kM8FYWHq4gM59H2x" "asdf")
+
+  (d/pull @db
+          '[* {:refinement/_tickets [* {:refinement/voting-mode [*]
+                                        :refinement/settings [*]}]
+               :ticket/sessions [* {:estimation-session/votes [*]}]}]
+          [:ticket/refinement+id ["Lw5h_kM8FYWHq4gM59H2x" "asdf"]])
+
+  )
