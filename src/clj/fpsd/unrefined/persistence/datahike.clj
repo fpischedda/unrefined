@@ -36,12 +36,14 @@
                   :refinement/created-at (str (utc-now))
                   :refinement/updated-at (str (utc-now))
                   :refinement/voting-mode :voting.mode/linear}
+
     ;; adding some settings to it
-                 {:voting.mode.linear/refinement [:refinement/id _refinement]
+                 {:refinement/_settings [:refinement/id _refinement]
                   :voting.mode.linear/max-points-delta 3
                   :voting.mode.linear/minimum-votes 3
                   :voting.mode.linear/max-rediscussions 1
                   :voting.mode.linear/suggestion-strategy :suggestion.strategy/majority}
+
     ;; now add a ticket to the refinement session
                  {:refinement/_tickets [:refinement/id _refinement]
                   :ticket/refinement _refinement
@@ -67,13 +69,12 @@
 
     ,)
 
-
   ;; queries
   (d/pull @db '[*] [:refinement/id _refinement])
 
   (d/pull @db
           '[* {:refinement/_tickets [*]
-               :ticket/sessions [*]}]
+               :ticket/sessions [* {:estimation-session/votes [*]}]}]
           [:ticket/refinement+id [_refinement _ticket-id]])
 
   (d/pull @db

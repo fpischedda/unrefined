@@ -19,6 +19,9 @@
    {:db/ident :refinement/voting-mode
     :db/valueType :db.type/ref
     :db/cardinality :db.cardinality/one}
+   {:db/ident :refinement/settings
+    :db/valueType :db.type/ref
+    :db/cardinality :db.cardinality/one}
    {:db/ident :refinement/tickets
     :db/valueType :db.type/ref
     :db/cardinality :db.cardinality/many}])
@@ -28,11 +31,7 @@
    {:db/ident :suggestion.strategy/mean}])
 
 (def voting-mode-linear-schema
-  [{:db/ident :voting.mode.linear/refinement
-    :db/valueType :db.type/ref
-    :db/unique :db.unique/identity
-    :db/cardinality :db.cardinality/one}
-   {:db/ident :voting.mode.linear/max-points-delta
+  [{:db/ident :voting.mode.linear/max-points-delta
     :db/valueType :db.type/long
     :db/cardinality :db.cardinality/one}
    {:db/ident :voting.mode.linear/minimum-votes
