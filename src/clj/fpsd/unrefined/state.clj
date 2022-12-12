@@ -128,7 +128,7 @@
    :link-to-original link-to-original
    :sessions (mapv db->session sessions)})
 
-(defn get-ticket
+(defn get-refinement-ticket
   [code ticket-id]
   (let [res (d/pull @db
                     '[* {:refinement/_tickets [* {:refinement/voting-mode [:db/ident]
@@ -140,7 +140,7 @@
      :ticket (db->ticket res)}))
 
 (comment
-  (get-ticket  "Lw5h_kM8FYWHq4gM59H2x" "asdf")
+  (get-refinement-ticket  "Lw5h_kM8FYWHq4gM59H2x" "asdf")
 
   (d/pull @db
           '[* {:refinement/_tickets [* {:refinement/voting-mode [*]

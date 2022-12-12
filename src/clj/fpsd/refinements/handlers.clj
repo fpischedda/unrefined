@@ -74,17 +74,16 @@
          :ticket-id ticket-id
          :error "Could not find requested ticket or refinement session")
   {:status 404
-       :headers {:content-type "text/html"}
-       :body (render-file "templates/index.html"
-                          {:error "Unable to find rifenement session or ticket"})})
+   :headers {:content-type "text/html"}
+   :body (render-file "templates/index.html"
+                      {:error "Unable to find rifenement session or ticket"})})
 
 (defn estimate-watch
   [request]
-  (let [code (-> request :path-params :code)
-        refinement (core/get-refinement code)
-        ticket-id (-> request :path-params :ticket-id)]
+  (let [{:keys [code ticket-id]} (-> request :path-params)
+        {:keys [refinement ticket]} (core/get-refinement-ticket code ticket-id)]
 
-    (if-let [ticket (core/get-refinement-ticket refinement ticket-id)]
+    (if (and refinement ticket)
       {:body
        (render-file "templates/estimate-watch.html" {:refinement refinement
                                                      :ticket ticket})

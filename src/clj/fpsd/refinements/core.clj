@@ -15,10 +15,8 @@
   (state/get-refinement code))
 
 (defn get-refinement-ticket
-  [refinement ticket-id]
-  (-> refinement
-      :tickets
-      (get ticket-id)))
+  [code ticket-id]
+  (state/get-refinement-ticket code ticket-id))
 
 (defn get-ticket
   [code ticket-id]
