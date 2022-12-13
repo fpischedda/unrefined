@@ -11,7 +11,6 @@
   (:refinements @state_)
   (-> @state_ :refinements (get "SDYFFD") :tickets (get "asdf"))
   (-> @state_ :refinements-sink (get "MJXHBI"))
-  (get-refinement-sink "MJXHBI")
 
   ,)
 
@@ -21,14 +20,6 @@
       deref
       key
       (get code)))
-
-(defn get-refinement
-  [code]
-  (get-by-code_ :refinements code))
-
-(defn get-refinements
-  []
-  (:refinements @state_))
 
 (defn get-refinement-sink
   [code]
@@ -108,6 +99,14 @@
    :created-at created-at
    :updated-at updated-at
    :settings (db->voting-mode-settings (:db/ident voting-mode) settings)})
+
+(defn get-refinement
+  [code]
+  (let [res (d/pull @db
+                    '[* {:refinement/voting-mode [:db/ident]
+                         :refinement/settings [*]}]
+                    [:refinement/id code])]
+    (db->refinement res)))
 
 (defn db->estimation
   [{:estimation/keys [author-id author-name score] :as estimation}]
