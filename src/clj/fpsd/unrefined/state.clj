@@ -86,7 +86,7 @@
 (defmethod db->voting-mode-settings :voting.mode/linear
   [voting-mode
    {:voting.mode.linear/keys [max-points-delta minimum-votes max-rediscussions suggestion-strategy]
-    :as settings}]
+    :as _settings}]
   {:voting-mode voting-mode
    :max-points-delta max-points-delta
    :minimum-votes minimum-votes
@@ -94,7 +94,7 @@
    :suggestion-strategy suggestion-strategy})
 
 (defn db->refinement
-  [{:refinement/keys [id created-at updated-at voting-mode settings] :as refinement}]
+  [{:refinement/keys [id created-at updated-at voting-mode settings] :as _refinement}]
   {:code id
    :created-at created-at
    :updated-at updated-at
@@ -109,20 +109,20 @@
     (db->refinement res)))
 
 (defn db->estimation
-  [{:estimation/keys [author-id author-name score] :as estimation}]
+  [{:estimation/keys [author-id author-name score] :as _estimation}]
   {:author-id author-id
    :author-name author-name
    :score score})
 
 (defn db->session
-  [{:estimation-session/keys [num votes status result] :as session}]
+  [{:estimation-session/keys [num votes status result] :as _session}]
   {:num num
    :status (:db/ident status)
    :result (:db/ident result)
    :votes (mapv db->estimation votes)})
 
 (defn db->ticket
-  [{:ticket/keys [id link-to-original sessions] :as ticket}]
+  [{:ticket/keys [id link-to-original sessions] :as _ticket}]
   {:id id
    :link-to-original link-to-original
    :sessions (mapv db->session sessions)})
