@@ -11,10 +11,10 @@
     :db/unique :db.unique/identity
     :db/cardinality :db.cardinality/one}
    {:db/ident :refinement/created-at
-    :db/valueType :db.type/string
+    :db/valueType :db.type/instant
     :db/cardinality :db.cardinality/one}
    {:db/ident :refinement/updated-at
-    :db/valueType :db.type/string
+    :db/valueType :db.type/instant
     :db/cardinality :db.cardinality/one}
    {:db/ident :refinement/voting-mode
     :db/valueType :db.type/ref
@@ -127,6 +127,9 @@
     :db/cardinality :db.cardinality/one}
    {:db/ident :estimation/score
     :db/valueType :db.type/long
+    :db/cardinality :db.cardinality/one}
+   {:db/ident :estimation/skipped?
+    :db/valueType :db.type/boolean
     :db/cardinality :db.cardinality/one}])
 
 (defn full-schema
