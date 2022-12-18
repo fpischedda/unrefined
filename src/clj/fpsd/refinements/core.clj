@@ -50,18 +50,16 @@
 
   (let [ticket-id (or (helpers/extract-ticket-id-from-url ticket-url)
                       ticket-url)
-        code (gen-random-code)]
+        code (gen-random-code)
+        refinement (refinements/create code)
+        ticket (refinements/new-ticket ticket-id ticket-url)]
     (state/transact!
      (fn [state]
-       (let [refinement (-> code
-                            refinements/create
-                            (refinements/add-new-ticket ticket-id ticket-url))]
-         (-> state
-             (update :refinements assoc code refinement)
-             (update :refinements-sink assoc code (events/new-stream))))))
+       (-> state
+           (update :refinements-sink assoc code (events/new-stream)))))
 
-    (state/insert-refinement (state/get-refinement code))
-    (state/insert-ticket code (-> (state/get-refinement code) :tickets first))
+    (state/insert-refinement refinement)
+    (state/insert-ticket code ticket)
 
     {:code code
      :ticket-id ticket-id}))
@@ -69,39 +67,29 @@
 (defn add-ticket
   [code ticket-url]
   (let [ticket-id (or (helpers/extract-ticket-id-from-url ticket-url)
-                      ticket-url)]
+                      ticket-url)
+        ticket (refinements/new-ticket ticket-id ticket-url)]
 
-    (state/transact!
-     (fn [state]
-       (-> state
-           (update-in [:refinements code] refinements/add-new-ticket ticket-id ticket-url)
-           (update-in [:refinemets code] assoc :updated-at (utc-now)))))
-
-    (state/insert-ticket code (-> (state/get-refinement code) :tickets (get ticket-id)))
+    (state/insert-ticket code ticket)
 
     (events/send-ticket-added-event! (state/get-refinement-sink code) code ticket-id)
 
-    (get-ticket code ticket-id)))
+    ticket))
 
 (defn vote-ticket
-  [code ticket-id user-id skipped vote]
-  (state/transact!
-   (fn [state]
-     (if skipped
-       (-> state
-           (update-in [:refinements code]
-                      refinements/skip-ticket ticket-id user-id)
-           (update-in [:refinements code] assoc :updated-at (utc-now)))
-       (-> state
-           (update-in [:refinements code]
-                      refinements/vote-ticket ticket-id user-id vote)
-           (update-in [:refinements code] assoc :updated-at (utc-now))))))
+  [{:keys [code ticket-id author-id author-name skipped vote] :as _estimation}]
+
+  (state/add-estimation code ticket-id 0
+                        {:author-id author-id
+                         :author-name author-name
+                         :score vote
+                         :skipped? skipped})
 
   (if skipped
     (events/send-vote-event! (state/get-refinement-sink code)
-                             :user-skipped user-id ticket-id)
+                             :user-skipped author-id ticket-id)
     (events/send-vote-event! (state/get-refinement-sink code)
-                             :user-voted user-id ticket-id)))
+                             :user-voted author-id ticket-id)))
 
 (defn re-estimate-ticket
   [code ticket-id]

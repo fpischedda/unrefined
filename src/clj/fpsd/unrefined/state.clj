@@ -53,7 +53,7 @@
        :refinement/voting-mode :voting.mode/linear}
 
       ;; adding some settings to it
-      {:voting.mode.linear/refinement [:refinement/id code]
+      {:refinement/settings [:refinement/id code]
        :voting.mode.linear/max-points-delta 3
        :voting.mode.linear/minimum-votes 3
        :voting.mode.linear/max-rediscussions 1
@@ -148,3 +148,15 @@
           [:ticket/refinement+id ["Lw5h_kM8FYWHq4gM59H2x" "asdf"]])
 
   )
+
+(defn add-estimation
+  [refinement ticket-id session-num
+   {:keys [author-id author-name score skipped?] :as _estimation}]
+   (let [session-id [:estimation-session/refinement+ticket+num [refinement ticket-id session-num]]]
+     (d/transact db
+                 [{:estimation-session/_votes session-id
+                   :estimation/session session-id
+                   :estimation/author-id author-id
+                   :estimation/author-name author-name
+                   :estimation/score score
+                   :estimation/skipped? skipped?}])))
