@@ -31,4 +31,4 @@
 
 (defn utc-now
   []
-  (java.time.LocalDateTime/now))
+  (java.util.Date.))
