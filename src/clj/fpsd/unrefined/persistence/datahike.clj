@@ -1,18 +1,26 @@
 (ns fpsd.unrefined.persistence.datahike
-  (:require [datahike.api :as d]
-            [mount.core :as mount]
-            [nano-id.core :refer [nano-id]]
-            [fpsd.configuration :refer [config]]
-            [fpsd.unrefined.persistence.datahike.schema :as schema]
-            [fpsd.refinements.helpers :refer [utc-now]]))
+  (:require
+   [com.brunobonacci.mulog :as u]
+   [datahike.api :as d]
+   [mount.core :as mount]
+   [nano-id.core :refer [nano-id]]
+   [fpsd.configuration :refer [config]]
+   [fpsd.unrefined.persistence.datahike.schema :as schema]
+   [fpsd.refinements.helpers :refer [utc-now]]))
 
 (mount/defstate db
   :start (do
            ;; create a database at this place, per default configuration
            ;; we enforce a strict schema and keep all historical data
-           (d/create-database (-> config
-                                  :datahike
-                                  (assoc :initial-tx (schema/full-schema))))
+           (try
+             (d/create-database (-> config
+                                    :datahike
+                                    (assoc :initial-tx (schema/full-schema))))
+             (catch Throwable t
+               (u/log ::create-database
+                      :config (:datahike config)
+                      :message "Unable to create DB"
+                      :exception t)))
            (d/connect (:datahike config)))
   :stop (d/delete-database (:datahike config)))
 
@@ -65,7 +73,8 @@
                   :estimation/session [:estimation-session/refinement+ticket+num [_refinement _ticket-id 0]]
                   :estimation/author-id "person-1"
                   :estimation/author-name "Bob"
-                  :estimation/score 4}])
+                  :estimation/score 4
+                  :estimation/skipped? false}])
 
     ,)
 
