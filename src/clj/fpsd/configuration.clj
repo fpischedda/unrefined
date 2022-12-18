@@ -2,7 +2,7 @@
   (:require [mount.core :as mount]
             [environ.core :refer [env]]))
 
-(def default-ttl (* 60 60 12))
+(def default-ttl 0) ;; transient, disable mr-clean before possibly removing it
 
 (defn safe-to-int
   [maybe-int]
