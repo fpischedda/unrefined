@@ -85,13 +85,19 @@
 
 (defmethod db->voting-mode-settings :voting.mode/linear
   [voting-mode
-   {:voting.mode.linear/keys [max-points-delta minimum-votes max-rediscussions suggestion-strategy]
+   {:voting.mode.linear/keys [max-points-delta
+                              minimum-votes
+                              max-rediscussions
+                              suggestion-strategy
+                              estimation-cheatsheet]
+    :or {estimation-cheatsheet "default"}
     :as _settings}]
   {:voting-mode voting-mode
    :max-points-delta max-points-delta
    :minimum-votes minimum-votes
    :max-rediscussions max-rediscussions
-   :suggestion-strategy suggestion-strategy})
+   :suggestion-strategy suggestion-strategy
+   :estimation-cheatsheet estimation-cheatsheet})
 
 (defn db->refinement
   [{:refinement/keys [id created-at updated-at voting-mode settings] :as _refinement}]
