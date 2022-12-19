@@ -41,7 +41,7 @@
 
 
 (defn insert-refinement
-  [refinement]
+  [refinement cheatsheet]
   (let [code (:code refinement)]
     (d/transact
      db
@@ -57,7 +57,8 @@
        :voting.mode.linear/max-points-delta 3
        :voting.mode.linear/minimum-votes 3
        :voting.mode.linear/max-rediscussions 1
-       :voting.mode.linear/suggestion-strategy :suggestion.strategy/majority}
+       :voting.mode.linear/suggestion-strategy :suggestion.strategy/majority
+       :voting.mode.linear/cheatsheet cheatsheet}
       ])))
 
 (defn insert-ticket
@@ -89,15 +90,15 @@
                               minimum-votes
                               max-rediscussions
                               suggestion-strategy
-                              estimation-cheatsheet]
-    :or {estimation-cheatsheet "default"}
+                              cheatsheet]
+    :or {cheatsheet "default"}
     :as _settings}]
   {:voting-mode voting-mode
    :max-points-delta max-points-delta
    :minimum-votes minimum-votes
    :max-rediscussions max-rediscussions
    :suggestion-strategy suggestion-strategy
-   :estimation-cheatsheet estimation-cheatsheet})
+   :estimation-cheatsheet cheatsheet})
 
 (defn db->refinement
   [{:refinement/keys [id created-at updated-at voting-mode settings] :as _refinement}]

@@ -70,7 +70,7 @@
        (-> state
            (update :refinements-sink assoc code (events/new-stream)))))
 
-    (state/insert-refinement refinement)
+    (state/insert-refinement refinement "default")
     (state/insert-ticket code ticket)
 
     {:code code

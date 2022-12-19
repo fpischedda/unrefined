@@ -42,6 +42,9 @@
     :db/cardinality :db.cardinality/one}
    {:db/ident :voting.mode.linear/suggestion-strategy
     :db/valueType :db.type/ref
+    :db/cardinality :db.cardinality/one}
+   {:db/ident :voting.mode.linear/cheatsheet
+    :db/valueType :db.type/string
     :db/cardinality :db.cardinality/one}])
 
 (def ticket-schema
