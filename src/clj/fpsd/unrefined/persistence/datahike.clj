@@ -22,7 +22,7 @@
                       :message "Unable to create DB"
                       :exception t)))
            (d/connect (:datahike config)))
-  :stop (d/delete-database (:datahike config)))
+  :stop (d/release db))
 
 (comment
   (mount/start)
