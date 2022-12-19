@@ -89,9 +89,9 @@
     ticket))
 
 (defn vote-ticket
-  [{:keys [code ticket-id author-id author-name skipped vote] :as _estimation}]
+  [{:keys [code ticket-id session-num author-id author-name skipped vote] :as _estimation}]
 
-  (state/add-estimation code ticket-id 0
+  (state/add-estimation code ticket-id session-num
                         {:author-id author-id
                          :author-name author-name
                          :score vote
