@@ -81,7 +81,7 @@
 (defn estimate-watch
   [request]
   (let [{:keys [code ticket-id]} (-> request :path-params)
-        {:keys [refinement ticket]} (core/get-refinement-ticket code ticket-id)]
+        {:keys [error refinement ticket]} (core/get-refinement-ticket code ticket-id)]
 
     (if (and refinement ticket)
       {:body
@@ -89,7 +89,11 @@
                                                      :ticket ticket})
        :headers {:content-type "text/html"}
        :status 200}
-      (refinement-or-ticket-not-found-error code ticket-id))))
+      (do
+        (u/log ::estimate-watch
+               :message (format "Unable to find refinement %s or ticket %s" code ticket-id)
+               :error error)
+        (refinement-or-ticket-not-found-error code ticket-id)))))
 
 (defn estimate-results
   [request]

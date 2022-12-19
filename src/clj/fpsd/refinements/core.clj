@@ -8,15 +8,27 @@
             [fpsd.unrefined.persistence :as persistence]
             [fpsd.unrefined.persistence.json-file]
             [fpsd.unrefined.state :as state]
-            [fpsd.unrefined.ticket-parser :refer [fetch-jira-ticket]]))
+            [fpsd.unrefined.ticket-parser :refer [fetch-jira-ticket]]
+            [com.brunobonacci.mulog :as u]))
 
 (defn get-refinement
   [code]
   (state/get-refinement code))
 
 (defn get-refinement-ticket
+  "Return a map with :refinement and :ticket keys holding
+  respectiveli the refinement and ticket data.
+  On error return a map with a :error key holding a string of
+  the error."
   [code ticket-id]
-  (state/get-refinement-ticket code ticket-id))
+  (try
+    (state/get-refinement-ticket code ticket-id)
+
+    (catch clojure.lang.ExceptionInfo e
+      (u/log ::get-refinement-ticket
+             :message "Unable to fetch ticket or refinement"
+             :error (ex-data e))
+      {:error "Unable to find ticket or refinement session"})))
 
 (defn get-ticket
   [code ticket-id]
