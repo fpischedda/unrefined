@@ -116,10 +116,11 @@
     (db->refinement res)))
 
 (defn db->estimation
-  [{:estimation/keys [author-id author-name score] :as _estimation}]
+  [{:estimation/keys [author-id author-name score skipped?] :as _estimation}]
   {:author-id author-id
    :author-name author-name
-   :score score})
+   :score score
+   :skipped? skipped?})
 
 (defn db->session
   [{:estimation-session/keys [num votes status result] :as _session}]
@@ -128,11 +129,28 @@
    :result (:db/ident result)
    :votes (mapv db->estimation votes)})
 
+(defn get-current-session
+  [sessions]
+  (let [session (last sessions)
+        votes (for [{:keys [author-id author-name score skipped?]} (:votes session)
+                    :when (not skipped?)]
+                {:user-id author-id
+                 :name author-name
+                 :vote score})
+        skips (for [{:keys [author-id skipped?]} (:votes session)
+                    :when skipped?]
+                author-id)]
+    (assoc session
+           :votes votes
+           :skips skips)))
+
 (defn db->ticket
   [{:ticket/keys [id link-to-original sessions] :as _ticket}]
-  {:id id
-   :link-to-original link-to-original
-   :sessions (mapv db->session sessions)})
+  (let [sessions (mapv db->session sessions)]
+    {:id id
+     :link-to-original link-to-original
+     :sessions sessions
+     :current-session (get-current-session sessions)}))
 
 (defn get-refinement-ticket
   [code ticket-id]
@@ -144,6 +162,14 @@
                     [:ticket/refinement+id [code ticket-id]])]
     {:refinement (db->refinement (-> res :refinement/_tickets first))
      :ticket (db->ticket res)}))
+
+(defn get-ticket
+  [code ticket-id]
+  (let [res (d/pull @db
+                    '[* {:ticket/sessions [* {:estimation-session/status [:db/ident]
+                                              :estimation-session/votes [*]}]}]
+                    [:ticket/refinement+id [code ticket-id]])]
+    {:ticket (db->ticket res)}))
 
 (comment
   (get-refinement-ticket  "Lw5h_kM8FYWHq4gM59H2x" "asdf")
