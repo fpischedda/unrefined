@@ -141,8 +141,7 @@
         {:keys [code ticket-id]} (:path-params request)
         {:keys [error refinement ticket]} (core/get-refinement-ticket code ticket-id)
         session-num (or (-> request :params :session-num) 0)
-        skipped? (some? (-> request :params :skip-button))
-        vote (when-not skipped? (-> request :params helpers/get-vote-from-params))
+        vote (-> request :params helpers/get-vote-from-params)
         name (:name vote)]
 
     (if (and refinement ticket)
@@ -152,14 +151,11 @@
                            :session-num session-num
                            :author-id user-id
                            :author-name name
-                           :skipped? skipped?
                            :vote vote})
 
         {:body (render-file "templates/estimate-done.html"
                             {:refinement refinement
                              :ticket ticket
-                             :name name
-                             :skipped skipped?
                              :vote vote})
          :headers {:content-type "text/html"}
          :cookies {"user-id" (cookie-value user-id)

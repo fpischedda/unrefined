@@ -8,8 +8,8 @@
     :count <how many times voters selected this story points>
     :authors <a vector of strings of the author names>}
 
-   `votes` map looks like the following:
-   {<author1-id> {:points <some-int> :name <author1-name-string>}
+   `votes` is a vector of maps looking like the following:
+   {:points <some-int> :name <author1-name-string>}
     ...}"
   [votes]
   (->> (group-by :points votes)
