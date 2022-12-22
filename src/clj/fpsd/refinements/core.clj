@@ -11,13 +11,9 @@
             [fpsd.unrefined.ticket-parser :refer [fetch-jira-ticket]]
             [com.brunobonacci.mulog :as u]))
 
-(defn get-refinement
-  [code]
-  (state/get-refinement code))
-
 (defn get-refinement-ticket
   "Return a map with :refinement and :ticket keys holding
-  respectiveli the refinement and ticket data.
+  respectively the refinement and ticket data.
   On error return a map with a :error key holding a string of
   the error."
   [code ticket-id]
@@ -31,20 +27,35 @@
       {:error "Unable to find ticket or refinement session"})))
 
 (defn get-ticket
+  "Return a map with  :ticket key holding the ticket data.
+  On error return a map with a :error key holding a string of
+  the error."
   [code ticket-id]
-  (-> (state/get-refinement code)
-      :tickets
-      (get ticket-id)))
+  (try
+    (state/get-ticket code ticket-id)
+    (catch clojure.lang.ExceptionInfo e
+      (let [error-msg (format "Unable to fetch ticket %s" ticket-id)]
+        (u/log ::get-ticket
+               :message error-msg
+               :error (ex-data e))
+        {:error error-msg}))))
 
 (defn user-connected!
   [code ticket-id]
   (let [sink (state/get-refinement-sink code)
-        stream (events/user-connected! sink)]
+        stream (events/user-connected! sink)
+        {:keys [ticket error]} (get-ticket code ticket-id)]
+
     (events/send-event! sink {:event "ping"})
-    (events/send-ticket-status-event! sink
-                                      (-> code
-                                          state/get-refinement
-                                          (refinements/ticket-details ticket-id)))
+
+    (if ticket
+      ;; send last status of ticket as message
+      (events/send-ticket-status-event! sink ticket)
+
+      ;; otherwise send and error message
+      (events/send-ticket-status-event! sink {:error error}))
+
+    ;; and return the new event stream
     stream))
 
 (defn gen-random-code
@@ -58,6 +69,9 @@
    (nano-id length)))
 
 (defn create-refinement
+  "Return a new randomlygenerated refinement code and the ticket-id
+  As a side effect the refinement and ticket data are stored in the
+  application state together with the refinemen's event sink."
   [ticket-url]
 
   (let [ticket-id (or (helpers/extract-ticket-id-from-url ticket-url)
@@ -116,11 +130,11 @@
 
 (defn store-ticket
   [code ticket-id]
-  (let [refinement (get-refinement code)
-        ticket (get-ticket code ticket-id)]
+  (let [{:keys [refinement ticket error]} (get-refinement-ticket code ticket-id)]
+
     (cond
-      (nil? refinement) (format "Unable to find refinement %s" code)
-      (nil? ticket) (format "Unable to find ticket %s in refinement %s" ticket-id code)
+      (nil? refinement) (format "Unable to find refinement %s, error %s" code error)
+      (nil? ticket) (format "Unable to find ticket %s in refinement %s, error %s" ticket-id code error)
       :else
       (persistence/store-ticket! (:persistence config)
        code
