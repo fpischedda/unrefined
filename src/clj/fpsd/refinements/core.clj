@@ -108,8 +108,8 @@
   (state/add-estimation code ticket-id session-num
                         {:author-id author-id
                          :author-name author-name
-                         :score vote
-                         :skipped? skipped})
+                         :score (long (:points vote))
+                         :skipped? (boolean skipped)})
 
   (if skipped
     (events/send-vote-event! (state/get-refinement-sink code)
