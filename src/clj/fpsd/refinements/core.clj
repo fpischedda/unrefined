@@ -42,7 +42,7 @@
 
 (defn user-connected!
   [code ticket-id]
-  (let [sink (state/get-refinement-sink code)
+  (let [sink (state/get-or-create-refinement-sink code)
         stream (events/user-connected! sink)
         {:keys [ticket error]} (get-ticket code ticket-id)]
 
@@ -69,9 +69,10 @@
    (nano-id length)))
 
 (defn create-refinement
-  "Return a new randomlygenerated refinement code and the ticket-id
+  "Return a new randomly generated refinement code and the ticket-id extracted
+  from ticket-url (if possible, otherwise defaults to ticket-url).
   As a side effect the refinement and ticket data are stored in the
-  application state together with the refinemen's event sink."
+  application state."
   [ticket-url]
 
   (let [ticket-id (or (helpers/extract-ticket-id-from-url ticket-url)
@@ -79,10 +80,6 @@
         code (gen-random-code)
         refinement (refinements/create code)
         ticket (refinements/new-ticket ticket-id ticket-url)]
-    (state/transact!
-     (fn [state]
-       (-> state
-           (update :refinements-sink assoc code (events/new-stream)))))
 
     (state/insert-refinement refinement "default")
     (state/insert-ticket code ticket)
@@ -98,7 +95,7 @@
 
     (state/insert-ticket code ticket)
 
-    (events/send-ticket-added-event! (state/get-refinement-sink code) code ticket-id)
+    (events/send-ticket-added-event! (state/get-or-create-refinement-sink code) code ticket-id)
 
     ticket))
 
@@ -111,7 +108,7 @@
                          :score (long (:points vote))
                          :skipped? (boolean (:skipped? vote))})
 
-  (events/send-vote-event! (state/get-refinement-sink code)
+  (events/send-vote-event! (state/get-or-create-refinement-sink code)
                            (if (:skipped? vote) :user-skipped :user-voted)
                            author-id
                            (state/get-ticket code ticket-id)))
@@ -119,16 +116,18 @@
 
 (defn re-estimate-ticket
   [code ticket-id]
-  (state/transact! update-in [:refinements code]
+  ;; to be implemented using datahike
+  #_(state/transact! update-in [:refinements code]
                    (fn [refinement]
                      (-> refinement
                          (refinements/re-estimate-ticket ticket-id)
                          (assoc :updated-at (utc-now)))))
 
-  (events/send-re-estimate-event! (state/get-refinement-sink code)
+  (events/send-re-estimate-event! (state/get-or-create-refinement-sink code)
                                   code ticket-id))
 
 (defn store-ticket
+  "To be deprecated eventually"
   [code ticket-id]
   (let [{:keys [refinement ticket error]} (get-refinement-ticket code ticket-id)]
 
