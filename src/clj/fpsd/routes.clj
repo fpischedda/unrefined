@@ -77,8 +77,7 @@
                               :name :unrefined/render-stored-ticket}
                         :post {:handler handlers/store-ticket
                                :name :unrefined/store-ticket}}]
-         ["/preview" {:get {:handler handlers/ticket-preview
-                            :name :unrefined/ticket-preview}}]]]
+         ]]
 
        ["events" {:get handlers/events-stream-handler}]]]]
 

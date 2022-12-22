@@ -149,12 +149,3 @@
     (persistence/get-stored-ticket (:persistence config) code ticket-id)
     (catch Throwable t
       {:error (format "Unable to retrieve ticket %s for refinement %s: %s" ticket-id code t)})))
-
-(defn ticket-preview
-  [code ticket-id]
-  (state/transact! update-in [:refinements code :tickets ticket-id]
-                   (fn [ticket]
-                     (if-not (:preview ticket)
-                       (assoc ticket :preview (delay (fetch-jira-ticket ticket-id)))
-                       ticket)))
-  (:preview (get-ticket code ticket-id)))
