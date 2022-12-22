@@ -12,7 +12,7 @@
    {<author1-id> {:points <some-int> :name <author1-name-string>}
     ...}"
   [votes]
-  (->> (group-by (comp :points second) votes)
+  (->> (group-by :points votes)
        (reduce (fn [acc [points point-and-authors]]
                  (conj acc {:points points
                             :count (count point-and-authors)

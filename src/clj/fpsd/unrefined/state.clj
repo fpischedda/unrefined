@@ -1,7 +1,6 @@
 (ns fpsd.unrefined.state
   (:require [datahike.api :as d]
-            [fpsd.unrefined.persistence.datahike :refer [db]]
-            [fpsd.refinements.helpers :refer [utc-now]]))
+            [fpsd.unrefined.persistence.datahike :refer [db]]))
 
 (def state_ (atom {:refinements {}
                    :refinements-sink {}
@@ -136,7 +135,7 @@
                     :when (not skipped?)]
                 {:user-id author-id
                  :name author-name
-                 :vote score})
+                 :points score})
         skips (for [{:keys [author-id skipped?]} (:votes session)
                     :when skipped?]
                 author-id)]

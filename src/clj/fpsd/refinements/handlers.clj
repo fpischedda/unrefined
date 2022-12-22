@@ -140,10 +140,10 @@
   (let [user-id (or (-> request :common-cookies :user-id) (str (random-uuid)))
         {:keys [code ticket-id]} (:path-params request)
         {:keys [error refinement ticket]} (core/get-refinement-ticket code ticket-id)
-        name (-> request :params :name)
         session-num (or (-> request :params :session-num) 0)
         skipped? (some? (-> request :params :skip-button))
-        vote (when-not skipped? (-> request :params helpers/get-vote-from-params))]
+        vote (when-not skipped? (-> request :params helpers/get-vote-from-params))
+        name (:name vote)]
 
     (if (and refinement ticket)
       (do
