@@ -22,6 +22,10 @@ function get_ticket_permalink_path (code, ticket_id) {
   return get_ticket_path(code, ticket_id) + '/permalink'
 }
 
+function get_ticket_events_path (code, ticket_id) {
+  return get_ticket_path(code, ticket_id) + '/events'
+}
+
 function copy_estimation_link (code, ticket_id) {
   var url = document.location.origin + get_ticket_estimation_path(code, ticket_id)
   navigator.clipboard.writeText(url)
@@ -86,10 +90,10 @@ function handle_sse_messages (e) {
 function init_sse () {
   const code = get_refinement_code()
   const ticket_id = get_ticket_id()
-  const url = '/refine/' + code + '/ticket/' + ticket_id + '/events'
+  const url = get_ticket_events_path(code, ticket_id)
 
-  console.log('connecting to SSE endpoint ' + url)
-  connect_to_events(url, handle_sse_messages)
+  console.log(`connecting to SSE endpoint ${url}`)
+  connect_to_events(url, handle_sse_messages, {delay_ms: 1000, max_retries: 5, retries: 0})
 }
 
 function start () {

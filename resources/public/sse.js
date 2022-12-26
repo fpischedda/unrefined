@@ -1,5 +1,7 @@
-function connect_to_events (url, message_handler){
-  var source = new EventSource(url)
+function connect_to_events (url, message_handler,
+                            retry = {delay_ms: 1000, max_retries: 0, retries: 0}){
+
+  let source = new EventSource(url)
 
   source.onmessage = (e) => {
     console.log(e)
@@ -8,14 +10,26 @@ function connect_to_events (url, message_handler){
   }
 
   source.onopen = (e) => {
-    console.log('connection opened:' + e)
+    console.log(`[EventSource] Connection opened to url ${url}`)
+    console.log(e)
+    retry.retries = 0  // on successful connection reset the retry counter
   }
 
   source.onerror = (e) => {
-    console.log('error:' + e)
+    console.log(`[EventSource] Connection error, url ${url}`)
     console.log(e)
-    if (e.readyState == EventSource.CLOSED) {
-      console.log('connection closed:' + e)
+    if ( e.target.readyState == EventSource.CLOSED ) {
+      console.log('[EventSource] Connection closed:' + e)
+
+      if ( retry.max_retries > 0 && retry.retries < retry.max_retries ) {
+        retry.retries += 1
+        const delay = retry.delay_ms * retry.retries
+        console.log(`[EventSource] Reconnecting to ${url} in ${delay} milliseconds, retries left ${retry.max_retries - retry.retries}`)
+        setTimeout(connect_to_events, delay, url, message_handler, retry)
+      }
+      else {
+        console.log('[EventSource] Not trying to reconnect')
+      }
     }
     source.close()
   }
