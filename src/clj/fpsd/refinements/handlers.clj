@@ -140,7 +140,7 @@
   (let [user-id (or (-> request :common-cookies :user-id) (str (random-uuid)))
         {:keys [code ticket-id]} (:path-params request)
         {:keys [error refinement ticket]} (core/get-refinement-ticket code ticket-id)
-        session-num (or (-> request :params :session-num) 0)
+        session-num (or (-> request :params :session-num helpers/try-parse-int) 0)
         vote (-> request :params helpers/get-vote-from-params)
         name (:name vote)]
 
@@ -169,12 +169,20 @@
 
 (defn estimate-again
   [request]
-  (let [{:keys [code ticket-id]} (:path-params request)]
+  (let [{:keys [code ticket-id]} (:path-params request)
+        {:keys [ticket error]} (core/get-ticket code ticket-id)]
 
-    (core/re-estimate-ticket code ticket-id)
+    (if ticket
+      (do
+        (core/re-estimate-ticket code ticket)
+        {:headers {:location (safe-ticket-url code ticket-id)}
+         :status 302})
 
-    {:headers {:location (safe-ticket-url code ticket-id)}
-     :status 302}))
+      (do
+        (u/log ::estimate-done
+               :message (format "Unable to find refinement %s or ticket %s" code ticket-id)
+               :error error)
+        (refinement-or-ticket-not-found-error code ticket-id)))))
 
 (defn store-ticket
   [request]

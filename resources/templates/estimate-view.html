@@ -5,6 +5,7 @@
     action="/refine/{{refinement.code}}/ticket/{{ticket.id}}/estimate"
   >
     <input type="hidden" name="points" id="points" value="0" />
+    <input type="hidden" name="session-num" value="{{ticket.current-session.num}}" />
     <div class="row">
       <div class="col">
         <p>

@@ -4,11 +4,10 @@
             [fpsd.estimator :as estimator]
             [fpsd.refinements.events :as events]
             [fpsd.refinements :as refinements]
-            [fpsd.refinements.helpers :refer [utc-now] :as helpers]
+            [fpsd.refinements.helpers :as helpers]
             [fpsd.unrefined.persistence :as persistence]
             [fpsd.unrefined.persistence.json-file]
             [fpsd.unrefined.state :as state]
-            [fpsd.unrefined.ticket-parser :refer [fetch-jira-ticket]]
             [com.brunobonacci.mulog :as u]))
 
 (defn get-refinement-ticket
@@ -115,16 +114,11 @@
 
 
 (defn re-estimate-ticket
-  [code ticket-id]
-  ;; to be implemented using datahike
-  #_(state/transact! update-in [:refinements code]
-                   (fn [refinement]
-                     (-> refinement
-                         (refinements/re-estimate-ticket ticket-id)
-                         (assoc :updated-at (utc-now)))))
+  [code ticket]
+  (state/new-estimation-session code ticket)
 
   (events/send-re-estimate-event! (state/get-or-create-refinement-sink code)
-                                  code ticket-id))
+                                  code (:id ticket)))
 
 (defn store-ticket
   "To be deprecated eventually"
