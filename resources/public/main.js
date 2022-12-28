@@ -173,20 +173,6 @@ const startVotingPage = (estimationSet) => {
   })
 }
 
-function load_ticket_preview (refinement_code, ticket_id) {
-
-  const url = '/refine/' + refinement_code + '/ticket/' + ticket_id + '/preview'
-  console.log('feching preview from ', url)
-
-  fetch(url)
-    .then(response => { return response.text()})
-    .then(preview => {
-      console.log('preview:')
-      console.log(preview)
-      document.getElementById('ticket-preview').innerHTML = preview
-    })
-}
-
 const getEstimationTopicExample = (estimationTopics, topicName, estimation) => {
   console.log(topicName, estimation)
   return estimationTopics.find(t => t.name === topicName).examples[estimation]
