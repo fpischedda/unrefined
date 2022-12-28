@@ -60,6 +60,26 @@
        :estimation-session/status :estimation.session.status/not-estimated}
       ])))
 
+(defn new-estimation-session
+  [code ticket]
+
+  (let [tid (:id ticket)
+        {cur-session-id :db/id cur-session-num :num} (-> ticket :sessions last)]
+    (d/transact
+     db
+     [
+      ;; set last session status to :re-estimated
+      {:db/id cur-session-id
+       :estimation-session/status :estimation.session.status/re-estimated}
+
+      ;; create a new estiamtion session
+      {:ticket/_sessions [:ticket/refinement+id [code tid]]
+       :estimation-session/refinement code
+       :estimation-session/ticket tid
+       :estimation-session/num (inc cur-session-num)
+       :estimation-session/status :estimation.session.status/not-estimated}
+      ])))
+
 (defmulti db->voting-mode-settings (fn [voting-mode _settings] voting-mode))
 
 (defmethod db->voting-mode-settings :voting.mode/linear
@@ -79,8 +99,9 @@
    :estimation-cheatsheet cheatsheet})
 
 (defn db->refinement
-  [{:refinement/keys [id created-at updated-at voting-mode settings] :as _refinement}]
-  {:code id
+  [{:refinement/keys [id created-at updated-at voting-mode settings] :as refinement}]
+  {:db/id (:db/id refinement)
+   :code id
    :created-at created-at
    :updated-at updated-at
    :settings (db->voting-mode-settings (:db/ident voting-mode) settings)})
@@ -94,15 +115,17 @@
     (db->refinement res)))
 
 (defn db->estimation
-  [{:estimation/keys [author-id author-name score skipped?] :as _estimation}]
-  {:author-id author-id
+  [{:estimation/keys [author-id author-name score skipped?] :as estimation}]
+  {:db/id (:db/id estimation)
+   :author-id author-id
    :author-name author-name
    :score score
    :skipped? skipped?})
 
 (defn db->session
-  [{:estimation-session/keys [num votes status result] :as _session}]
-  {:num num
+  [{:estimation-session/keys [num votes status result] :as session}]
+  {:db/id (:db/id session)
+   :num num
    :status (:db/ident status)
    :result (:db/ident result)
    :votes (mapv db->estimation votes)})
@@ -123,9 +146,10 @@
            :skips skips)))
 
 (defn db->ticket
-  [{:ticket/keys [id link-to-original sessions] :as _ticket}]
+  [{:ticket/keys [id link-to-original sessions] :as ticket}]
   (let [sessions (mapv db->session sessions)]
-    {:id id
+    {:db/id (:db/id ticket)
+     :id id
      :link-to-original link-to-original
      :sessions sessions
      :current-session (get-current-session sessions)}))
@@ -156,7 +180,7 @@
           '[* {:refinement/_tickets [* {:refinement/voting-mode [*]
                                         :refinement/settings [*]}]
                :ticket/sessions [* {:estimation-session/votes [*]}]}]
-          [:ticket/refinement+id ["Lw5h_kM8FYWHq4gM59H2x" "asdf"]])
+          [:ticket/refinement+id ["Hyu7AnkjyM9vY5InBZKCX" "asdf"]])
 
   )
 
