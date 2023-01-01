@@ -45,17 +45,17 @@
 
 (defn max-rediscussions-reached
   [sessions settings]
-  (>= (count sessions) (:max-rediscussions settings)))
+  (>= (count sessions) (or (:max-rediscussions settings) 0)))
 
 (defn estimate
   [{:keys [current-session sessions] :as _ticket} settings]
-  (if (> (:reasonable-minimum-votes settings)
+  (if (> (or (:minimum-votes settings) 0)
          (-> current-session :votes count))
       {:result :not-enough-votes}
       (let [votes (-> current-session :votes count-votes)
             delta (votes-delta votes)
             result
-            (if (or (< delta (:max-points-delta settings))
+            (if (or (< delta (or (:max-points-delta settings) 0))
                     (max-rediscussions-reached sessions settings))
               (select-winner votes)
 
