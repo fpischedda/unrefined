@@ -73,10 +73,6 @@
                                  :name :unrefined/estimate-again}}]
          ["/events" {:get {:handler handlers/events-stream-handler
                            :name :unrefined/estimate-stream-handler}}]
-         ["/permalink" {:get {:handler handlers/render-stored-ticket
-                              :name :unrefined/render-stored-ticket}
-                        :post {:handler handlers/store-ticket
-                               :name :unrefined/store-ticket}}]
          ]]
 
        ["events" {:get handlers/events-stream-handler}]]]]

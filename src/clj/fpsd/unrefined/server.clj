@@ -11,7 +11,7 @@
   (println (mount/start))
   (println "Datahike config" (-> config :datahike))
   (println "Ready to accept nrepl connections at" (-> config :nrepl :port))
-  (println "Ready to accept nrepl connections at" (-> config :nrepl :port))
+  (println "Ready to accept http connections at" (-> config :http :port))
   (println "Startup config" config)
 
   (loop []

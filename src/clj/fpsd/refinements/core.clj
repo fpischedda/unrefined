@@ -1,12 +1,8 @@
 (ns fpsd.refinements.core
   (:require [nano-id.core :refer [nano-id]]
-            [fpsd.configuration :refer [config]]
-            [fpsd.estimator :as estimator]
             [fpsd.refinements.events :as events]
             [fpsd.refinements :as refinements]
             [fpsd.refinements.helpers :as helpers]
-            [fpsd.unrefined.persistence :as persistence]
-            [fpsd.unrefined.persistence.json-file]
             [fpsd.unrefined.state :as state]
             [com.brunobonacci.mulog :as u]))
 
@@ -119,26 +115,3 @@
 
   (events/send-re-estimate-event! (state/get-or-create-refinement-sink code)
                                   code (:id ticket)))
-
-(defn store-ticket
-  "To be deprecated eventually"
-  [code ticket-id]
-  (let [{:keys [refinement ticket error]} (get-refinement-ticket code ticket-id)]
-
-    (cond
-      (nil? refinement) (format "Unable to find refinement %s, error %s" code error)
-      (nil? ticket) (format "Unable to find ticket %s in refinement %s, error %s" ticket-id code error)
-      :else
-      (persistence/store-ticket! (:persistence config)
-       code
-       ticket-id
-       {:refinement (dissoc refinement :tickets)
-        :ticket ticket
-        :estimation (estimator/estimate ticket (:settings refinement))}))))
-
-(defn get-stored-ticket
-  [code ticket-id]
-  (try
-    (persistence/get-stored-ticket (:persistence config) code ticket-id)
-    (catch Throwable t
-      {:error (format "Unable to retrieve ticket %s for refinement %s: %s" ticket-id code t)})))
