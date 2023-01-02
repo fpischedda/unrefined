@@ -16,7 +16,7 @@
        (reduce (fn [acc [points point-and-authors]]
                  (conj acc {:points points
                             :count (count point-and-authors)
-                            :authors (mapv (comp :name second) point-and-authors)}))
+                            :authors (mapv :name point-and-authors)}))
                [])
        (sort-by :points)
        (reverse)
@@ -34,7 +34,7 @@
   (let [sorted (reverse (sort-by :count counted-votes))
         [{first-vote :points first-voters :authors}
          {second-vote :points second-voters :authors} _] sorted]
-    (println sorted)
+
     (if (= (count first-voters) (count second-voters))
       {:result :ex-equo
        :suggested (max first-vote second-vote)
