@@ -6,12 +6,12 @@
 
 (testing "Estimator utils"
   (deftest count-votes
-    (is (= (estimator/count-votes {"id1" {:points 3 :name "Bob"}
-                                   "id2" {:points 2 :name "Alice"}
-                                   "id3" {:points 2 :name "Mario"}
-                                   "id4" {:points 1 :name "Frank"}
-                                   "id5" {:points 3 :name "Foo"}
-                                   "id6" {:points 5 :name "Bar"}})
+    (is (= (estimator/count-votes [{:points 3 :name "Bob"}
+                                   {:points 2 :name "Alice"}
+                                   {:points 2 :name "Mario"}
+                                   {:points 1 :name "Frank"}
+                                   {:points 3 :name "Foo"}
+                                   {:points 5 :name "Bar"}])
 
            [{:points 5, :count 1, :authors ["Bar"]}
             {:points 3, :count 2, :authors ["Bob" "Foo"]}
@@ -69,12 +69,12 @@
       ;; clear winner
       {:current-session
        {:votes
-        {"id1" {:points 3 :name "Bob"}
-         "id2" {:points 2 :name "Alice"}
-         "id3" {:points 2 :name "Mario"}
-         "id4" {:points 1 :name "Frank"}
-         "id5" {:points 3 :name "Foo"}
-         "id6" {:points 3 :name "Bar"}}}
+        [{:points 3 :name "Bob"}
+         {:points 2 :name "Alice"}
+         {:points 2 :name "Mario"}
+         {:points 1 :name "Frank"}
+         {:points 3 :name "Foo"}
+         {:points 3 :name "Bar"}]}
        :sessions []}
 
       {:result :winner
@@ -84,10 +84,10 @@
                {:authors ["Frank"], :count 1, :points 1}]}
 
       ;; ex-equo
-      {:current-session {:votes {"1" {:points 3 :name "Bob"}
-                                 "2" {:points 2 :name "Alice"}
-                                 "3" {:points 2 :name "Joe"}
-                                 "4" {:points 3 :name "Foo"}}}
+      {:current-session {:votes [{:points 3 :name "Bob"}
+                                 {:points 2 :name "Alice"}
+                                 {:points 2 :name "Joe"}
+                                 {:points 3 :name "Foo"}]}
        :sessions []}
 
       {:result :ex-equo
@@ -98,10 +98,10 @@
                {:points 2 :count 2 :authors ["Alice" "Joe"]}]}
 
       ;; discuss
-      {:current-session {:votes {"1" {:points 1 :name "Bob"}
-                                 "2" {:points 2 :name "Alice"}
-                                 "3" {:points 4 :name "Joe"}
-                                 "4" {:points 3 :name "Foo"}}}
+      {:current-session {:votes [{:points 1 :name "Bob"}
+                                 {:points 2 :name "Alice"}
+                                 {:points 4 :name "Joe"}
+                                 {:points 3 :name "Foo"}]}
        :sessions []}
 
       {:result :discuss
@@ -115,14 +115,14 @@
                {:points 1 :count 1 :authors ["Bob"]}]}
 
       ;; select most voted after discussion case
-      {:current-session {:votes {"1" {:points 1 :name "Bob"}
-                                 "2" {:points 3 :name "Alice"}
-                                 "3" {:points 4 :name "Joe"}
-                                 "4" {:points 3 :name "Foo"}}}
-       :sessions [{:votes {"1" {:points 1 :name "Bob"}
-                           "2" {:points 2 :name "Alice"}
-                           "3" {:points 4 :name "Joe"}
-                           "4" {:points 3 :name "Foo"}}}]}
+      {:current-session {:votes [{:points 1 :name "Bob"}
+                                 {:points 3 :name "Alice"}
+                                 {:points 4 :name "Joe"}
+                                 {:points 3 :name "Foo"}]}
+       :sessions [{:votes [{:points 1 :name "Bob"}
+                           {:points 2 :name "Alice"}
+                           {:points 4 :name "Joe"}
+                           {:points 3 :name "Foo"}]}]}
 
       {:result :winner
        :points 3
@@ -131,5 +131,5 @@
                {:authors ["Bob"] :points 1 :count 1}]}
 
       ;; not enough voters
-      {:current-session {:votes {"1" {:points 2 :name "Foo"}}}}
+      {:current-session {:votes [{:points 2 :name "Foo"}]}}
       {:result :not-enough-votes})))
