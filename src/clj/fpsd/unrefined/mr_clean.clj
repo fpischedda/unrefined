@@ -1,22 +1,21 @@
 (ns fpsd.unrefined.mr-clean
   (:require [manifold.stream :as s]
-            [fpsd.refinements.helpers :refer [utc-now]]
             [fpsd.unrefined.state :as state]))
 
-(defn clean-expired-refinements
-  [state oldest-time]
-  (reduce (fn [acc [ref-code refinement]]
-            (if (.isAfter (:updated-at refinement) oldest-time)
-              acc
-              (do
-                (s/close! (-> acc :refinements-sink (get ref-code)))
-                (-> acc
-                    (update :refinements dissoc ref-code)
-                    (update :refinements-sink dissoc ref-code)))))
-          state (:refinements state)))
+(defn all-downstream-drained?
+  [stream]
+  (every? (comp s/drained? second) (s/downstream stream)))
 
-(defn remove-old-refinements!
-  [ttl]
-  (state/transact!
-   (fn [state]
-     (clean-expired-refinements state (.minusSeconds (utc-now) ttl)))))
+(defn clean-sinks-with-drained-sources
+  [sinks]
+  (reduce (fn [acc [refinement-code sink]]
+            (if (all-downstream-drained? sink)
+              (do
+                (s/close! sink)
+                acc)
+              (assoc acc refinement-code sink)))
+          {} sinks))
+
+(defn remove-drained-sinks!
+  []
+  (swap! state/state_ update :refinements-sink clean-sinks-with-drained-sources))
