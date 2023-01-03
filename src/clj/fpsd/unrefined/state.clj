@@ -3,19 +3,19 @@
             [fpsd.unrefined.persistence.datahike :refer [db]]
             [fpsd.refinements.events :as events]))
 
-(def state_ (atom {:refinements-sink {}}))
+(def state_ (atom {:refinements-event-source {}}))
 
 (comment
-  (-> @state_ :refinements-sink (get "MJXHBI"))
+  (-> @state_ :refinements-event-source (get "MJXHBI"))
 
   ,)
 
 (defn get-or-create-refinement-sink
   [code]
-  (swap! state_ update-in [:refinements-sink code]
+  (swap! state_ update-in [:refinements-event-source code]
          (fn [sink]
            (or sink (events/new-stream))))
-  (get-in @state_ [:refinements-sink code]))
+  (get-in @state_ [:refinements-event-source code]))
 
 (defn insert-refinement
   [refinement cheatsheet]
