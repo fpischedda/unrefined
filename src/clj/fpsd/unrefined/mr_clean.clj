@@ -3,19 +3,23 @@
             [fpsd.unrefined.state :as state]))
 
 (defn all-downstream-drained?
+  "Return true if all downstream streams (sinks) are
+  drained."
   [stream]
   (every? (comp s/drained? second) (s/downstream stream)))
 
-(defn clean-sinks-with-drained-sources
-  [sinks]
-  (reduce (fn [acc [refinement-code sink]]
-            (if (all-downstream-drained? sink)
+(defn clean-sources-with-drained-sinks
+  "Return a new sources map removing all closed sources or
+   sources with all drained sinks."
+  [sources]
+  (reduce (fn [acc [refinement-code source]]
+            (if (or (s/closed? source) (all-downstream-drained? source))
               (do
-                (s/close! sink)
+                (s/close! source)
                 acc)
-              (assoc acc refinement-code sink)))
-          {} sinks))
+              (assoc acc refinement-code source)))
+          {} sources))
 
-(defn remove-drained-sinks!
+(defn remove-drained-sources!
   []
-  (swap! state/state_ update :refinements-sink clean-sinks-with-drained-sources))
+  (swap! state/state_ update :refinements-event-source clean-sources-with-drained-sinks))

@@ -1,8 +1,6 @@
 (ns fpsd.unrefined.mr-clean-test
   (:require [clojure.test :refer [deftest is testing]]
             [manifold.stream :as s]
-            [fpsd.refinements :as refinements]
-            [fpsd.refinements.helpers :refer [utc-now]]
             [fpsd.unrefined.mr-clean :as mr-clean]
             [fpsd.unrefined.state :as state]))
 
@@ -33,21 +31,21 @@
 (testing "Remove refinements past ttl"
   (deftest filter-expired-refinements
     (is (= {}
-           (mr-clean/clean-sinks-with-drained-sources {"REF1" (create-drained-source)}))))
+           (mr-clean/clean-sources-with-drained-sinks {"REF1" (create-drained-source)}))))
 
   (deftest keep-non-expired-refinements
     (let [refinements {"REF-KEEP" (create-active-source)
                        "REF-REMOVE" (create-drained-source)}
-          cleaned (mr-clean/clean-sinks-with-drained-sources refinements)]
+          cleaned (mr-clean/clean-sources-with-drained-sinks refinements)]
 
       (is (and (some? (get cleaned "REF-KEEP"))
                (nil? (get cleaned "REF-REMOVED")))))))
 
 (testing "Update the state removing refinements past ttl"
   (deftest stateful-filter-expired-refinements
-    (let [_ (reset! state/state_ {:refinements-sink {"REF-KEEP" (create-active-source)
-                                                     "REF-REMOVE" (create-drained-source)}})
-          _ (mr-clean/remove-drained-sinks!)
-          cleaned (:refinements-sink @state/state_)]
+    (let [_ (reset! state/state_ {:refinements-event-source {"REF-KEEP" (create-active-source)
+                                                             "REF-REMOVE" (create-drained-source)}})
+          _ (mr-clean/remove-drained-sources!)
+          cleaned (:refinements-event-source @state/state_)]
       (is (and (some? (get cleaned "REF-KEEP"))
                (nil? (get cleaned "REF-REMOVED")))))))
