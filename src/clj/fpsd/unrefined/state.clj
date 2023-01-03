@@ -3,8 +3,7 @@
             [fpsd.unrefined.persistence.datahike :refer [db]]
             [fpsd.refinements.events :as events]))
 
-(def state_ (atom {:refinements-sink {}
-                   :last-updates {}}))
+(def state_ (atom {:refinements-sink {}}))
 
 (comment
   (-> @state_ :refinements-sink (get "MJXHBI"))
