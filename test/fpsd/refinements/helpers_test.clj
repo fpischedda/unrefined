@@ -35,25 +35,37 @@
 
       ;; all defaults on empty params
       {}
-      {:points nil
+      {:points 0
        :name "Anonymous Coward"
-       :breakdown {}}
+       :breakdown {}
+       :skipped? false}
 
       ;; only parse breakdown
       {:name "Bob"
-       :tests "1"
-       :pain "2"}
-      {:points nil
+       :testing "1"
+       :backend "2"}
+      {:points 0
        :name "Bob"
-       :breakdown {:tests "1"
-                   :pain "2"}}
+       :breakdown {:testing "1"
+                   :backend "2"}
+       :skipped? false}
 
       ;; parse all
       {:name "Bob"
        :points "3"
-       :tests "1"
-       :pain "2"}
+       :testing "1"
+       :backend "2"}
       {:points 3
        :name "Bob"
-       :breakdown {:tests "1"
-                   :pain "2"}})))
+       :breakdown {:testing "1"
+                   :backend "2"}
+       :skipped? false}
+
+      ;; skipping
+      {:name "Skipper"
+       :skip-button 1}
+      {:name "Skipper"
+       :points 0
+       :breakdown {}
+       :skipped? true}
+      )))
