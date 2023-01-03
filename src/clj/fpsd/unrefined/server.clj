@@ -16,8 +16,7 @@
 
   (loop []
     (Thread/sleep 10000)
-    (when-let [ttl (-> config :mr-clean :ttl)]  ;; disable GC if TTL not set
-      (mr-clean/remove-old-refinements! ttl))
+    (mr-clean/remove-drained-sources!)
     (recur))
   (println "Stopping unrefined service")
   (mount/stop))
