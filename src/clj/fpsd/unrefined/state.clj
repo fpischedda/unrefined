@@ -30,7 +30,7 @@
        :refinement/voting-mode :voting.mode/linear}
 
       ;; adding some settings to it
-      {:refinement/settings [:refinement/id code]
+      {:refinement/_settings [:refinement/id code]
        :voting.mode.linear/max-points-delta 3
        :voting.mode.linear/minimum-votes 3
        :voting.mode.linear/max-rediscussions 1
