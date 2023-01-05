@@ -1,40 +1,56 @@
 (ns fpsd.refinements.core
   (:require [nano-id.core :refer [nano-id]]
-            [fpsd.configuration :refer [config]]
-            [fpsd.estimator :as estimator]
             [fpsd.refinements.events :as events]
             [fpsd.refinements :as refinements]
-            [fpsd.refinements.helpers :refer [utc-now] :as helpers]
-            [fpsd.unrefined.persistence :as persistence]
-            [fpsd.unrefined.persistence.json-file]
+            [fpsd.refinements.helpers :as helpers]
             [fpsd.unrefined.state :as state]
-            [fpsd.unrefined.ticket-parser :refer [fetch-jira-ticket]]))
-
-(defn get-refinement
-  [code]
-  (state/get-refinement code))
+            [com.brunobonacci.mulog :as u]))
 
 (defn get-refinement-ticket
-  [refinement ticket-id]
-  (-> refinement
-      :tickets
-      (get ticket-id)))
+  "Return a map with :refinement and :ticket keys holding
+  respectively the refinement and ticket data.
+  On error return a map with a :error key holding a string of
+  the error."
+  [code ticket-id]
+  (try
+    (state/get-refinement-ticket code ticket-id)
+
+    (catch clojure.lang.ExceptionInfo e
+      (u/log ::get-refinement-ticket
+             :message "Unable to fetch ticket or refinement"
+             :error (ex-data e))
+      {:error "Unable to find ticket or refinement session"})))
 
 (defn get-ticket
+  "Return a map with  :ticket key holding the ticket data.
+  On error return a map with a :error key holding a string of
+  the error."
   [code ticket-id]
-  (-> (state/get-refinement code)
-      :tickets
-      (get ticket-id)))
+  (try
+    (state/get-ticket code ticket-id)
+    (catch clojure.lang.ExceptionInfo e
+      (let [error-msg (format "Unable to fetch ticket %s" ticket-id)]
+        (u/log ::get-ticket
+               :message error-msg
+               :error (ex-data e))
+        {:error error-msg}))))
 
 (defn user-connected!
   [code ticket-id]
-  (let [sink (state/get-refinement-sink code)
-        stream (events/user-connected! sink)]
+  (let [sink (state/get-or-create-refinement-sink code)
+        stream (events/user-connected! sink)
+        {:keys [ticket error]} (get-ticket code ticket-id)]
+
     (events/send-event! sink {:event "ping"})
-    (events/send-ticket-status-event! sink
-                                      (-> code
-                                          state/get-refinement
-                                          (refinements/ticket-details ticket-id)))
+
+    (if ticket
+      ;; send last status of ticket as message
+      (events/send-ticket-status-event! sink ticket)
+
+      ;; otherwise send and error message
+      (events/send-ticket-status-event! sink {:error error}))
+
+    ;; and return the new event stream
     stream))
 
 (defn gen-random-code
@@ -48,19 +64,20 @@
    (nano-id length)))
 
 (defn create-refinement
+  "Return a new randomly generated refinement code and the ticket-id extracted
+  from ticket-url (if possible, otherwise defaults to ticket-url).
+  As a side effect the refinement and ticket data are stored in the
+  application state."
   [ticket-url]
 
   (let [ticket-id (or (helpers/extract-ticket-id-from-url ticket-url)
                       ticket-url)
-        code (gen-random-code)]
-    (state/transact!
-     (fn [state]
-       (let [refinement (-> code
-                            refinements/create
-                            (refinements/add-new-ticket ticket-id ticket-url))]
-         (-> state
-             (update :refinements assoc code refinement)
-             (update :refinements-sink assoc code (events/new-stream))))))
+        code (gen-random-code)
+        refinement (refinements/create code)
+        ticket (refinements/new-ticket ticket-id ticket-url)]
+
+    (state/insert-refinement refinement "default")
+    (state/insert-ticket code ticket)
 
     {:code code
      :ticket-id ticket-id}))
@@ -68,76 +85,33 @@
 (defn add-ticket
   [code ticket-url]
   (let [ticket-id (or (helpers/extract-ticket-id-from-url ticket-url)
-                      ticket-url)]
+                      ticket-url)
+        ticket (refinements/new-ticket ticket-id ticket-url)]
 
-    (state/transact!
-     (fn [state]
-       (-> state
-           (update-in [:refinements code] refinements/add-new-ticket ticket-id ticket-url)
-           (update-in [:refinemets code] assoc :updated-at (utc-now)))))
+    (state/insert-ticket code ticket)
 
-    (events/send-ticket-added-event! (state/get-refinement-sink code) code ticket-id)
+    (events/send-ticket-added-event! (state/get-or-create-refinement-sink code) code ticket-id)
 
-    (get-ticket code ticket-id)))
+    ticket))
 
 (defn vote-ticket
-  [code ticket-id user-id skipped vote]
-  (state/transact!
-   (fn [state]
-     (if skipped
-       (-> state
-           (update-in [:refinements code]
-                      refinements/skip-ticket ticket-id user-id)
-           (update-in [:refinements code] assoc :updated-at (utc-now)))
-       (-> state
-           (update-in [:refinements code]
-                      refinements/vote-ticket ticket-id user-id vote)
-           (update-in [:refinements code] assoc :updated-at (utc-now))))))
+  [{:keys [code ticket-id session-num author-id author-name vote] :as _estimation}]
 
-  (if skipped
-    (events/send-vote-event! (state/get-refinement-sink code)
-                             :user-skipped user-id ticket-id)
-    (events/send-vote-event! (state/get-refinement-sink code)
-                             :user-voted user-id ticket-id)))
+  (state/add-estimation code ticket-id session-num
+                        {:author-id author-id
+                         :author-name author-name
+                         :score (long (:points vote))
+                         :skipped? (boolean (:skipped? vote))})
+
+  (events/send-vote-event! (state/get-or-create-refinement-sink code)
+                           (if (:skipped? vote) :user-skipped :user-voted)
+                           author-id
+                           (state/get-ticket code ticket-id)))
+
 
 (defn re-estimate-ticket
-  [code ticket-id]
-  (state/transact! update-in [:refinements code]
-                   (fn [refinement]
-                     (-> refinement
-                         (refinements/re-estimate-ticket ticket-id)
-                         (assoc :updated-at (utc-now)))))
+  [code ticket]
+  (state/new-estimation-session code ticket)
 
-  (events/send-re-estimate-event! (state/get-refinement-sink code)
-                                  code ticket-id))
-
-(defn store-ticket
-  [code ticket-id]
-  (let [refinement (get-refinement code)
-        ticket (get-ticket code ticket-id)]
-    (cond
-      (nil? refinement) (format "Unable to find refinement %s" code)
-      (nil? ticket) (format "Unable to find ticket %s in refinement %s" ticket-id code)
-      :else
-      (persistence/store-ticket! (:persistence config)
-       code
-       ticket-id
-       {:refinement (dissoc refinement :tickets)
-        :ticket ticket
-        :estimation (estimator/estimate ticket (:settings refinement))}))))
-
-(defn get-stored-ticket
-  [code ticket-id]
-  (try
-    (persistence/get-stored-ticket (:persistence config) code ticket-id)
-    (catch Throwable t
-      {:error (format "Unable to retrieve ticket %s for refinement %s: %s" ticket-id code t)})))
-
-(defn ticket-preview
-  [code ticket-id]
-  (state/transact! update-in [:refinements code :tickets ticket-id]
-                   (fn [ticket]
-                     (if-not (:preview ticket)
-                       (assoc ticket :preview (delay (fetch-jira-ticket ticket-id)))
-                       ticket)))
-  (:preview (get-ticket code ticket-id)))
+  (events/send-re-estimate-event! (state/get-or-create-refinement-sink code)
+                                  code (:id ticket)))

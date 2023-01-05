@@ -24,11 +24,12 @@
 
 (defn get-vote-from-params
   [params]
-  {:points (-> params :points try-parse-int)
+  {:points (-> params :points try-parse-int (or 0))
    :name (or (-> params :name) "Anonymous Coward")
+   :skipped? (some? (:skip-button params))
    :breakdown
    (select-keys params supported-breakdowns)})
 
 (defn utc-now
   []
-  (java.time.LocalDateTime/now))
+  (java.util.Date.))

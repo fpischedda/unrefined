@@ -9,14 +9,14 @@
 (defn -main [& _args]
   (println "Starting unrefined service...")
   (println (mount/start))
-  (println "Ready to accept http connections at" (-> config :http :port))
+  (println "Datahike config" (-> config :datahike))
   (println "Ready to accept nrepl connections at" (-> config :nrepl :port))
+  (println "Ready to accept http connections at" (-> config :http :port))
   (println "Startup config" config)
 
   (loop []
     (Thread/sleep 10000)
-    (when-let [ttl (-> config :mr-clean :ttl)]  ;; disable GC if TTL not set
-      (mr-clean/remove-old-refinements! ttl))
+    (mr-clean/remove-drained-sources!)
     (recur))
   (println "Stopping unrefined service")
   (mount/stop))

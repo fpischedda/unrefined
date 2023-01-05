@@ -8,15 +8,15 @@
     :count <how many times voters selected this story points>
     :authors <a vector of strings of the author names>}
 
-   `votes` map looks like the following:
-   {<author1-id> {:points <some-int> :name <author1-name-string>}
+   `votes` is a vector of maps looking like the following:
+   {:points <some-int> :name <author1-name-string>}
     ...}"
   [votes]
-  (->> (group-by (comp :points second) votes)
+  (->> (group-by :points votes)
        (reduce (fn [acc [points point-and-authors]]
                  (conj acc {:points points
                             :count (count point-and-authors)
-                            :authors (mapv (comp :name second) point-and-authors)}))
+                            :authors (mapv :name point-and-authors)}))
                [])
        (sort-by :points)
        (reverse)
@@ -34,7 +34,7 @@
   (let [sorted (reverse (sort-by :count counted-votes))
         [{first-vote :points first-voters :authors}
          {second-vote :points second-voters :authors} _] sorted]
-    (println sorted)
+
     (if (= (count first-voters) (count second-voters))
       {:result :ex-equo
        :suggested (max first-vote second-vote)
@@ -45,17 +45,17 @@
 
 (defn max-rediscussions-reached
   [sessions settings]
-  (>= (count sessions) (:max-rediscussions settings)))
+  (>= (count sessions) (or (:max-rediscussions settings) 0)))
 
 (defn estimate
   [{:keys [current-session sessions] :as _ticket} settings]
-  (if (> (:reasonable-minimum-votes settings)
+  (if (> (or (:minimum-votes settings) 0)
          (-> current-session :votes count))
       {:result :not-enough-votes}
       (let [votes (-> current-session :votes count-votes)
             delta (votes-delta votes)
             result
-            (if (or (< delta (:max-points-delta settings))
+            (if (or (< delta (or (:max-points-delta settings) 0))
                     (max-rediscussions-reached sessions settings))
               (select-winner votes)
 
