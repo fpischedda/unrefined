@@ -1,14 +1,10 @@
 (ns fpsd.unrefined.state
   (:require [datahike.api :as d]
             [fpsd.unrefined.persistence.datahike :refer [db]]
-            [fpsd.refinements.events :as events]))
+            [fpsd.refinements.events :as events]
+            [manifold.stream :as s]))
 
 (def state_ (atom {:refinements-event-source {}}))
-
-(comment
-  (-> @state_ :refinements-event-source (get "MJXHBI"))
-
-  ,)
 
 (defn get-or-create-refinement-sink
   [code]
@@ -16,6 +12,13 @@
          (fn [sink]
            (or sink (events/new-stream))))
   (get-in @state_ [:refinements-event-source code]))
+
+(comment
+  (-> "zF0eJ5_k18iBh8eYszWVY"
+      get-or-create-refinement-sink
+      s/downstream)
+
+  ,)
 
 (defn insert-refinement
   [refinement cheatsheet]

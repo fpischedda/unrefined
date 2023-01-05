@@ -25,4 +25,4 @@ Focus will now be on better user and developer experience, possibly adding usefu
 - Better design and UX
   - DONE responsive design (at least is kind of usable on a mobile device)
 - Persistent storage
-  - Some ideas [here](https://github.com/fpischedda/unrefined/issues/10)
+  - DONE Some ideas [here](https://github.com/fpischedda/unrefined/issues/10)
