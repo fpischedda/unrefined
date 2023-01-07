@@ -1,17 +1,10 @@
 (ns fpsd.refinements.events
   (:require [cheshire.core :refer [generate-string]]
             [manifold.bus :as b]
-            [manifold.stream :as s]
             [fpsd.estimator :as estimator]
             [fpsd.refinements :as refinements]))
 
 (defonce event-bus (b/event-bus))
-
-(defn new-stream
-  "this is a tiny layer of abstraction hiding the fact that manifold
-  is used as the main driver for events flow"
-  []
-  (s/stream))
 
 (defn user-connected!
   "Every refinement session have a specific topic on the event-bus, each user connecting

@@ -2,7 +2,6 @@
   (:require [mount.core :as mount]
             [fpsd.configuration :refer [config]]
             [fpsd.routes :refer [http-server]]
-            [fpsd.unrefined.mr-clean :as mr-clean]
             [fpsd.unrefined.nrepl :refer [nrepl-server]])
   (:gen-class))
 
@@ -16,7 +15,6 @@
 
   (loop []
     (Thread/sleep 10000)
-    (mr-clean/remove-drained-sources!)
     (recur))
   (println "Stopping unrefined service")
   (mount/stop))

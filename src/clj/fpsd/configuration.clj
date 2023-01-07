@@ -2,8 +2,6 @@
   (:require [mount.core :as mount]
             [environ.core :refer [env]]))
 
-(def default-ttl 0) ;; transient, disable mr-clean before possibly removing it
-
 (defn safe-to-int
   [maybe-int]
   (if (string? maybe-int)
@@ -22,5 +20,4 @@
                      :schema-flexibility :write
                      :keep-history? true}
           :persistence {:backend :json-file
-                        :path (:unrefined-tickets-path env "/tmp/")}
-          :mr-clean {:ttl (safe-to-int (:unrefined-refinement-ttl env default-ttl))}})
+                        :path (:unrefined-tickets-path env "/tmp/")}})
