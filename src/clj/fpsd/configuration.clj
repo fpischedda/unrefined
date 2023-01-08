@@ -15,7 +15,7 @@
                     :filename (:unrefined-log-file env "/tmp/unrefined.log")}
           ;; use the filesystem as storage medium
           :datahike {:store {:backend :file
-                             :path "/tmp/unrefined.datahike"}
+                             :path (:unrefined-datahike-db "/tmp/unrefined.datahike")}
                      :name "unrefined"
                      :schema-flexibility :write
                      :keep-history? true}
