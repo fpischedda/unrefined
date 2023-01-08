@@ -36,22 +36,17 @@
         {:error error-msg}))))
 
 (defn user-connected!
+  "Return a stream for the subscription to refinement events topic.
+   The refinement code is used as the topic name.
+   If not ticket is found do not subscribe and return an error."
   [code ticket-id]
-  (let [sink (state/get-or-create-refinement-sink code)
-        stream (events/user-connected! sink)
-        {:keys [ticket error]} (get-ticket code ticket-id)]
-
-    (events/send-event! sink {:event "ping"})
-
+  (let [{:keys [ticket error]} (get-ticket code ticket-id)]
     (if ticket
-      ;; send last status of ticket as message
-      (events/send-ticket-status-event! sink ticket)
-
-      ;; otherwise send and error message
-      (events/send-ticket-status-event! sink {:error error}))
-
-    ;; and return the new event stream
-    stream))
+      (let [stream (events/user-connected! code)]
+        ;; send last status of ticket as message
+        (events/send-ticket-status-event! code ticket)
+        {:stream stream}) ;; return the stream for the subscription
+      {:error error})))
 
 (defn gen-random-code
   "Generate a random code/id using nano-id lib.
@@ -90,7 +85,7 @@
 
     (state/insert-ticket code ticket)
 
-    (events/send-ticket-added-event! (state/get-or-create-refinement-sink code) code ticket-id)
+    (events/send-ticket-added-event! code code ticket-id)
 
     ticket))
 
@@ -103,7 +98,7 @@
                          :score (long (:points vote))
                          :skipped? (boolean (:skipped? vote))})
 
-  (events/send-vote-event! (state/get-or-create-refinement-sink code)
+  (events/send-vote-event! code
                            (if (:skipped? vote) :user-skipped :user-voted)
                            author-id
                            (state/get-ticket code ticket-id)))
@@ -113,5 +108,4 @@
   [code ticket]
   (state/new-estimation-session code ticket)
 
-  (events/send-re-estimate-event! (state/get-or-create-refinement-sink code)
-                                  code (:id ticket)))
+  (events/send-re-estimate-event! code code (:id ticket)))

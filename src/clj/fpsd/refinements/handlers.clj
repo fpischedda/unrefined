@@ -13,21 +13,23 @@
 (defn events-stream-handler
   [request]
   (let [code (-> request :path-params :code)
-        ticket-id (-> request :path-params :ticket-id)]
+        ticket-id (-> request :path-params :ticket-id)
+        {:keys [stream error]} (core/user-connected! code ticket-id)]
 
-    (if-let [events-stream (core/user-connected! code ticket-id)]
+    (if stream
       (do
         (u/log ::events-stream-handler :refinement code :ticket-id ticket-id)
         {:status 200
          :headers {:content-type "text/event-stream"
                    :cache-control "no-cache"
                    "X-Accel-Buffering" "no"}
-         :body events-stream})
+         :body stream})
       (do
         (u/log ::events-stream-handler
                :refinement code
                :ticket-id ticket-id
-               :error "Could not find requested ticket or refinement session")
+               :error error
+               :message "Could not find requested ticket or refinement session")
         {:status 404}))))
 
 (defn safe-ticket-url

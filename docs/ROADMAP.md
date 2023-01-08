@@ -1,5 +1,23 @@
 # ROADMAP
 
+## Update - 2023-01-06
+
+From now on new goals and improvements will inserted on top of this file.
+
+Changes introduced so far to the MVP:
+
+- Voting UI reworked to use sliders for votes and show a voting cheatsheet
+- Refinement and ticket data is now persisted using datahike
+- Close and event sources periodically when these have no connected clients
+
+Next steps in no particular order:
+
+- Validate that voter name exists when voting (not useful for skipping)
+- Create some introduction content to describe the project (either video or blog)
+- More testing
+- Add contact info and link to sources
+- Show this thing around to get feedback
+
 ## Features of the MVP
 
 - Create a refinement session with at least a ticket to estimate
