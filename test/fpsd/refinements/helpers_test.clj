@@ -21,12 +21,25 @@
       ;; failed
       "https://some-garbage" nil)))
 
-(testing "try-parse-int tries to convert a string to int, if it falis return nil"
+(testing "try-parse-int tries to convert a string to int, if it falis return nil or default"
   (deftest try-parse-int-success
     (is (= 5 (helpers/try-parse-int "5"))))
 
   (deftest try-parse-int-fail
-    (is (nil? (helpers/try-parse-int "five")))))
+    (is (nil? (helpers/try-parse-int "five"))))
+  
+  (deftest try-parse-int-uses-default
+    (is (= 0 (helpers/try-parse-int "five" 0)))))
+
+(testing "try-parse-long tries to convert a string to long, if it falis return nil or default"
+  (deftest try-parse-long-success
+    (is (= 5 (helpers/try-parse-long "5"))))
+
+  (deftest try-parse-long-fail
+    (is (nil? (helpers/try-parse-long "five"))))
+  
+  (deftest try-parse-long-uses-default
+    (is (= 0 (helpers/try-parse-long "five" 0)))))
 
 (testing "get-vote-from-params extract vote, name and breakdown from request body"
   (deftest all-defaults-when-empty-params
@@ -46,8 +59,8 @@
        :backend "2"}
       {:points 0
        :name "Bob"
-       :breakdown {:testing "1"
-                   :backend "2"}
+       :breakdown {:testing 1
+                   :backend 2}
        :skipped? false}
 
       ;; parse all
@@ -57,8 +70,8 @@
        :backend "2"}
       {:points 3
        :name "Bob"
-       :breakdown {:testing "1"
-                   :backend "2"}
+       :breakdown {:testing 1
+                   :backend 2}
        :skipped? false}
 
       ;; skipping

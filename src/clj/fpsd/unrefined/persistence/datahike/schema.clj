@@ -133,6 +133,17 @@
     :db/cardinality :db.cardinality/one}
    {:db/ident :estimation/skipped?
     :db/valueType :db.type/boolean
+    :db/cardinality :db.cardinality/one}
+   {:db/ident :estimation/breakdown
+    :db/valueType :db.type/ref
+    :db/cardinality :db.cardinality/many}])
+
+(def estimation-breakdown-schema
+  [{:db/ident :estimation-breakdown/name
+    :db/valueType :db.type/string
+    :db/cardinality :db.cardinality/one}
+   {:db/ident :estimation-breakdown/points
+    :db/valueType :db.type/long
     :db/cardinality :db.cardinality/one}])
 
 (defn full-schema
@@ -145,4 +156,5 @@
           estimation-session-status-enum-schema
           estimation-session-result-enum-schema
           estimation-session-schema
-          estimation-schema))
+          estimation-schema
+          estimation-breakdown-schema))

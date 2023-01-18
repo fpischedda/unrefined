@@ -95,8 +95,9 @@
   (state/add-estimation code ticket-id session-num
                         {:author-id author-id
                          :author-name author-name
-                         :score (long (:points vote))
-                         :skipped? (boolean (:skipped? vote))})
+                         :score (:points vote)
+                         :skipped? (boolean (:skipped? vote))
+                         :breakdown (:breakdown vote)})
 
   (events/send-vote-event! code
                            (if (:skipped? vote) :user-skipped :user-voted)
