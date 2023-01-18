@@ -41,6 +41,17 @@
   (deftest try-parse-long-uses-default
     (is (= 0 (helpers/try-parse-long "five" 0)))))
 
+(testing "get-breakdown-from-params"
+  (deftest skip-missing-breakdown
+    (is (= {} (helpers/get-breakdown-from-params {:new-one "1"} [:missing]))))
+
+  (deftest use-default-if-breakdown-empty-string
+    (is (= {:item 0} (helpers/get-breakdown-from-params {:item ""} [:item]))))
+
+  (deftest only-selects-available-breakdown
+    (is (= {:available 1} (helpers/get-breakdown-from-params {:available "1"
+                                                              :not-available "2"} [:available])))))
+
 (testing "get-vote-from-params extract vote, name and breakdown from request body"
   (deftest all-defaults-when-empty-params
     (are [params expected]

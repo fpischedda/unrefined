@@ -31,10 +31,11 @@
    (try (Long/parseLong str-value)
         (catch NumberFormatException _ default))))
 
-(def supported-breakdowns [:implementation :backend :migrations :data_migrations :testing :manual_testing :risk :complexity])
+(def initial-supported-breakdowns_
+  [:implementation :backend :migrations :data_migrations :testing :manual_testing :risk :complexity])
 
 (defn get-breakdown-from-params
-  [params]
+  [params supported-breakdowns]
   (reduce (fn [acc breakdown]
              (if-let [value (get params breakdown)]
                (assoc acc breakdown (try-parse-long value 0))
@@ -46,7 +47,7 @@
   {:points (-> params :points (try-parse-long 0))
    :name (or (params :name) "Anonymous Coward")
    :skipped? (some? (:skip-button params))
-   :breakdown (get-breakdown-from-params params)})
+   :breakdown (get-breakdown-from-params params initial-supported-breakdowns_)})
 
 (defn utc-now
   []
