@@ -38,7 +38,7 @@
   [params supported-breakdowns]
   (reduce (fn [acc breakdown]
              (if-let [value (get params breakdown)]
-               (assoc acc breakdown (try-parse-long value 0))
+               (assoc acc (name breakdown) (try-parse-long value 0))
                acc))
            {} supported-breakdowns))
 

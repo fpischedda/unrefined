@@ -90,17 +90,9 @@
    :updated-at updated-at
    :settings (db->voting-mode-settings (:db/ident voting-mode) settings)})
 
-(defn get-refinement
-  [code]
-  (let [res (d/pull @db
-                    '[* {:refinement/voting-mode [:db/ident]
-                         :refinement/settings [*]}]
-                    [:refinement/id code])]
-    (db->refinement res)))
-
 (defn db->estimation-breakdown
   [{:estimation-breakdown/keys [name points]}]
-  {:name name
+  {:name (keyword name)
    :points points})
 
 (defn db->estimation
@@ -178,19 +170,14 @@
 (defn add-estimation
   [refinement ticket-id session-num
    {:keys [author-id author-name score skipped? breakdown] :as _estimation}]
-  (let [session-id [:estimation-session/refinement+ticket+num [refinement ticket-id session-num]]
-        estimation-id (d/tempid)
-        estimation-breakdowns (for [[name points] breakdown]
-                                {:estimation/_breakdown estimation-id
-                                 :estimation-breakdown/name name
-                                 :estimation-breakdown/points points})]
+  (let [session-id [:estimation-session/refinement+ticket+num [refinement ticket-id session-num]]]
     (d/transact db
-                (concat
                  [{:estimation-session/_votes session-id
-                   :db/id estimation-id
                    :estimation/session session-id
                    :estimation/author-id author-id
                    :estimation/author-name author-name
                    :estimation/score score
-                   :estimation/skipped? skipped?}]
-                 estimation-breakdowns))))
+                   :estimation/skipped? skipped?
+                   :estimation/breakdown (for [[name points] breakdown]
+                                {:estimation-breakdown/name name
+                                 :estimation-breakdown/points points})}])))
