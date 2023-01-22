@@ -5,8 +5,26 @@
    [mount.core :as mount]
    [nano-id.core :refer [nano-id]]
    [fpsd.configuration :refer [config]]
+   [fpsd.unrefined.persistence.datahike.migrator :as migrator]
    [fpsd.unrefined.persistence.datahike.schema :as schema]
    [fpsd.refinements.helpers :refer [utc-now]]))
+
+(defn migrate-schema!
+  "Try to apply migrations and log errors if any."
+  [db migrations]
+  (let [{:migration/keys [error applied not-applied]}
+        (migrator/collect-migrations-to-apply db migrations)]
+    (if error
+      (u/log ::migrate-schema
+             :errors error
+             :message "Unable to migrate the schema")
+      (do
+        (u/log ::migrate-schema
+               :migrations-to-apply not-applied
+               :migrations-applied applied
+               :message "Applying migrations")
+        (doseq [{:migration/keys [name transactions]} not-applied]
+          (migrator/apply-migration db name transactions))))))
 
 (mount/defstate db
   :start (do
@@ -21,7 +39,9 @@
                       :config (:datahike config)
                       :message "Unable to create DB"
                       :exception t)))
-           (d/connect (:datahike config)))
+           (let [db (d/connect (:datahike config))]
+             (migrate-schema! db (concat migrator/initial-migration schema/migrations))
+             db))
   :stop (d/release db))
 
 (comment
@@ -90,7 +110,6 @@
           '[*]
           [:voting-session/refinement+ticket+num [_refinement _ticket-id 0]])
 
-
   (d/pull @db
           '[* {:refinement/tickets [*]
                :refinement/voting-mode [*]}]
@@ -104,4 +123,15 @@
           '[* {:voting-session/votes [*]}]
           [:voting-session/refinement+ticket+num [_refinement _ticket-id 0]])
 
+  ;; trying the migrator manually :)
+  (d/transact db migrator/migrations-schema)
+
+  (migrator/get-applied-migrations db)
+  
+  (migrator/analyze-migrations (concat migrator/initial-migration schema/migrations)
+                               (migrator/get-applied-migrations db))
+
+  (migrator/collect-migrations-to-apply db schema/migrations)
+  
+  (migrate-schema! db schema/migrations)
   ,)

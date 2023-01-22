@@ -158,3 +158,7 @@
           estimation-session-schema
           estimation-schema
           estimation-breakdown-schema))
+
+(def migrations
+  [{:migration/name "add estimation breakdown"
+    :migration/transactions estimation-breakdown-schema}])
