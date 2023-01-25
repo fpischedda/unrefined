@@ -41,13 +41,14 @@
     migration))
 
 (defn get-applied-migrations
+  "Return a vector with all previously applied migrations,
+   sorted by :migration/applied-at."
   [db]
   (->> db
        (d/q '[:find (pull ?e [*])
                :where [?e :migration/name]
                       [?e :migration/applied-at]
-                      [?e :migration/transactions]]
-                @db)
+                      [?e :migration/transactions]])
        flatten
        (sort-by :migration/applied-at)))
 

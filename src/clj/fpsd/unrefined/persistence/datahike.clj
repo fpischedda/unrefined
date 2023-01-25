@@ -13,7 +13,7 @@
   "Try to apply migrations and log errors if any."
   [db migrations]
   (let [{:migration/keys [error applied not-applied]}
-        (migrator/collect-migrations-to-apply db migrations)]
+        (migrator/collect-migrations-to-apply @db migrations)]
     (if error
       (u/log ::migrate-schema
              :errors error
@@ -126,12 +126,12 @@
   ;; trying the migrator manually :)
   (d/transact db migrator/migrations-schema)
 
-  (migrator/get-applied-migrations db)
+  (migrator/get-applied-migrations @db)
   
   (migrator/analyze-migrations (concat migrator/initial-migration schema/migrations)
-                               (migrator/get-applied-migrations db))
+                               (migrator/get-applied-migrations @db))
 
-  (migrator/collect-migrations-to-apply db schema/migrations)
+  (migrator/collect-migrations-to-apply @db schema/migrations)
   
   (migrate-schema! db schema/migrations)
   ,)
