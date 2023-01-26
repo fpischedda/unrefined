@@ -92,8 +92,7 @@
 
 (defn db->estimation-breakdown
   [{:estimation-breakdown/keys [name points]}]
-  {:name (keyword name)
-   :points points})
+  {(keyword name) points})
 
 (defn db->estimation
   [{:estimation/keys [author-id author-name score skipped? breakdown] :as estimation}]
@@ -102,7 +101,7 @@
    :author-name author-name
    :score score
    :skipped? skipped?
-   :breakdown (mapv db->estimation-breakdown breakdown)})
+   :breakdown (->> breakdown (mapv db->estimation-breakdown) (into {}))})
 
 (defn db->session
   [{:estimation-session/keys [num votes status result] :as session}]
@@ -178,6 +177,6 @@
                    :estimation/author-name author-name
                    :estimation/score score
                    :estimation/skipped? skipped?
-                   :estimation/breakdown (for [[name points] breakdown]
-                                {:estimation-breakdown/name name
-                                 :estimation-breakdown/points points})}])))
+                   :estimation/breakdown (for [[kw-name points] breakdown]
+                                           {:estimation-breakdown/name (name kw-name)
+                                            :estimation-breakdown/points points})}])))

@@ -131,7 +131,7 @@
   (migrator/analyze-migrations (concat migrator/initial-migration schema/migrations)
                                (migrator/get-applied-migrations @db))
 
-  (migrator/collect-migrations-to-apply @db schema/migrations)
+  (migrator/collect-migrations-to-apply @db (concat migrator/initial-migration schema/migrations))
   
   (migrate-schema! db schema/migrations)
   ,)

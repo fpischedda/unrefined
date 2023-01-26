@@ -144,7 +144,10 @@
     :db/cardinality :db.cardinality/one}
    {:db/ident :estimation-breakdown/points
     :db/valueType :db.type/long
-    :db/cardinality :db.cardinality/one}])
+    :db/cardinality :db.cardinality/one}
+   {:db/ident :estimation/breakdown
+    :db/valueType :db.type/ref
+    :db/cardinality :db.cardinality/many}])
 
 (defn full-schema
   []
