@@ -4,13 +4,13 @@
 <div class="container">
   <div class="row">
     <div class="col">
-      <p>Hi {{vote.name}}!<br/>Thank you for estimating the ticket {{ticket.id}}.</p>
-      {% if vote.skipped? %}
+      <p>Hi {{estimation.author-name}}!<br/>Thank you for estimating the ticket {{ticket.id}}.</p>
+      {% if estimation.skipped? %}
       <p>You <strong>skipped</strong>.</p>
       {% else %}
-      <p>Your vote: <strong>{{vote.points}}</strong></p>
+      <p>Your vote: <strong>{{estimation.points}}</strong></p>
       <p>Breakdown:
-        <ul>{% for item in vote.breakdown %}
+        <ul>{% for item in estimation.breakdown %}
     <li>{{item|first|name}}: {{item|last}}</li>
     {% endfor %}
         </ul>
