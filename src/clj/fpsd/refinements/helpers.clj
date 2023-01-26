@@ -38,14 +38,14 @@
   [params supported-breakdowns]
   (reduce (fn [acc breakdown]
              (if-let [value (get params breakdown)]
-               (assoc acc (name breakdown) (try-parse-long value 0))
+               (assoc acc breakdown (try-parse-long value 0))
                acc))
            {} supported-breakdowns))
 
-(defn get-vote-from-params
+(defn get-estimation-from-params
   [params]
   {:points (-> params :points (try-parse-long 0))
-   :name (or (params :name) "Anonymous Coward")
+   :author-name (or (params :name) "Anonymous Coward")
    :skipped? (some? (:skip-button params))
    :breakdown (get-breakdown-from-params params initial-supported-breakdowns_)})
 

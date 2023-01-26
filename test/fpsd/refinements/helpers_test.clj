@@ -52,15 +52,15 @@
     (is (= {:available 1} (helpers/get-breakdown-from-params {:available "1"
                                                               :not-available "2"} [:available])))))
 
-(testing "get-vote-from-params extract vote, name and breakdown from request body"
+(testing "get-estimation-from-params extract vote, name and breakdown from request body"
   (deftest all-defaults-when-empty-params
     (are [params expected]
-         (= (helpers/get-vote-from-params params) expected)
+         (= (helpers/get-estimation-from-params params) expected)
 
       ;; all defaults on empty params
       {}
       {:points 0
-       :name "Anonymous Coward"
+       :author-name "Anonymous Coward"
        :breakdown {}
        :skipped? false}
 
@@ -69,7 +69,7 @@
        :testing "1"
        :backend "2"}
       {:points 0
-       :name "Bob"
+       :author-name "Bob"
        :breakdown {:testing 1
                    :backend 2}
        :skipped? false}
@@ -80,7 +80,7 @@
        :testing "1"
        :backend "2"}
       {:points 3
-       :name "Bob"
+       :author-name "Bob"
        :breakdown {:testing 1
                    :backend 2}
        :skipped? false}
@@ -88,7 +88,7 @@
       ;; skipping
       {:name "Skipper"
        :skip-button 1}
-      {:name "Skipper"
+      {:author-name "Skipper"
        :points 0
        :breakdown {}
        :skipped? true}
