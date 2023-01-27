@@ -21,22 +21,46 @@
       ;; failed
       "https://some-garbage" nil)))
 
-(testing "try-parse-int tries to convert a string to int, if it falis return nil"
+(testing "try-parse-int tries to convert a string to int, if it falis return nil or default"
   (deftest try-parse-int-success
     (is (= 5 (helpers/try-parse-int "5"))))
 
   (deftest try-parse-int-fail
-    (is (nil? (helpers/try-parse-int "five")))))
+    (is (nil? (helpers/try-parse-int "five"))))
+  
+  (deftest try-parse-int-uses-default
+    (is (= 0 (helpers/try-parse-int "five" 0)))))
 
-(testing "get-vote-from-params extract vote, name and breakdown from request body"
+(testing "try-parse-long tries to convert a string to long, if it falis return nil or default"
+  (deftest try-parse-long-success
+    (is (= 5 (helpers/try-parse-long "5"))))
+
+  (deftest try-parse-long-fail
+    (is (nil? (helpers/try-parse-long "five"))))
+  
+  (deftest try-parse-long-uses-default
+    (is (= 0 (helpers/try-parse-long "five" 0)))))
+
+(testing "get-breakdown-from-params"
+  (deftest skip-missing-breakdown
+    (is (= {} (helpers/get-breakdown-from-params {:new-one "1"} [:missing]))))
+
+  (deftest use-default-if-breakdown-empty-string
+    (is (= {:item 0} (helpers/get-breakdown-from-params {:item ""} [:item]))))
+
+  (deftest only-selects-available-breakdown
+    (is (= {:available 1} (helpers/get-breakdown-from-params {:available "1"
+                                                              :not-available "2"} [:available])))))
+
+(testing "get-estimation-from-params extract vote, name and breakdown from request body"
   (deftest all-defaults-when-empty-params
     (are [params expected]
-         (= (helpers/get-vote-from-params params) expected)
+         (= (helpers/get-estimation-from-params params) expected)
 
       ;; all defaults on empty params
       {}
       {:points 0
-       :name "Anonymous Coward"
+       :author-name "Anonymous Coward"
        :breakdown {}
        :skipped? false}
 
@@ -45,9 +69,9 @@
        :testing "1"
        :backend "2"}
       {:points 0
-       :name "Bob"
-       :breakdown {:testing "1"
-                   :backend "2"}
+       :author-name "Bob"
+       :breakdown {:testing 1
+                   :backend 2}
        :skipped? false}
 
       ;; parse all
@@ -56,15 +80,15 @@
        :testing "1"
        :backend "2"}
       {:points 3
-       :name "Bob"
-       :breakdown {:testing "1"
-                   :backend "2"}
+       :author-name "Bob"
+       :breakdown {:testing 1
+                   :backend 2}
        :skipped? false}
 
       ;; skipping
       {:name "Skipper"
        :skip-button 1}
-      {:name "Skipper"
+      {:author-name "Skipper"
        :points 0
        :breakdown {}
        :skipped? true}

@@ -15,20 +15,39 @@
 
 (defn try-parse-int
   "Return the integer value represented by the string int-str
-   or nil if it is not possible to parse the number"
-  [int-str]
-  (try (Integer/parseInt int-str)
-       (catch NumberFormatException _ nil)))
+   or default if it is not possible to parse the number"
+  ([str-value]
+   (try-parse-int str-value nil))
+  ([str-value default]
+   (try (Integer/parseInt str-value)
+        (catch NumberFormatException _ default))))
 
-(def supported-breakdowns [:implementation :backend :migrations :data_migrations :testing :manual_testing :risk :complexity])
+(defn try-parse-long
+  "Return the integer value represented by the string int-str
+   or default if it is not possible to parse the number"
+  ([str-value]
+   (try-parse-long str-value nil))
+  ([str-value default]
+   (try (Long/parseLong str-value)
+        (catch NumberFormatException _ default))))
 
-(defn get-vote-from-params
+(def initial-supported-breakdowns_
+  [:implementation :backend :migrations :data_migrations :testing :manual_testing :risk :complexity])
+
+(defn get-breakdown-from-params
+  [params supported-breakdowns]
+  (reduce (fn [acc breakdown]
+             (if-let [value (get params breakdown)]
+               (assoc acc breakdown (try-parse-long value 0))
+               acc))
+           {} supported-breakdowns))
+
+(defn get-estimation-from-params
   [params]
-  {:points (-> params :points try-parse-int (or 0))
-   :name (or (-> params :name) "Anonymous Coward")
+  {:points (-> params :points (try-parse-long 0))
+   :author-name (or (params :name) "Anonymous Coward")
    :skipped? (some? (:skip-button params))
-   :breakdown
-   (select-keys params supported-breakdowns)})
+   :breakdown (get-breakdown-from-params params initial-supported-breakdowns_)})
 
 (defn utc-now
   []

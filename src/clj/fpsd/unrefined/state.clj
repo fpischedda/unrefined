@@ -90,21 +90,18 @@
    :updated-at updated-at
    :settings (db->voting-mode-settings (:db/ident voting-mode) settings)})
 
-(defn get-refinement
-  [code]
-  (let [res (d/pull @db
-                    '[* {:refinement/voting-mode [:db/ident]
-                         :refinement/settings [*]}]
-                    [:refinement/id code])]
-    (db->refinement res)))
+(defn db->estimation-breakdown
+  [{:estimation-breakdown/keys [name points]}]
+  {(keyword name) points})
 
 (defn db->estimation
-  [{:estimation/keys [author-id author-name score skipped?] :as estimation}]
+  [{:estimation/keys [author-id author-name score skipped? breakdown] :as estimation}]
   {:db/id (:db/id estimation)
    :author-id author-id
    :author-name author-name
    :score score
-   :skipped? skipped?})
+   :skipped? skipped?
+   :breakdown (->> breakdown (mapv db->estimation-breakdown) (into {}))})
 
 (defn db->session
   [{:estimation-session/keys [num votes status result] :as session}]
@@ -144,7 +141,8 @@
                     '[* {:refinement/_tickets [* {:refinement/voting-mode [:db/ident]
                                                   :refinement/settings [*]}]
                          :ticket/sessions [* {:estimation-session/status [:db/ident]
-                                              :estimation-session/votes [*]}]}]
+                                              :estimation-session/votes [* {:estimation/breakdown [:estimation-breakdown/name
+                                                                                                   :estimation-breakdown/points]}]}]}]
                     [:ticket/refinement+id [code ticket-id]])]
     {:refinement (db->refinement (-> res :refinement/_tickets first))
      :ticket (db->ticket res)}))
@@ -170,12 +168,15 @@
 
 (defn add-estimation
   [refinement ticket-id session-num
-   {:keys [author-id author-name score skipped?] :as _estimation}]
-   (let [session-id [:estimation-session/refinement+ticket+num [refinement ticket-id session-num]]]
-     (d/transact db
+   {:keys [author-id author-name score skipped? breakdown] :as _estimation}]
+  (let [session-id [:estimation-session/refinement+ticket+num [refinement ticket-id session-num]]]
+    (d/transact db
                  [{:estimation-session/_votes session-id
                    :estimation/session session-id
                    :estimation/author-id author-id
                    :estimation/author-name author-name
                    :estimation/score score
-                   :estimation/skipped? skipped?}])))
+                   :estimation/skipped? skipped?
+                   :estimation/breakdown (for [[kw-name points] breakdown]
+                                           {:estimation-breakdown/name (name kw-name)
+                                            :estimation-breakdown/points points})}])))

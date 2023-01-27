@@ -116,7 +116,22 @@
                :error error)
         (refinement-or-ticket-not-found-error code ticket-id)))))
 
+(defn get-user-ticket-estimation
+  [ticket user-id]
+  (->> ticket
+      :sessions
+      last
+      :votes
+      (filter #(= user-id (:author-id %)))
+      first))
+
+(comment
+  (let [{:keys [error refinement ticket]} (core/get-refinement-ticket "wocmokJqeEvPQ1F37FoPU" "asdf")]
+    (get-user-ticket-estimation ticket  "d44524ff-898f-43d9-8ea2-383b98bdff41"))
+  ,)
+
 (defn estimate-view
+  "Handler for the engineers estimation page."
   [request]
   (let [user-id (or (-> request :common-cookies :user-id) (str (random-uuid)))
         name (-> request :common-cookies :name)
@@ -124,13 +139,19 @@
         {:keys [error refinement ticket]} (core/get-refinement-ticket code ticket-id)]
 
     (if (and refinement ticket)
-      {:body (render-file "templates/estimate-view.html" {:refinement refinement
-                                                          :ticket ticket
-                                                          :name name})
-       :headers {:content-type "text/html"}
-       :cookies {"user-id" (cookie-value user-id)
-                 "name" (cookie-value name)}
-       :status 200}
+      (let [body
+            (if-let [estimation (get-user-ticket-estimation ticket user-id)]
+              (render-file "templates/estimate-done.html" {:refinement refinement
+                                                           :ticket ticket
+                                                           :estimation estimation})
+              (render-file "templates/estimate-view.html" {:refinement refinement
+                                                           :ticket ticket
+                                                           :name name}))]
+        {:body body
+         :headers {:content-type "text/html"}
+         :cookies {"user-id" (cookie-value user-id)
+                   "name" (cookie-value name)}
+         :status 200})
       (do
         (u/log ::estimate-view
                :message (format "Unable to find refinement %s or ticket %s" code ticket-id)
@@ -143,22 +164,22 @@
         {:keys [code ticket-id]} (:path-params request)
         {:keys [error refinement ticket]} (core/get-refinement-ticket code ticket-id)
         session-num (or (-> request :params :session-num helpers/try-parse-int) 0)
-        vote (-> request :params helpers/get-vote-from-params)
-        name (:name vote)]
+        estimation (-> request :params helpers/get-estimation-from-params)
+        name (:author-name estimation)]
 
     (if (and refinement ticket)
       (do
-        (core/vote-ticket {:code code
-                           :ticket-id ticket-id
-                           :session-num session-num
-                           :author-id user-id
-                           :author-name name
-                           :vote vote})
+        (core/estimate-ticket {:code code
+                               :ticket-id ticket-id
+                               :session-num session-num
+                               :author-id user-id
+                               :author-name name
+                               :estimation estimation})
 
         {:body (render-file "templates/estimate-done.html"
                             {:refinement refinement
                              :ticket ticket
-                             :vote vote})
+                             :estimation estimation})
          :headers {:content-type "text/html"}
          :cookies {"user-id" (cookie-value user-id)
                    "name" (cookie-value name)}

@@ -89,17 +89,18 @@
 
     ticket))
 
-(defn vote-ticket
-  [{:keys [code ticket-id session-num author-id author-name vote] :as _estimation}]
+(defn estimate-ticket
+  [{:keys [code ticket-id session-num author-id author-name estimation] :as _estimation}]
 
   (state/add-estimation code ticket-id session-num
                         {:author-id author-id
                          :author-name author-name
-                         :score (long (:points vote))
-                         :skipped? (boolean (:skipped? vote))})
+                         :score (:points estimation)
+                         :skipped? (boolean (:skipped? estimation))
+                         :breakdown (:breakdown estimation)})
 
   (events/send-vote-event! code
-                           (if (:skipped? vote) :user-skipped :user-voted)
+                           (if (:skipped? estimation) :user-skipped :user-voted)
                            author-id
                            (state/get-ticket code ticket-id)))
 
