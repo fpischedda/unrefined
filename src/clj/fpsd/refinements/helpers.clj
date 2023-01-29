@@ -44,7 +44,7 @@
 
 (defn get-estimation-from-params
   [params]
-  {:points (-> params :points (try-parse-long 0))
+  {:score (-> params :points (try-parse-long 0))
    :author-name (or (params :name) "Anonymous Coward")
    :skipped? (some? (:skip-button params))
    :breakdown (get-breakdown-from-params params initial-supported-breakdowns_)})

@@ -8,7 +8,7 @@
       {% if estimation.skipped? %}
       <p>You <strong>skipped</strong>.</p>
       {% else %}
-      <p>Your vote: <strong>{{estimation.points}}</strong></p>
+      <p>Your vote: <strong>{{estimation.score}}</strong></p>
       <p>Breakdown:
         <ul>{% for item in estimation.breakdown %}
     <li>{{item|first|name}}: {{item|last}}</li>

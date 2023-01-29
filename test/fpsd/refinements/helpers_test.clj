@@ -59,7 +59,7 @@
 
       ;; all defaults on empty params
       {}
-      {:points 0
+      {:score 0
        :author-name "Anonymous Coward"
        :breakdown {}
        :skipped? false}
@@ -68,7 +68,7 @@
       {:name "Bob"
        :testing "1"
        :backend "2"}
-      {:points 0
+      {:score 0
        :author-name "Bob"
        :breakdown {:testing 1
                    :backend 2}
@@ -79,7 +79,7 @@
        :points "3"
        :testing "1"
        :backend "2"}
-      {:points 3
+      {:score 3
        :author-name "Bob"
        :breakdown {:testing 1
                    :backend 2}
@@ -89,7 +89,7 @@
       {:name "Skipper"
        :skip-button 1}
       {:author-name "Skipper"
-       :points 0
+       :score 0
        :breakdown {}
        :skipped? true}
       )))

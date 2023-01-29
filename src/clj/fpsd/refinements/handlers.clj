@@ -141,12 +141,14 @@
     (if (and refinement ticket)
       (let [body
             (if-let [estimation (get-user-ticket-estimation ticket user-id)]
-              (render-file "templates/estimate-done.html" {:refinement refinement
-                                                           :ticket ticket
-                                                           :estimation estimation})
-              (render-file "templates/estimate-view.html" {:refinement refinement
-                                                           :ticket ticket
-                                                           :name name}))]
+              (render-file "templates/estimate-done.html"
+                           {:refinement refinement
+                            :ticket ticket
+                            :estimation estimation})
+              (render-file "templates/estimate-view.html"
+                           {:refinement refinement
+                            :ticket ticket
+                            :name name}))]
         {:body body
          :headers {:content-type "text/html"}
          :cookies {"user-id" (cookie-value user-id)

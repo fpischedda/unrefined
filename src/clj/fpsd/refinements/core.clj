@@ -95,7 +95,7 @@
   (state/add-estimation code ticket-id session-num
                         {:author-id author-id
                          :author-name author-name
-                         :score (:points estimation)
+                         :score (:score estimation)
                          :skipped? (boolean (:skipped? estimation))
                          :breakdown (:breakdown estimation)})
 
