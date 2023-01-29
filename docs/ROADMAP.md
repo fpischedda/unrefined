@@ -1,5 +1,21 @@
 # ROADMAP
 
+## Update - 2023-01-29
+
+- Store estimation breakdown and avoid re-voting during the same session
+- Use event-bus with a topic for each refinement session
+- Introduced migration facility
+
+Testing coverage is still quite limited and limited to unit tests, this sometimes
+slows down the development. I'd like to at least test up to the "core" level and
+possibly up to handlers level.
+
+Todos:
+
+- Reach out to people asking to try it
+- Write about the estimation cheatsheet and why it can be helpful
+- Record a small refinement session as an example
+
 ## Update - 2023-01-06
 
 From now on new goals and improvements will inserted on top of this file.
@@ -8,7 +24,7 @@ Changes introduced so far to the MVP:
 
 - Voting UI reworked to use sliders for votes and show a voting cheatsheet
 - Refinement and ticket data is now persisted using datahike
-- Close and event sources periodically when these have no connected clients
+- Close event sources periodically when these have no connected clients
 
 Next steps in no particular order:
 
