@@ -7,7 +7,7 @@
       <h5> Ticket:  <a href="{{ticket.link-to-original}}">{{ticket.id}}</a>
 	<div><button class="btn btn-primary" onclick="copy_estimation_link('{{refinement.code}}', '{{ticket.id}}')">Copy link to estimation page</button></div>
       </h5>
-
+      
       {% include "templates/estimation-result-fragment.html" with estimation=estimation refinement=refinement %}
 
       <p>

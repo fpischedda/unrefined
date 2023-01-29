@@ -1,5 +1,5 @@
   {% ifequal estimation.result :not-enough-votes %}
-    <p>Unfortunately we haven't reached the minimum number of votes ({{refinement.settings.reasonable-minimum-votes}}).</p>
+    <p>Unfortunately we haven't reached the minimum number of votes ({{refinement.settings.minimum-votes}}).</p>
     <p>You may want to estimate a new ticket or wait for more votes.</p>
   {% endifequal %}
   {% ifequal estimation.result :winner %}
