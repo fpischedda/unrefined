@@ -1,0 +1,17 @@
+* Build a browser extension that can
+
+- Start new refinement session
+  
+  - if on a recognizable ticket page start from there
+  - otherwise start from scratch requesting a ticket id or URL
+
+- After starting a new session then the ticket URL is automatically copied to the clipboard
+  - The link is then shared with other peeps
+  - When loading the page
+    - if the person has the plugin installed then redirect the current browser to the ticket URL
+    - otherwise the usual workflow should be shown
+      
+- The plugin should subscribe to refinements events and 
+  - Show a sorts of estimation view with the breakdown
+    - If the ticket gets re-estimated than reset the estimation view
+  - Redirect to new tickets when the current ticket changes
