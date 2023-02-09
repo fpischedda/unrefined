@@ -48,6 +48,22 @@
      :cookies {"user-id" (cookie-value user-id)}
      :status 302}))
 
+(defn create-refinement-api
+  [request]
+  (let [user-id (or (-> request :common-cookies :user-id) (str (random-uuid)))
+        ticket-url (-> request :body-params :ticket-url)
+        {:keys [code ticket-id]} (core/create-refinement ticket-url)
+        ]
+
+    (u/log ::create-refinement :user-id user-id :ticket-url ticket-url :refinement code :ticket-id ticket-id)
+
+    {:body {:refinement-path (safe-ticket-url code ticket-id)
+            :refinement-code code
+            :ticket-id ticket-id
+            :source-ticket-url ticket-url}
+     :cookies {"user-id" (cookie-value user-id)}
+     :status 200}))
+
 (defn add-ticket
   [request]
   (let [code (-> request :path-params :code)

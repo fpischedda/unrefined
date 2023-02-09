@@ -1,6 +1,13 @@
 (ns fpsd.routes
-  (:require [reitit.ring :as ring]
+  (:require [reitit.coercion.spec]
+            [reitit.ring :as ring]
+            [reitit.ring.coercion :as rrc]
+            [reitit.ring.middleware.exception :as exception]
             [reitit.ring.middleware.muuntaja :as muuntaja]
+            [reitit.ring.middleware.parameters :as parameters]
+            [reitit.swagger :as swagger]
+            [reitit.swagger-ui :as swagger-ui]
+            [reitit.dev.pretty :as pretty]
             [muuntaja.core :as m]
             [aleph.http :as http]
             [mount.core :as mount]
@@ -46,11 +53,45 @@
 (def app
   (ring/ring-handler
    (ring/router
-    [["/" {:get {:handler handlers/index
+    [["/" {:get {:no-doc true
+                 :handler handlers/index
                  :name :unrefined/index}}]
-     ["/assets/*" (ring/create-resource-handler)]
+     ["/assets" {:no-doc true}
+      ["/*" (ring/create-resource-handler)]]
 
-     ["/refine"
+     ["/api"
+      {:coercion reitit.coercion.spec/coercion
+       :middleware [swagger/swagger-feature
+                    ;; query-params & form-params
+                    parameters/parameters-middleware
+                    ;; content-negotiation
+                    muuntaja/format-negotiate-middleware
+                    ;; encoding response body
+                    muuntaja/format-response-middleware
+                    ;; exception handling
+                    exception/exception-middleware
+                    ;; decoding request body
+                    muuntaja/format-request-middleware
+                    ;; coercing response bodys
+                    rrc/coerce-response-middleware
+                    ;; coercing request parameters
+                    rrc/coerce-request-middleware]}
+
+      ["/docs/swagger.json"
+       {:get {:no-doc  true
+              :swagger {:info {:title "unrefined API"}}
+              :handler (swagger/create-swagger-handler)}}]
+      
+      ["/refine" {:post {:summary "starts a new refinement session with the provided ticket"
+                         :parameters {:body {:ticket-url string?}}
+                         :responses {200 {:body {:refinement-path string?
+                                                 :refinement-code string?
+                                                 :ticket-id string?
+                                                 :source-ticket-url string?}}}
+                         :handler handlers/create-refinement-api
+                         :name :unrefined/create-refinement-api}}]]
+
+     ["/refine" {:no-doc true}
       ["" {:post {:handler handlers/create-refinement
                   :name :unrefined/create-refinement}}]
 
@@ -77,19 +118,18 @@
 
        ["events" {:get handlers/events-stream-handler}]]]]
 
-    {:data {:muuntaja m/instance
+    {:exception pretty/exception
+     :data {:muuntaja m/instance
             :middleware [muuntaja/format-middleware
                          wrap-cookies
                          wrap-params
                          wrap-keyword-params
                          wrap-log-context
-                         common-cookies]}})))
-
-(comment
-  (#'app {:request-method :get
-          :uri "/"
-          :form-params {:ticket-url "abc"}})
-  ,)
+                         common-cookies]}})
+   (ring/routes
+    (swagger-ui/create-swagger-ui-handler {:path "/api/docs"
+                                           :url  "/api/docs/swagger.json"})
+    (ring/create-default-handler))))
 
 (mount/defstate http-server
   :start (do
@@ -98,6 +138,11 @@
   :stop (.close http-server))
 
 (comment
+  
+  (do
+    (require '[flow-storm.api :as fs-api])
+    (fs-api/local-connect))
+
   (mount/start)
   (mount/stop)
   )
