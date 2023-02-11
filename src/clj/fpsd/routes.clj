@@ -50,7 +50,7 @@
       (handler (assoc request :common-cookies {:user-id user-id
                                                :name name})))))
 
-(def app
+(defn create-app []
   (ring/ring-handler
    (ring/router
     [["/" {:get {:no-doc true
@@ -89,7 +89,12 @@
                                                  :ticket-id string?
                                                  :source-ticket-url string?}}}
                          :handler handlers/create-refinement-api
-                         :name :unrefined/create-refinement-api}}]]
+                         :name :unrefined/create-refinement-api}
+                  :options {:no-doc true
+                            :handler (fn [_] {:status 200
+                                              :headers {"Access-Control-Allow-Origin" "*"
+                                                        "Access-Control-Allow-Methods" "POST, OPTIONS"
+                                                        "Access-Control-Allow-Headers" "*"}})}}]]
 
      ["/refine" {:no-doc true}
       ["" {:post {:handler handlers/create-refinement
@@ -134,7 +139,7 @@
 (mount/defstate http-server
   :start (do
            (u/start-publisher! (:logging config))
-           (http/start-server #'app {:port (-> config :http :port)}))
+           (http/start-server (create-app) {:port (-> config :http :port)}))
   :stop (.close http-server))
 
 (comment
