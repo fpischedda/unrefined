@@ -75,7 +75,10 @@
                     ;; coercing response bodys
                     rrc/coerce-response-middleware
                     ;; coercing request parameters
-                    rrc/coerce-request-middleware]}
+                    rrc/coerce-request-middleware
+                    [add-headers {"Access-Control-Allow-Origin" "*"
+                                  "Access-Control-Allow-Methods" "DELETE, GET, POST, PATCH, PUT, OPTIONS"
+                                  "Access-Control-Allow-Headers" "*"}]]}
 
       ["/docs/swagger.json"
        {:get {:no-doc  true
@@ -91,10 +94,7 @@
                          :handler handlers/create-refinement-api
                          :name :unrefined/create-refinement-api}
                   :options {:no-doc true
-                            :handler (fn [_] {:status 200
-                                              :headers {"Access-Control-Allow-Origin" "*"
-                                                        "Access-Control-Allow-Methods" "POST, OPTIONS"
-                                                        "Access-Control-Allow-Headers" "*"}})}}]]
+                            :handler (fn [_] {:status 200})}}]]
 
      ["/refine" {:no-doc true}
       ["" {:post {:handler handlers/create-refinement
