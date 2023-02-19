@@ -1,3 +1,15 @@
+function storeCurrentSession(data) {
+    chrome.storage.local.set({currentSession: data}).then( () => {console.log('Stored refinement data', data)})
+}
+
+function getCurrentSession() {
+    let session = chrome.storage.local.get(["currentSession"]).then( (result) => {
+	if(result.currentSession) {
+	    refinementStarted(result.currentSession)
+	}
+    })
+}
+
 function refinementStarted(data) {
     let activityElement = document.getElementById('activity')
     const refinementURL = 'http://localhost:8080' + data['refinement-path']
@@ -8,15 +20,19 @@ function refinementStarted(data) {
     const text = document.createTextNode('Estimation link copied to clipboard!')
     activityElement.appendChild (text)
 
-    let button = document.createElement ('button')
+    let button = document.createElement('button')
     button.appendChild (document.createTextNode ('Click here for live updates'))
-    button.addEventListener ('click', () => {
-	chrome.tabs.create ({'url': refinementURL})
+    button.addEventListener('click', () => {
+	chrome.tabs.create({'url': refinementURL})
     })
     activityElement.appendChild (button)
 }
 
 function getTicketURLFromCurrentTab(callback) {
+    let activityElement = document.getElementById('activity')
+    // reset the activity div before starting a new refinement
+    activityElement.innerHTML = ''
+
     chrome.tabs.query({active: true, lastFocusedWindow: true}, (tabs) => {
 	callback(tabs[0].url) })
 }
@@ -33,6 +49,7 @@ function refineTicket(ticketURL) {
 	return response.json()
     }).then((data) => {
 	console.log(data)
+	storeCurrentSession(data)
 	refinementStarted(data)
     })
 }
@@ -41,6 +58,8 @@ function setup() {
     let startButton = document.getElementById('startRefinementButton')
 
     startButton.addEventListener( 'click', () => { getTicketURLFromCurrentTab(refineTicket) })
+
+    getCurrentSession()
 }
 
 setup()

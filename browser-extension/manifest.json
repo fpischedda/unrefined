@@ -11,9 +11,9 @@
     "extension_pages": "script-src 'self'; object-src 'self';",
     "sandbox": "sandbox allow-scripts allow-forms allow-popups allow-modals; script-src 'self' 'unsafe-inline' 'unsafe-eval'; child-src 'self';"
   },
-  "permissions": ["scripting", "tabs"],
+    "permissions": ["scripting", "tabs", "storage"],
   "host_permissions": [
         "http://localhost:8080/api/*",
-        "https://unrefined.one/api*"
+        "https://unrefined.one/api/*"
     ]
 }
