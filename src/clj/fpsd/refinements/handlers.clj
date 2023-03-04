@@ -62,7 +62,7 @@
             :ticket-id ticket-id
             :source-ticket-url ticket-url}
      :cookies {"user-id" (cookie-value user-id)}
-     :status 200}))
+     :status 201}))
 
 (defn add-ticket
   [request]
@@ -76,6 +76,23 @@
            :ticket-id (:id ticket))
     {:headers {:location (safe-ticket-url code (:id ticket))}
      :status 302}))
+
+(defn add-ticket-api
+  [request]
+  (let [code (-> request :path-params :code)
+        ticket-url (-> request :body-params :ticket-url)
+        ticket (core/add-ticket code ticket-url)
+        ticket-id (:id ticket)]
+
+    (u/log ::add-ticket-api
+           :ticket-url ticket-url
+           :refinement code
+           :ticket-id ticket-id)
+    {:status 201
+     :body {:refinement-path (safe-ticket-url code ticket-id)
+            :refinement-code code
+            :ticket-id ticket-id
+            :source-ticket-url ticket-url}}))
 
 (defn index
   [request]

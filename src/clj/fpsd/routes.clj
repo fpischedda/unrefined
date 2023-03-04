@@ -94,8 +94,15 @@
                          :handler handlers/create-refinement-api
                          :name :unrefined/create-refinement-api}
                   :options {:no-doc true
-                            :handler (fn [_] {:status 200})}}]]
+                            :handler (fn [_] {:status 200})}}
+       ["/:code"
 
+        ["/ticket"
+         ["" {:post {:handler handlers/add-ticket-api
+                     :name :unrefined/add-ticket}
+              :options {:no-doc true
+                        :handler (fn [_] {:status 200})}}]]]]]
+     
      ["/refine" {:no-doc true}
       ["" {:post {:handler handlers/create-refinement
                   :name :unrefined/create-refinement}}]
