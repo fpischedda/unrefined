@@ -85,7 +85,8 @@
               :swagger {:info {:title "unrefined API"}}
               :handler (swagger/create-swagger-handler)}}]
       
-      ["/refine" {:post {:summary "starts a new refinement session with the provided ticket"
+      ["/refine" 
+       ["" {:post {:summary "starts a new refinement session with the provided ticket"
                          :parameters {:body {:ticket-url string?}}
                          :responses {200 {:body {:refinement-path string?
                                                  :refinement-code string?
@@ -94,7 +95,7 @@
                          :handler handlers/create-refinement-api
                          :name :unrefined/create-refinement-api}
                   :options {:no-doc true
-                            :handler (fn [_] {:status 200})}}
+                            :handler (fn [_] {:status 200})}}]
        ["/:code"
 
         ["/ticket"
