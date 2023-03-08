@@ -100,9 +100,14 @@
 
         ["/ticket"
          ["" {:post {:handler handlers/add-ticket-api
-                     :name :unrefined/add-ticket}
+                     :name :unrefined/add-ticket-api}
               :options {:no-doc true
-                        :handler (fn [_] {:status 200})}}]]]]]
+                        :handler (fn [_] {:status 200})}}]
+         ["/:ticket-id"
+          ["/results" {:get {:handler handlers/estimate-results-api
+                             :name :unrefined/estimate-results-api}
+                       :options {:no-doc true
+                                 :handler (fn [_] {:status 200})}}]]]]]]
      
      ["/refine" {:no-doc true}
       ["" {:post {:handler handlers/create-refinement

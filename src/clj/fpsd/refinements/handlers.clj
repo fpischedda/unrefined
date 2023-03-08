@@ -149,6 +149,23 @@
                :error error)
         (refinement-or-ticket-not-found-error code ticket-id)))))
 
+(defn estimate-results-api
+  [request]
+  (let [{:keys [code ticket-id]} (:path-params request)
+        {:keys [error refinement ticket]} (core/get-refinement-ticket code ticket-id)]
+    (if (and refinement ticket)
+      {:body
+       {:refinement refinement
+        :ticket ticket
+        :estimation (estimator/estimate ticket (:settings refinement))}
+       :headers {:content-type "application/json"}
+       :status 200}
+      (do
+        (u/log ::estimate-result
+               :message (format "Unable to find refinement %s or ticket %s" code ticket-id)
+               :error error)
+        {:status 404}))))
+
 (defn get-user-ticket-estimation
   [ticket user-id]
   (->> ticket
