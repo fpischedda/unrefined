@@ -87,27 +87,41 @@
       
       ["/refine" 
        ["" {:post {:summary "starts a new refinement session with the provided ticket"
-                         :parameters {:body {:ticket-url string?}}
-                         :responses {200 {:body {:refinement-path string?
-                                                 :refinement-code string?
-                                                 :ticket-id string?
-                                                 :source-ticket-url string?}}}
-                         :handler handlers/create-refinement-api
-                         :name :unrefined/create-refinement-api}
-                  :options {:no-doc true
-                            :handler (fn [_] {:status 200})}}]
+                   :parameters {:body {:ticket-url string?}}
+                   :responses {200 {:body {:refinement-path string?
+                                           :refinement-code string?
+                                           :ticket-id string?
+                                           :source-ticket-url string?}}}
+                   :handler handlers/create-refinement-api
+                   :name :unrefined/create-refinement-api}
+            :options {:no-doc true
+                      :handler (fn [_] {:status 200})}}]
        ["/:code"
 
         ["/ticket"
-         ["" {:post {:handler handlers/add-ticket-api
+         ["" {:post {:summary "Estimate a new ticket in the current session"
+                     :parameters {:path {:code string?}
+                                  :body {:ticket-url string?}}
+                     :handler handlers/add-ticket-api
                      :name :unrefined/add-ticket-api}
               :options {:no-doc true
                         :handler (fn [_] {:status 200})}}]
          ["/:ticket-id"
-          ["/results" {:get {:handler handlers/estimate-results-api
+          ["/results" {:get {:summary "Get results for the current estimation"
+                             :parameters {:path {:code string?
+                                                 :ticket-id string?}}
+                             :handler handlers/estimate-results-api
                              :name :unrefined/estimate-results-api}
                        :options {:no-doc true
-                                 :handler (fn [_] {:status 200})}}]]]]]]
+                                 :handler (fn [_] {:status 200})}}]
+          ["/re-estimate" {:post {:summary "Re estimate the current ticket"
+                                  :parameters {:path {:code string?
+                                                      :ticket-id string?}}
+                                  :responses {200 {:body nil}}
+                                  :handler handlers/estimate-again-api
+                                  :name :unrefined/estimate-again-api}
+                           :options {:no-doc true
+                                     :handler (fn [_] {:status 200})}}]]]]]]
      
      ["/refine" {:no-doc true}
       ["" {:post {:handler handlers/create-refinement
