@@ -56,6 +56,19 @@ function refinementStarted(data) {
     })
     p.appendChild(reestimateButton)
     activityElement.appendChild(p)
+
+    p = document.createElement('p')
+    let newTicketButton = document.createElement('button')
+    newTicketButton.appendChild(document.createTextNode('Estimate new ticket'))
+    newTicketButton.addEventListener('click', () => {
+
+	getTicketURLFromCurrentTab().then( (ticketURL) => {
+	    console.log(ticketURL)
+	    refineTicket(ticketURL, data['refinement-code'])
+	})
+    })
+    p.appendChild(newTicketButton)
+    activityElement.appendChild(p)
 }
 
 function getTicketURLFromCurrentTab() {
@@ -73,7 +86,7 @@ function refineTicket(ticketURL, refinementCode) {
     let url = `${config.baseURL}/api/refine`
 
     if ( refinementCode ) {
-	url = `${url}/${refinementCode}`
+	url = `${url}/${refinementCode}/ticket`
     }
 
     fetch(url, {
