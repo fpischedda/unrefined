@@ -1,17 +1,30 @@
+/**
+ * Code for the popup of the browser extension
+ *
+ * The popup will provide the following actions:
+ * - Start a refinement session
+ * - Estimate a new ticket in the current session
+ * - Re-estimate the current ticket
+ *
+ * When opening the popup, the interface should reflect the available actions
+ * - Start a refinement session: always
+ * - Estimate new ticket: only when there is an active session
+ * - Re-estimete the current ticket: only when there is an active session
+ */
+
 function storeCurrentSession(data) {
     chrome.storage.local.set({currentSession: data}).then( () => {console.log('Stored refinement data', data)})
 }
 
 function getCurrentSession() {
-    let session = chrome.storage.local.get(["currentSession"]).then( (result) => {
-	if(result.currentSession) {
-	    refinementStarted(result.currentSession)
-	}
+    return chrome.storage.local.get(["currentSession"]).then( (result) => {
+	return result
     })
 }
 
 function refinementStarted(data) {
     let activityElement = document.getElementById('activity')
+    activityElement.innerHTML = ''
     const refinementURL = 'http://localhost:8080' + data['refinement-path']
     const estimationURL = refinementURL + '/estimate'
 
@@ -28,19 +41,25 @@ function refinementStarted(data) {
     activityElement.appendChild (button)
 }
 
-function getTicketURLFromCurrentTab(callback) {
-    let activityElement = document.getElementById('activity')
-    // reset the activity div before starting a new refinement
-    activityElement.innerHTML = ''
+function getTicketURLFromCurrentTab() {
+    let p = new Promise((resolve) => {
+	chrome.tabs.query({active: true, lastFocusedWindow: true}, (tabs) => {
+	    resolve(tabs[0].url)
+	})
+    })
 
-    chrome.tabs.query({active: true, lastFocusedWindow: true}, (tabs) => {
-	callback(tabs[0].url) })
+    return p
 }
 
-function refineTicket(ticketURL) {
-    console.log("ticket url: " + ticketURL) 
+function refineTicket(ticketURL, refinementCode) {
 
-    fetch('http://127.0.0.1:8080/api/refine', {
+    let url = 'http://127.0.0.1:8080/api/refine'
+
+    if ( refinementCode ) {
+	url = `${url}/${refinementCode}`
+    }
+
+    fetch(url, {
 	method: 'POST',
 	headers: {'Content-Type': 'application/json'},
 	body: JSON.stringify({'ticket-url': ticketURL})
@@ -57,9 +76,19 @@ function refineTicket(ticketURL) {
 function setup() {
     let startButton = document.getElementById('startRefinementButton')
 
-    startButton.addEventListener( 'click', () => { getTicketURLFromCurrentTab(refineTicket) })
+    startButton.addEventListener( 'click', () => {
+	getTicketURLFromCurrentTab().then( (ticketURL) => {
+	    console.log(ticketURL)
+	    refineTicket(ticketURL)
+	})
+    })
 
-    getCurrentSession()
+    getCurrentSession().then ( (result) => {
+	if(result.currentSession) {
+	    console.log (result)
+	    refinementStarted(result.currentSession)
+	}
+    })
 }
 
 setup()
