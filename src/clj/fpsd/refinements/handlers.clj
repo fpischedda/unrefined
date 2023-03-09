@@ -258,3 +258,19 @@
                :message (format "Unable to find refinement %s or ticket %s" code ticket-id)
                :error error)
         (refinement-or-ticket-not-found-error code ticket-id)))))
+
+(defn estimate-again-api
+  [request]
+  (let [{:keys [code ticket-id]} (:path-params request)
+        {:keys [ticket error]} (core/get-ticket code ticket-id)]
+
+    (if ticket
+      (do
+        (core/re-estimate-ticket code ticket)
+        {:status 200})
+
+      (do
+        (u/log ::estimate-done
+               :message (format "Unable to find refinement %s or ticket %s" code ticket-id)
+               :error error)
+        {:status 404}))))
