@@ -12,8 +12,12 @@
  * - Re-estimete the current ticket: only when there is an active session
  */
 
+const config = { baseURL: 'http://localhost:8080' }
+
 function storeCurrentSession(data) {
-    chrome.storage.local.set({currentSession: data}).then( () => {console.log('Stored refinement data', data)})
+    chrome.storage.local.set({currentSession: data}).then( () => {
+	console.log('Stored refinement data', data)
+    })
 }
 
 function getCurrentSession() {
@@ -23,22 +27,35 @@ function getCurrentSession() {
 }
 
 function refinementStarted(data) {
-    let activityElement = document.getElementById('activity')
-    activityElement.innerHTML = ''
-    const refinementURL = 'http://localhost:8080' + data['refinement-path']
+    const refinementURL = config.baseURL + data['refinement-path']
     const estimationURL = refinementURL + '/estimate'
 
     navigator.clipboard.writeText(estimationURL)
 
-    const text = document.createTextNode('Estimation link copied to clipboard!')
-    activityElement.appendChild (text)
+    let activityElement = document.getElementById('activity')
+    activityElement.innerHTML = ''
 
-    let button = document.createElement('button')
-    button.appendChild (document.createTextNode ('Click here for live updates'))
-    button.addEventListener('click', () => {
+    var p = document.createElement('p')
+    p.appendChild(document.createTextNode('Current session\'s estimation link copied to clipboard.'))
+    activityElement.appendChild(p)
+
+    p = document.createElement('p')
+    let tabButton = document.createElement('button')
+    tabButton.appendChild(document.createTextNode('Click here for live updates'))
+    tabButton.addEventListener('click', () => {
 	chrome.tabs.create({'url': refinementURL})
     })
-    activityElement.appendChild (button)
+    p.appendChild(tabButton)
+    activityElement.appendChild(p)
+
+    p = document.createElement('p')
+    let reestimateButton = document.createElement('button')
+    reestimateButton.appendChild(document.createTextNode('Re estimate'))
+    reestimateButton.addEventListener('click', () => {
+        reestimateTicket(data['ticket-id'], data['refinement-code'])
+    })
+    p.appendChild(reestimateButton)
+    activityElement.appendChild(p)
 }
 
 function getTicketURLFromCurrentTab() {
@@ -53,7 +70,7 @@ function getTicketURLFromCurrentTab() {
 
 function refineTicket(ticketURL, refinementCode) {
 
-    let url = 'http://127.0.0.1:8080/api/refine'
+    let url = `${config.baseURL}/api/refine`
 
     if ( refinementCode ) {
 	url = `${url}/${refinementCode}`
@@ -70,6 +87,18 @@ function refineTicket(ticketURL, refinementCode) {
 	console.log(data)
 	storeCurrentSession(data)
 	refinementStarted(data)
+    })
+}
+
+function reestimateTicket(ticketId, refinementCode) {
+
+    let url = `${config.baseURL}/api/refine/${refinementCode}/ticket/${ticketId}/re-estimate`
+
+    fetch(url, {
+	method: 'POST',
+	headers: {'Content-Type': 'application/json'}
+    }).then((response) => {
+	console.log("Re-estimation successful")
     })
 }
 
