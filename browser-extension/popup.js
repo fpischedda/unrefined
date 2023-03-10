@@ -36,12 +36,25 @@ function refinementStarted(data) {
     activityElement.innerHTML = ''
 
     var p = document.createElement('p')
-    p.appendChild(document.createTextNode('Current session\'s estimation link copied to clipboard.'))
+    p.appendChild(document.createTextNode(`Refining ticket: ${data["ticket-id"]}`))
+    p.appendChild(document.createElement('br'))
+    let ticketButton = document.createElement('button')
+    ticketButton.appendChild(document.createTextNode('Show original ticket'))
+    ticketButton.addEventListener('click', () => {
+	chrome.tabs.create({'url': data['source-ticket-url']})
+    })
+    p.appendChild(ticketButton)
+    activityElement.appendChild(p)
+
+    activityElement.appendChild(document.createElement('hr'))
+
+    p = document.createElement('p')
+    p.appendChild(document.createTextNode('Estimation link copied to clipboard.'))
     activityElement.appendChild(p)
 
     p = document.createElement('p')
     let tabButton = document.createElement('button')
-    tabButton.appendChild(document.createTextNode('Click here for live updates'))
+    tabButton.appendChild(document.createTextNode('Show live updates'))
     tabButton.addEventListener('click', () => {
 	chrome.tabs.create({'url': refinementURL})
     })
