@@ -1,5 +1,25 @@
 # ROADMAP
 
+## Update - 2023-03-11
+
+- Add minimal REST API at /api to create and manage refinement sessions
+- API docs available at /api/docs
+- Experimental browser extension
+
+Todos:
+
+- Publish the extension pointing to https://unrefined.one
+- Record a session with and without the extension
+- Think about possible improvements, for example
+  - Show estimation results subscribing to SSE
+  - Enable estimating
+
+Todos from 2023-01-29:
+
+- Reach out to people asking to try it
+- Write about the estimation cheatsheet and why it can be helpful
+- Record a small refinement session as an example
+
 ## Update - 2023-01-29
 
 - Store estimation breakdown and avoid re-voting during the same session
