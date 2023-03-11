@@ -1,0 +1,14 @@
+body {
+  font-family: 'Source Sans Pro', sans-serif;
+}
+
+.preview-container {
+  display: flex;
+  background-color: #cbe1ef;
+}
+
+.preview-container > div {
+  padding: 8px;
+  font-size: 24px;
+  background-color: #fafafa;
+}

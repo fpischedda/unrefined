@@ -39,6 +39,7 @@ function refinementStarted(data) {
     p.appendChild(document.createTextNode(`Refining ticket: ${data["ticket-id"]}`))
     p.appendChild(document.createElement('br'))
     let ticketButton = document.createElement('button')
+    ticketButton.className = 'btn btn-primary'
     ticketButton.appendChild(document.createTextNode('Show original ticket'))
     ticketButton.addEventListener('click', () => {
 	chrome.tabs.create({'url': data['source-ticket-url']})
@@ -54,6 +55,7 @@ function refinementStarted(data) {
 
     p = document.createElement('p')
     let tabButton = document.createElement('button')
+    tabButton.className = 'btn btn-primary'
     tabButton.appendChild(document.createTextNode('Show live updates'))
     tabButton.addEventListener('click', () => {
 	chrome.tabs.create({'url': refinementURL})
@@ -63,6 +65,7 @@ function refinementStarted(data) {
 
     p = document.createElement('p')
     let reestimateButton = document.createElement('button')
+    reestimateButton.className = 'btn btn-primary'
     reestimateButton.appendChild(document.createTextNode('Re estimate'))
     reestimateButton.addEventListener('click', () => {
         reestimateTicket(data['ticket-id'], data['refinement-code'])
@@ -72,6 +75,7 @@ function refinementStarted(data) {
 
     p = document.createElement('p')
     let newTicketButton = document.createElement('button')
+    newTicketButton.className = 'btn btn-primary'
     newTicketButton.appendChild(document.createTextNode('Estimate new ticket'))
     newTicketButton.addEventListener('click', () => {
 
