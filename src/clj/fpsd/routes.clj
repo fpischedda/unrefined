@@ -1,6 +1,13 @@
 (ns fpsd.routes
-  (:require [reitit.ring :as ring]
+  (:require [reitit.coercion.spec]
+            [reitit.ring :as ring]
+            [reitit.ring.coercion :as rrc]
+            [reitit.ring.middleware.exception :as exception]
             [reitit.ring.middleware.muuntaja :as muuntaja]
+            [reitit.ring.middleware.parameters :as parameters]
+            [reitit.swagger :as swagger]
+            [reitit.swagger-ui :as swagger-ui]
+            [reitit.dev.pretty :as pretty]
             [muuntaja.core :as m]
             [aleph.http :as http]
             [mount.core :as mount]
@@ -43,14 +50,80 @@
       (handler (assoc request :common-cookies {:user-id user-id
                                                :name name})))))
 
-(def app
+(defn create-app []
   (ring/ring-handler
    (ring/router
-    [["/" {:get {:handler handlers/index
+    [["/" {:get {:no-doc true
+                 :handler handlers/index
                  :name :unrefined/index}}]
-     ["/assets/*" (ring/create-resource-handler)]
+     ["/assets" {:no-doc true}
+      ["/*" (ring/create-resource-handler)]]
 
-     ["/refine"
+     ["/api"
+      {:coercion reitit.coercion.spec/coercion
+       :middleware [swagger/swagger-feature
+                    ;; query-params & form-params
+                    parameters/parameters-middleware
+                    ;; content-negotiation
+                    muuntaja/format-negotiate-middleware
+                    ;; encoding response body
+                    muuntaja/format-response-middleware
+                    ;; exception handling
+                    exception/exception-middleware
+                    ;; decoding request body
+                    muuntaja/format-request-middleware
+                    ;; coercing response bodys
+                    rrc/coerce-response-middleware
+                    ;; coercing request parameters
+                    rrc/coerce-request-middleware
+                    [add-headers {"Access-Control-Allow-Origin" "*"
+                                  "Access-Control-Allow-Methods" "DELETE, GET, POST, PATCH, PUT, OPTIONS"
+                                  "Access-Control-Allow-Headers" "*"}]]}
+
+      ["/docs/swagger.json"
+       {:get {:no-doc  true
+              :swagger {:info {:title "unrefined API"}}
+              :handler (swagger/create-swagger-handler)}}]
+      
+      ["/refine" 
+       ["" {:post {:summary "starts a new refinement session with the provided ticket"
+                   :parameters {:body {:ticket-url string?}}
+                   :responses {200 {:body {:refinement-path string?
+                                           :refinement-code string?
+                                           :ticket-id string?
+                                           :source-ticket-url string?}}}
+                   :handler handlers/create-refinement-api
+                   :name :unrefined/create-refinement-api}
+            :options {:no-doc true
+                      :handler (fn [_] {:status 200})}}]
+       ["/:code"
+
+        ["/ticket"
+         ["" {:post {:summary "Estimate a new ticket in the current session"
+                     :parameters {:path {:code string?}
+                                  :body {:ticket-url string?}}
+                     :handler handlers/add-ticket-api
+                     :name :unrefined/add-ticket-api}
+              :options {:no-doc true
+                        :handler (fn [_] {:status 200})}}]
+         ["/:ticket-id"
+          ["/results" {:get {:summary "Get results for the current estimation"
+                             :parameters {:path {:code string?
+                                                 :ticket-id string?}}
+                             :handler handlers/estimate-results-api
+                             :name :unrefined/estimate-results-api}
+                       :options {:no-doc true
+                                 :handler (fn [_] {:status 200})}}]
+          ["/re-estimate" {:post {:summary "Re estimate the current ticket"
+                                  :parameters {:path {:code string?
+                                                      :ticket-id string?}}
+                                  :responses {200 {:body nil}}
+                                  :handler handlers/estimate-again-api
+                                  :name :unrefined/estimate-again-api}
+                           :options {:no-doc true
+                                     :handler (fn [_] {:status 200})}}]]]]]]
+     
+     ["/refine" {:no-doc true}
       ["" {:post {:handler handlers/create-refinement
                   :name :unrefined/create-refinement}}]
 
@@ -77,27 +150,31 @@
 
        ["events" {:get handlers/events-stream-handler}]]]]
 
-    {:data {:muuntaja m/instance
+    {:exception pretty/exception
+     :data {:muuntaja m/instance
             :middleware [muuntaja/format-middleware
                          wrap-cookies
                          wrap-params
                          wrap-keyword-params
                          wrap-log-context
-                         common-cookies]}})))
-
-(comment
-  (#'app {:request-method :get
-          :uri "/"
-          :form-params {:ticket-url "abc"}})
-  ,)
+                         common-cookies]}})
+   (ring/routes
+    (swagger-ui/create-swagger-ui-handler {:path "/api/docs"
+                                           :url  "/api/docs/swagger.json"})
+    (ring/create-default-handler))))
 
 (mount/defstate http-server
   :start (do
            (u/start-publisher! (:logging config))
-           (http/start-server #'app {:port (-> config :http :port)}))
+           (http/start-server (create-app) {:port (-> config :http :port)}))
   :stop (.close http-server))
 
 (comment
+  
+  (do
+    (require '[flow-storm.api :as fs-api])
+    (fs-api/local-connect))
+
   (mount/start)
   (mount/stop)
   )
