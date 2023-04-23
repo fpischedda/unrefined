@@ -12,8 +12,6 @@
  * - Re-estimete the current ticket: only when there is an active session
  */
 
-const config = { baseURL: 'http://localhost:8080' }
-
 function storeCurrentSession(data) {
     chrome.storage.local.set({currentSession: data}).then( () => {
 	console.log('Stored refinement data', data)
