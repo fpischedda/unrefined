@@ -13,10 +13,16 @@
     {% block head %}{% endblock %}
   </head>
   <body data-refinement="{{refinement.code}}" data-ticket="{{ticket.id}}">
-    <div class="bg-info p-3 mb-4">
-      <h1>Unrefined!</h1>
-      <p>The ticket estimation tool for remote teams.</p>
-    </div>
+      <header class="bg-info d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom" style="padding-left:16px; padding-right: 16px">
+	<div class="mb-3 mb-md-0 me-md-auto">
+	  <h1>Unrefined!</h1>
+	  <p>The ticket estimation tool for remote teams.</p>
+	</div>
+	<ul class="nav nav-pills">
+	  <li class="nav-item"><a class="nav-link px-2 link-secondary" href="/assets/chrome-extension/unrefined.zip">Chrome extension</a></li>
+	  <li class="nav-item"><a class="nav-link px-2 link-secondary" href="https://gitlab.com/fpischedda/unrefined">Sources</a></li>
+	</ul>
+      </header>
     {% block body %}{% endblock %}
   </body>
 </html>
