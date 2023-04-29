@@ -45,8 +45,8 @@
   (deftest skip-missing-breakdown
     (is (= {} (helpers/get-breakdown-from-params {:new-one "1"} [:missing]))))
 
-  (deftest use-default-if-breakdown-empty-string
-    (is (= {:item 0} (helpers/get-breakdown-from-params {:item ""} [:item]))))
+  (deftest skip-empty-breakdown
+    (is (= {} (helpers/get-breakdown-from-params {:item ""} [:item]))))
 
   (deftest only-selects-available-breakdown
     (is (= {:available 1} (helpers/get-breakdown-from-params {:available "1"

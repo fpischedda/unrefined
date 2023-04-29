@@ -32,13 +32,13 @@
         (catch NumberFormatException _ default))))
 
 (def initial-supported-breakdowns_
-  [:implementation :backend :migrations :data_migrations :testing :manual_testing :risk :complexity])
+  [:implementation :backend :schema :migrations :data_migrations :testing :manual_testing :risk :complexity])
 
 (defn get-breakdown-from-params
   [params supported-breakdowns]
   (reduce (fn [acc breakdown]
-             (if-let [value (get params breakdown)]
-               (assoc acc breakdown (try-parse-long value 0))
+             (if-let [value (try-parse-long (get params breakdown))]
+               (assoc acc breakdown value)
                acc))
            {} supported-breakdowns))
 
