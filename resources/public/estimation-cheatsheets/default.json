@@ -1,29 +1,28 @@
 {"estimationTopics": [
   {
     "name": "implementation",
-    "label": "Code implementations (endpoints, Airflow, models, queries, etc)",
-    "maxValue": 8,
+    "label": "Code implementations (for ex. core data structures, DB queries, endpoints)",
+    "maxValue": 7,
     "examples": [
       "no change",
-      "Add authorization check (one if condition added)",
-      "Implement GetEntityMetadata (just return statement) and showing it in FE",
-      "Parse a simple CSV file in airline UpdateAirlineData endpoint and expose it to cargo.drive",
-      "",
-      "Add an attribute to shipment model and update 3 airlines and 3 FEs to work with it",
-      "",
-      "",
-      "6 endpoints deep changes (i.e. link sharing)"
+      "Improve an existing functionality, covering one new use case",
+      "Implement a small new endpoint, for example entity detail or list",
+      "Introduce new entity in the domain model",
+      "Introduce more than one entity in the domain model",
+      "Simple addictive change to a domain entity that affect other domain entities, requiring updates on multiple parts of the application",
+      "Multiple addictive changes to different domain entities",
+      "Domain model refactoring, changing/removing domain entities and their schema",
     ]
   },
   {
-    "name": "backend",
-    "label": "Backend API changes (protos)",
+    "name": "schema",
+    "label": "Schema, domain entities modeling, interfaces",
     "maxValue": 3,
     "examples": [
       "no change",
-      "Small amount of API changes (e.g. 2 new attributes in a message)",
-      "Considerable amount of API changes (e.g. 5 new messages, including nested ones)",
-      "Huge amount of API changes (e.g. 2 new airlines at the same time + 2 new airline-specific additional data messages)"
+      "Schema change, adding more properties",
+      "New schema(s), destructive changes to existing ones",
+      "Big schema refactoring, (de)normalization of existing schema"
     ]
   },
   {
@@ -32,11 +31,11 @@
     "maxValue": 5,
     "examples": [
       "no change",
-      "Any schema migration changes in 1 db",
-      "",
-      "",
-      "",
-      "Change the schema in all services"
+      "Single DB, non destructive DB schema change, for ex. new table, new field, change field type",
+      "Single DB, multiple changes, requiring creation of indexes or constraints, affecting many tables",
+      "Multiple DBs, non destructive DB schema change, for ex. new table, new field, change field type",
+      "Multiple DBs, multiple changes, requiring creation of indexes or constraints, affecting many tables",
+      "All of the above plus risk of unforeseen performance issues"
     ]
   },
   {
@@ -46,10 +45,10 @@
     "examples": [
       "no change",
       "Populate all NULL rows with a default value",
-      "",
-      "",
-      "",
-      "Migration from stations to organizations from HubSpot (third-party system)"
+      "Update multiple tables, no constraint affected",
+      "Update multiple tables, multi step needed to satisfy constraint(s)",
+      "Generate and apply seed data for a new service or feature",
+      "Move entities to a new domain/service, maintaining both systems up until finally migrated",
     ]
   },
   {
@@ -89,7 +88,7 @@
     "examples": [
       "no change",
       "There might be hidden complexities",
-      "",
+      "Some initial investigation needed, but confidentat that it should not take too much time",
       "We need a design document"
     ]
   }
