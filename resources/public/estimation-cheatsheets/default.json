@@ -7,16 +7,16 @@
       "no change",
       "Improve an existing functionality, covering one new use case",
       "Implement a small new endpoint, for example entity detail or list",
-      "Introduce new entity in the domain model",
-      "Introduce more than one entity in the domain model",
+      "Implement new entity of the domain model",
+      "Implement more than one entity of the domain model",
       "Simple addictive change to a domain entity that affect other domain entities, requiring updates on multiple parts of the application",
       "Multiple addictive changes to different domain entities",
       "Domain model refactoring, changing/removing domain entities and their schema",
     ]
   },
   {
-    "name": "schema",
-    "label": "Schema, domain entities modeling, interfaces",
+    "name": "domain",
+    "label": "Domain entities modeling, interfaces",
     "maxValue": 3,
     "examples": [
       "no change",

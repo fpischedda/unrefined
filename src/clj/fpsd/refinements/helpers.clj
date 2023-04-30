@@ -32,7 +32,7 @@
         (catch NumberFormatException _ default))))
 
 (def initial-supported-breakdowns_
-  [:implementation :backend :schema :migrations :data_migrations :testing :manual_testing :risk :complexity])
+  [:implementation :backend :domain :migrations :data_migrations :testing :manual_testing :risk :complexity])
 
 (defn get-breakdown-from-params
   [params supported-breakdowns]
