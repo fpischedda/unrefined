@@ -9,6 +9,7 @@
         <p>Enter the URL of the ticket to refine and press Start!</p>
         <div class="input-group">
           <input
+	    id="start"
             class="form-control"
             type="text"
             name="ticket-url"
@@ -21,4 +22,41 @@
     </div>
   </div>
 </div>
+<div class="b-example-divider"></div>
+<div class="container px-4 py-5">
+    <h2 class="pb-2 border-bottom">Refinement session flow</h2>
+    <div class="row g-4 py-5 row-cols-1 row-cols-lg-3">
+      <div class="feature col">
+        <div class="feature-icon d-inline-flex align-items-center justify-content-center text-bg-primary bg-gradient fs-2 mb-3 text-center rounded px-3 py-2">
+          <i class="bi bi-node-plus-fill"></i>
+        </div>
+        <h3 class="fs-2">Start a new session</h3>
+        <p>Paste the link to the ticket and click start. It automatically detects Jira, Gitlab, Github and Trello URLs (more to come!). Free text works too.</p>
+        <a href="#start" class="icon-link d-inline-flex align-items-center">
+          Start now!
+        </a>
+      </div>
+      <div class="feature col">
+        <div class="feature-icon d-inline-flex align-items-center justify-content-center text-bg-primary bg-gradient fs-2 mb-3 text-center rounded px-3 py-2">
+          <i class="bi bi-people-fill"></i>
+        </div>
+        <h3 class="fs-2">Share the link with your team</h3>
+        <p>After starting a session, share the link with your team to either estimate the ticket or whats the results.</p>
+        <a href="#start" class="icon-link d-inline-flex align-items-center">
+          Start now!
+        </a>
+      </div>
+      <div class="feature col">
+        <div class="feature-icon d-inline-flex align-items-center justify-content-center text-bg-primary bg-gradient fs-2 mb-3 text-center rounded px-3 py-2">
+          <i class="bi bi-search-heart-fill"></i>
+        </div>
+        <h3 class="fs-2">Get the final estimation</h3>
+        <p>Once everyone have finished voting, the final result can be revealed with the option to re estimate the ticket if there is no clear agreement.</br>
+	If needed you can refine a new ticket from the result page.</p>
+        <a href="#start" class="icon-link d-inline-flex align-items-center">
+          Start now!
+        </a>
+      </div>
+    </div>
+  </div>
 {% endblock %}
