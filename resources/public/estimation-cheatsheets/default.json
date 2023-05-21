@@ -29,11 +29,11 @@
     "label": "Migrations",
     "examples": [
       "no change",
-      "Any schema migration changes in 1 db",
-      "",
-      "",
-      "",
-      "Change the schema in all services"
+      "Simple schema migration changes to 1 DB, adding one or more fields",
+      "Simple schema migration changes, adding one or more fields to more than one DB",
+      "Any change that would require, long running, re-indexing of existing data",
+      "Multi step schema changes requiring new fields and deprecating old ones.",
+      "Complex changes to more than one schema in all service DBs"
     ]
   },
   {
