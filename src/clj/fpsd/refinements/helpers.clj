@@ -31,8 +31,17 @@
    (try (Long/parseLong str-value)
         (catch NumberFormatException _ default))))
 
-(def initial-supported-breakdowns_
-  [:implementation :backend :domain :migrations :data_migrations :testing :manual_testing :risk :complexity])
+(def breakdown-cheatsheet-map_
+  {"default"
+   [:implementation :domain :migrations :data_migrations :testing :manual_testing :risk :complexity]
+   "generic"
+   [:implementation :backend :migrations :data_migrations :testing :manual_testing :risk :complexity]})
+
+(defn breakdowns-for-cheatsheet
+  [cheatsheet]
+  (if-let [breakdowns (get breakdown-cheatsheet-map_ cheatsheet)]
+    breakdowns
+    (get breakdown-cheatsheet-map_ "default")))
 
 (defn get-breakdown-from-params
   [params supported-breakdowns]
@@ -43,11 +52,11 @@
            {} supported-breakdowns))
 
 (defn get-estimation-from-params
-  [params]
+  [params cheatsheet]
   {:score (-> params :points (try-parse-long 0))
    :author-name (or (params :name) "Anonymous Coward")
    :skipped? (some? (:skip-button params))
-   :breakdown (get-breakdown-from-params params initial-supported-breakdowns_)})
+   :breakdown (get-breakdown-from-params params (breakdowns-for-cheatsheet cheatsheet))})
 
 (defn utc-now
   []

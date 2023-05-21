@@ -5,7 +5,7 @@
                        :minimum-votes 3
                        :max-rediscussions 1
                        :suggestion-strategy :majority
-                       :cheatsheet "cargo-one"})
+                       :cheatsheet "default"})
 
 (defn ticket-details
   [refinement ticket-id]

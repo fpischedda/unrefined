@@ -55,7 +55,8 @@
 (testing "get-estimation-from-params extract vote, name and breakdown from request body"
   (deftest all-defaults-when-empty-params
     (are [params expected]
-         (= (helpers/get-estimation-from-params params) expected)
+         (= (helpers/get-estimation-from-params params "general")
+            expected)
 
       ;; all defaults on empty params
       {}

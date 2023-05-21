@@ -215,12 +215,16 @@
   (let [user-id (or (-> request :common-cookies :user-id) (str (random-uuid)))
         {:keys [code ticket-id]} (:path-params request)
         {:keys [error refinement ticket]} (core/get-refinement-ticket code ticket-id)
-        session-num (or (-> request :params :session-num helpers/try-parse-int) 0)
-        estimation (-> request :params helpers/get-estimation-from-params)
-        name (:author-name estimation)]
-
+        session-num (or (-> request :params :session-num helpers/try-parse-int) 0)]
+    
     (if (and refinement ticket)
-      (do
+      (let [cheatsheet (-> refinement :settings :estimation-cheatseet)
+            estimation
+            (-> request
+                :params
+                (helpers/get-estimation-from-params cheatsheet))
+            name (:author-name estimation)]
+
         (core/estimate-ticket {:code code
                                :ticket-id ticket-id
                                :session-num session-num
