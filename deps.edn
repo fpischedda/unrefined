@@ -20,4 +20,6 @@
                    :ns-default build}
            :run {:main-opts ["-m" "fpsd.unrefined.server"]}
            :test {:main-opts ["-m" "kaocha.runner"]
-                  :extra-deps {lambdaisland/kaocha {:mvn/version "1.68.1059"}}}}}
+                  :extra-deps {lambdaisland/kaocha {:mvn/version "1.68.1059"}}}
+           :dev/repl {:extra-paths ["dev"]
+                      :extra-deps {org.clojure/clojure {:mvn/version "1.12.0-alpha3"}}}}}
