@@ -58,17 +58,17 @@
   ([length]
    (nano-id length)))
 
-(defn create-refinement
+(defn create-refinement!
   "Return a new randomly generated refinement code and the ticket-id extracted
   from ticket-url (if possible, otherwise defaults to ticket-url).
   As a side effect the refinement and ticket data are stored in the
   application state."
-  [ticket-url]
+  [ticket-url settings]
 
   (let [ticket-id (or (helpers/extract-ticket-id-from-url ticket-url)
                       ticket-url)
         code (gen-random-code)
-        refinement (refinements/create code)
+        refinement (refinements/create code settings)
         ticket (refinements/new-ticket ticket-id ticket-url)]
 
     (state/insert-refinement refinement "default")

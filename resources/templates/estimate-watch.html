@@ -5,6 +5,9 @@
     <div class="col">
       <p>
         Current ticket: <a href="{{ticket.link-to-original}}">{{ticket.id}}</a>
+	<div>
+	    Using cheat sheet <strong>{{ refinement.settings.estimation-cheatsheet }}</strong>
+	</div>
         <div><button type="button" class="btn btn-primary" onclick="copy_estimation_link('{{refinement.code}}', '{{ticket.id}}')">Copy link to estimation page</button></div>
       </p>
 

@@ -39,8 +39,9 @@
 (defn create-refinement
   [request]
   (let [user-id (or (-> request :common-cookies :user-id) (str (random-uuid)))
-        ticket-url (-> request :params :ticket-url)
-        {:keys [code ticket-id]} (core/create-refinement ticket-url)]
+        {:keys [ticket-url cheatsheet]} (-> request :params)
+        {:keys [code ticket-id]} (core/create-refinement! ticket-url
+                                                          {:cheatsheet cheatsheet})]
 
     (u/log ::create-refinement :user-id user-id :ticket-url ticket-url :refinement code :ticket-id ticket-id)
 
@@ -52,7 +53,8 @@
   [request]
   (let [user-id (or (-> request :common-cookies :user-id) (str (random-uuid)))
         ticket-url (-> request :body-params :ticket-url)
-        {:keys [code ticket-id]} (core/create-refinement ticket-url)
+        {:keys [code ticket-id]} (core/create-refinement! ticket-url
+                                                          {:cheatsheet "default"})
         ]
 
     (u/log ::create-refinement :user-id user-id :ticket-url ticket-url :refinement code :ticket-id ticket-id)
