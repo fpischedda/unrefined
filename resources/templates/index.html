@@ -19,11 +19,11 @@
           <button type="submit" class="btn btn-primary">Start!</button>
         </div>
 	<div>
-	  <ul>
+	  <select name="cheatsheet" class="form-select">
 	  {% for item in cheatsheets%}
-	  <li>{{item.0}}: {{item.1|join:", "}}</li>
+	    <option value="{{item.0}}">{{item.0}}: {{item.1|join:", "}}</option>
 	  {% endfor %}
-	  </ul>
+	  </select>
 </div>
       </form>
     </div>
