@@ -18,6 +18,13 @@
           />
           <button type="submit" class="btn btn-primary">Start!</button>
         </div>
+	<div>
+	  <ul>
+	  {% for item in cheatsheets%}
+	  <li>{{item.0}}: {{item.1|join:", "}}</li>
+	  {% endfor %}
+	  </ul>
+</div>
       </form>
     </div>
   </div>
