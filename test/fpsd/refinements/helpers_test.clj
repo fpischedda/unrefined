@@ -94,3 +94,8 @@
        :breakdown {}
        :skipped? true}
       )))
+
+(testing "Loading cheatsheets"
+  (deftest assure-all-expected-cheatsheets-are-loaded
+    (is (= '("default" "generic")
+           (keys (helpers/get-all-cheatsheets))))))

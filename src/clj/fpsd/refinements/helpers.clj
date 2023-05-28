@@ -1,5 +1,7 @@
 (ns fpsd.refinements.helpers
-  (:require [clojure.string :as str]))
+  (:require [clojure.string :as str]
+            [clojure.java.io :as io]
+            [cheshire.core :as json]))
 
 (def url-parsers [[#"https://.*/issues/(.*)" second]
                   [#"https://.*/browse/(.*)" second]
@@ -31,11 +33,23 @@
    (try (Long/parseLong str-value)
         (catch NumberFormatException _ default))))
 
+(def cheatsheets-root "resources/public/estimation-cheatsheets")
+
+(defn load-cheatsheet [name]
+  (-> (str cheatsheets-root "/" name ".json")
+      io/reader
+      (json/parse-stream true)))
+
+(defn get-all-cheatsheets []
+  (reduce (fn [acc name]
+            (assoc acc name (load-cheatsheet name)))
+          {} ["default" "generic"]))
+
 (def breakdown-cheatsheet-map_
-  {"default"
-   [:implementation :domain :migrations :data_migrations :testing :manual_testing :risk :complexity]
-   "generic"
-   [:implementation :backend :migrations :data_migrations :testing :manual_testing :risk :complexity]})
+  (reduce-kv (fn [acc name body]
+               (assoc acc name (mapv (fn [item] (keyword (:name item)))
+                                     (:estimationTopics body))))
+             {} (get-all-cheatsheets)))
 
 (defn breakdowns-for-cheatsheet
   [cheatsheet]
