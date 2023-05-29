@@ -19,12 +19,19 @@
           <button type="submit" class="btn btn-primary">Start!</button>
         </div>
 	<div>
-	  <select name="cheatsheet" class="form-select">
-	  {% for item in cheatsheets%}
-	    <option value="{{item.0}}">{{item.0}}: {{item.1|join:", "}}</option>
-	  {% endfor %}
-	  </select>
-</div>
+	  <button class="btn btn-default" data-bs-target="#collapseSettings" data-bs-toggle="collapse" aria-expanded="false" aria-controls="collapseSettings" type="button">
+	    Settings
+	</button></div>
+	<div class="collapse" id="collapseSettings">
+	  <div class="card card-body">
+	    <label for="cheatsheet">Cheatsheet</label>
+	    <select name="cheatsheet" class="form-select">
+	      {% for item in cheatsheets%}
+	      <option value="{{item.0}}">{{item.0}}: {{item.1|join:", "}}</option>
+	      {% endfor %}
+	    </select>
+	  </div>
+	</div>
       </form>
     </div>
   </div>
