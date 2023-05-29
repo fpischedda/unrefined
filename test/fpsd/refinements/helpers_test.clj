@@ -3,10 +3,10 @@
    [clojure.test :refer [are deftest is testing]]
    [fpsd.refinements.helpers :as helpers]))
 
-(testing "Extract ticket id from URL"
-  (deftest extract-jira-id
+(deftest extract-jira-id
+  (testing "Extract ticket id from URL"
     (are [url id]
-         (= (helpers/extract-ticket-id-from-url url) id)
+        (= (helpers/extract-ticket-id-from-url url) id)
 
       ;; jira
       "https://cargo-one.atlassian.net/browse/PE-1234" "PE-1234"
@@ -21,39 +21,39 @@
       ;; failed
       "https://some-garbage" nil)))
 
-(testing "try-parse-int tries to convert a string to int, if it falis return nil or default"
-  (deftest try-parse-int-success
+(deftest try-parse-int
+  (testing "try-parse-int success"
     (is (= 5 (helpers/try-parse-int "5"))))
 
-  (deftest try-parse-int-fail
+  (testing "try-parse-int fails returning nil, no default provided"
     (is (nil? (helpers/try-parse-int "five"))))
   
-  (deftest try-parse-int-uses-default
+  (testing "try-parse-int fails but returns a default value"
     (is (= 0 (helpers/try-parse-int "five" 0)))))
 
-(testing "try-parse-long tries to convert a string to long, if it falis return nil or default"
-  (deftest try-parse-long-success
+(deftest try-parse-long
+  (testing "try-parse-long success"
     (is (= 5 (helpers/try-parse-long "5"))))
 
-  (deftest try-parse-long-fail
+  (testing "try-parse-long fails returning nil, no default provided"
     (is (nil? (helpers/try-parse-long "five"))))
   
-  (deftest try-parse-long-uses-default
+  (testing "try-parse-long  fails but returns a default value"
     (is (= 0 (helpers/try-parse-long "five" 0)))))
 
-(testing "get-breakdown-from-params"
-  (deftest skip-missing-breakdown
+(deftest get-breakdown-from-params
+  (testing "skip missing breakdown items"
     (is (= {} (helpers/get-breakdown-from-params {:new-one "1"} [:missing]))))
 
-  (deftest skip-empty-breakdown
+  (testing "skip empty breakdown, user did not provide a value for it"
     (is (= {} (helpers/get-breakdown-from-params {:item ""} [:item]))))
 
-  (deftest only-selects-available-breakdown
+  (testing "given available and unknown breakdowns keep only available ones"
     (is (= {:available 1} (helpers/get-breakdown-from-params {:available "1"
                                                               :not-available "2"} [:available])))))
 
-(testing "get-estimation-from-params extract vote, name and breakdown from request body"
-  (deftest all-defaults-when-empty-params
+(deftest all-defaults-when-empty-params
+  (testing "get-estimation-from-params extract vote, name and breakdown from request body"
     (are [params expected]
          (= (helpers/get-estimation-from-params params "general")
             expected)
@@ -95,7 +95,7 @@
        :skipped? true}
       )))
 
-(testing "Loading cheatsheets"
-  (deftest assure-all-expected-cheatsheets-are-loaded
+(deftest get-all-cheatsheets
+  (testing "assure all expected cheatsheets are loaded"
     (is (= '("default" "generic")
            (keys (helpers/get-all-cheatsheets))))))
