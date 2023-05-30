@@ -229,7 +229,7 @@
         session-num (or (-> request :params :session-num helpers/try-parse-int) 0)]
     
     (if (and refinement ticket)
-      (let [cheatsheet (-> refinement :settings :estimation-cheatseet)
+      (let [cheatsheet (-> refinement :settings :cheatsheet)
             estimation
             (-> request
                 :params
