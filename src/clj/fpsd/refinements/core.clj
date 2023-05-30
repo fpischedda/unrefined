@@ -71,7 +71,7 @@
         refinement (refinements/create code settings)
         ticket (refinements/new-ticket ticket-id ticket-url)]
 
-    (state/insert-refinement refinement "default")
+    (state/insert-refinement refinement)
     (state/insert-ticket code ticket)
 
     {:code code

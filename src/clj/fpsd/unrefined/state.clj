@@ -3,24 +3,26 @@
             [fpsd.unrefined.persistence.datahike :refer [db]]))
 
 (defn insert-refinement
-  [refinement cheatsheet]
-  (let [code (:code refinement)]
+  [refinement]
+  (let [{:keys [code created-at updated-at settings]} refinement]
     (d/transact
      db
      [
       ;; lets create a refinement session
       {:refinement/id code
-       :refinement/created-at (:created-at refinement)
-       :refinement/updated-at (:updated-at refinement)
+       :refinement/created-at created-at
+       :refinement/updated-at updated-at
        :refinement/voting-mode :voting.mode/linear}
 
       ;; adding some settings to it
-      {:refinement/_settings [:refinement/id code]
-       :voting.mode.linear/max-points-delta 3
-       :voting.mode.linear/minimum-votes 3
-       :voting.mode.linear/max-rediscussions 1
-       :voting.mode.linear/suggestion-strategy :suggestion.strategy/majority
-       :voting.mode.linear/cheatsheet cheatsheet}
+      (let [{:keys [cheatsheet max-points-delta minimum-votes max-rediscussions]}
+            settings]
+        {:refinement/_settings [:refinement/id code]
+         :voting.mode.linear/max-points-delta max-points-delta
+         :voting.mode.linear/minimum-votes minimum-votes
+         :voting.mode.linear/max-rediscussions max-rediscussions
+         :voting.mode.linear/suggestion-strategy :suggestion.strategy/majority
+         :voting.mode.linear/cheatsheet cheatsheet})
       ])))
 
 (defn insert-ticket
@@ -80,7 +82,7 @@
    :minimum-votes minimum-votes
    :max-rediscussions max-rediscussions
    :suggestion-strategy suggestion-strategy
-   :estimation-cheatsheet cheatsheet})
+   :cheatsheet cheatsheet})
 
 (defn db->refinement
   [{:refinement/keys [id created-at updated-at voting-mode settings] :as refinement}]

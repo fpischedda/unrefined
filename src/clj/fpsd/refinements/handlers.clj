@@ -43,7 +43,12 @@
         {:keys [code ticket-id]} (core/create-refinement! ticket-url
                                                           {:cheatsheet cheatsheet})]
 
-    (u/log ::create-refinement :user-id user-id :ticket-url ticket-url :refinement code :ticket-id ticket-id)
+    (u/log ::create-refinement
+           :user-id user-id
+           :ticket-url ticket-url
+           :refinement code
+           :ticket-id ticket-id
+           :cheatsheet cheatsheet)
 
     {:headers {:location (safe-ticket-url code ticket-id)}
      :cookies {"user-id" (cookie-value user-id)}
