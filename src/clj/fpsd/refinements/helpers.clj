@@ -45,11 +45,16 @@
             (assoc acc name (load-cheatsheet name)))
           {} ["default" "generic"]))
 
-(def breakdown-cheatsheet-map_
+(def cheatsheet-map_
   (reduce-kv (fn [acc name body]
-               (assoc acc name (mapv (fn [item] (keyword (:name item)))
-                                     (:estimationTopics body))))
+               (assoc acc name (:estimationTopics body)))
              {} (get-all-cheatsheets)))
+
+(def breakdown-cheatsheet-map_
+  (reduce-kv (fn [acc name breakdowns]
+               (assoc acc name (mapv (fn [item] (keyword (:name item)))
+                                     breakdowns)))
+             {} cheatsheet-map_))
 
 (defn breakdowns-for-cheatsheet
   [cheatsheet]

@@ -105,11 +105,7 @@
   [request]
   (let [user-id (or (-> request :common-cookies :user-id) (str (random-uuid)))]
     {:body (render-file "templates/index.html"
-                        {:cheatsheets
-                         (reduce-kv
-                          (fn [acc key breakdowns]
-                            (assoc acc key (mapv name breakdowns)))
-                          {} helpers/breakdown-cheatsheet-map_)})
+                        {:cheatsheets helpers/cheatsheet-map_})
      :headers {:content-type "text/html"}
      :cookies {"user-id" (cookie-value user-id)}}))
 
