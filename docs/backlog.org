@@ -2,8 +2,6 @@
 
 * Backlog of tasks
 
-** Select cheat sheet from a list of available ones
-
 ** Rework estimation cheat sheet UI/UX
 
 ** Create custom cheat sheets

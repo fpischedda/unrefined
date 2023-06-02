@@ -1,0 +1,7 @@
+#+author: FPSD
+
+* Tasks in progress
+
+** Select cheat sheet from a list of available ones
+
+Details: [[file:tasks/enable-selecting-cheatsheet.org][enable selecting cheatsheet]]
