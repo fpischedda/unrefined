@@ -1,4 +1,11 @@
-{% extends "templates/base.html" %} {% block body %}
+{% extends "templates/base.html" %}
+
+{% block head %}
+{{ block.super }}
+<script defer data-domain="unrefined.one" src="https://plausible.io/js/script.js"></script>
+{% endblock %}
+
+{% block body %}
 <div class="container">
   <div class="row">
     <div class="col">
