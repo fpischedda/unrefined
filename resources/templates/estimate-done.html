@@ -12,7 +12,7 @@
       <p>Breakdown:
         <ul>
 	  {% for item in estimation.breakdown %}
-	  <li>{{item|first|name}}: {{item|last}}</li>
+	  <li>{{item|first|name|replace:_:" "|capitalize}}: {{item|last}}</li>
 	  {% endfor %}
         </ul>
       </p>
