@@ -33,11 +33,12 @@
    (try (Long/parseLong str-value)
         (catch NumberFormatException _ default))))
 
-(def cheatsheets-root "resources/public/estimation-cheatsheets")
+(def cheatsheets-root "public/estimation-cheatsheets")
 
 (defn load-cheatsheet [name]
   (-> (str cheatsheets-root "/" name ".json")
       io/resource
+      io/reader
       (json/parse-stream true)))
 
 (defn get-all-cheatsheets []
