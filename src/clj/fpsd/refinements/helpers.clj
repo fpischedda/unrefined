@@ -37,7 +37,7 @@
 
 (defn load-cheatsheet [name]
   (-> (str cheatsheets-root "/" name ".json")
-      io/reader
+      io/resource
       (json/parse-stream true)))
 
 (defn get-all-cheatsheets []
