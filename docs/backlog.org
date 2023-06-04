@@ -2,8 +2,15 @@
 
 * Backlog of tasks
 
-** Rework estimation cheat sheet UI/UX
-
 ** Create custom cheat sheets
 
+Details: [[file:tasks/create-custom-cheatsheet.org][create custom cheat sheet]]
+
 ** Implement authentication using clerk.com
+
+** Rework estimation cheat sheet UI/UX
+
+Details: [[file:tasks/rework-estimation-cheatsheet.org][rework estimation cheatsheet UI/UX]]
+
+** Create unrefined website and blog
+
