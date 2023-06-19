@@ -60,6 +60,14 @@
      ["/assets" {:no-doc true}
       ["/*" (ring/create-resource-handler)]]
 
+     ["/sign-up" {:get (fn [_] {:body "Signed in"
+                                :status 200})}]
+     ["/login" {:get (fn [_] {:body (render-file "templates/login.html" {})
+                              :headers {:content-type "text/html"}
+                              :status 200})}]
+     ["/me" {:get (fn [_] {:body "It's a me, FPSD!"
+                           :status 200})}]
+
      ["/api"
       {:coercion reitit.coercion.spec/coercion
        :middleware [swagger/swagger-feature
@@ -85,14 +93,6 @@
        {:get {:no-doc  true
               :swagger {:info {:title "unrefined API"}}
               :handler (swagger/create-swagger-handler)}}]
-
-      ["/sign-up" {:get (fn [_] {:body "Signed in"
-                                 :status 200})}]
-      ["/login" {:get (fn [_] {:body (render-file "templates/login.html" {})
-                               :headers {:content-type "text/html"}
-                               :status 200})}]
-      ["/me" {:get (fn [_] {:body "It's a me, FPSD!"
-                            :status 200})}]
       
       ["/refine" 
        ["" {:post {:summary "starts a new refinement session with the provided ticket"
