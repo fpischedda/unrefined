@@ -1,8 +1,6 @@
 {:deps {org.clojure/clojure {:mvn/version "1.11.1"}
         aleph/aleph {:mvn/version "0.6.0"}
         cheshire/cheshire {:mvn/version "5.11.0"}
-        http-kit/http-kit {:mvn/version "2.3.0"}
-        djblue/portal {:mvn/version "0.35.1"}
         metosin/malli {:mvn/version "0.8.4"}
         metosin/reitit {:mvn/version "0.5.18"}
         mount/mount {:mvn/version "0.1.16"}
@@ -11,15 +9,22 @@
         nrepl/nrepl {:mvn/version "0.9.0"}
         com.brunobonacci/mulog {:mvn/version "0.9.0"}
         nano-id/nano-id {:mvn/version "1.0.0"}
-        io.replikativ/datahike {:mvn/version "0.6.1524"}
-        com.github.jpmonettas/flow-storm-dbg {:mvn/version "3.3.315"}}
-
+        io.replikativ/datahike {:mvn/version "0.6.1524"}}
+ 
  :paths ["src/clj" "resources"]
 
  :aliases {:build {:deps {io.github.clojure/tools.build {:git/tag "v0.8.3" :git/sha "0d20256"}}
                    :ns-default build}
            :run {:main-opts ["-m" "fpsd.unrefined.server"]}
+           :dev/repl {:main-opts ["-m" "nrepl.cmdline" "--middleware" "[cider.nrepl/cider-middleware]"]
+                      :extra-paths ["dev"]
+                      :extra-deps {cider/cider-nrepl {:mvn/version "0.30.0"}
+                                   djblue/portal {:mvn/version "0.35.1"}
+                                   com.github.jpmonettas/flow-storm-dbg {:mvn/version "3.3.315"}
+                                   org.clojure/clojure {:mvn/version "1.12.0-alpha3"}}}
            :test {:main-opts ["-m" "kaocha.runner"]
                   :extra-deps {lambdaisland/kaocha {:mvn/version "1.68.1059"}}}
-           :dev/repl {:extra-paths ["dev"]
-                      :extra-deps {org.clojure/clojure {:mvn/version "1.12.0-alpha3"}}}}}
+           :shadow-cljs {:extra-deps {thheller/shadow-cljs {:mvn/version "2.23.3"}}
+                         :extra-paths ["src/cljs"]
+                         :main-opts ["-m" "shadow.cljs.devtools.cli"]}}}
+
