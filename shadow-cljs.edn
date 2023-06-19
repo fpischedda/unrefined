@@ -1,0 +1,17 @@
+{:source-paths ["src/cljs", "src/cljc"]
+ :nrepl {:port 9000}
+ :dependencies [[cider/cider-nrepl "0.21.0"]
+                [rum "0.12.10"]]
+ :builds {:unrefined {:target :browser
+                      :output-dir "resources/public/js"
+                      :asset-path "/js"
+                      :modules {:main {:init-fn one.unrefined.core/init}}
+                      ;; :compiler-options {:output-feature-set :es6}
+
+                      ;; The following two lines are for executing `shadow-cljs watch contacts` from the cmd line
+                      ;; and get a http server that serves :http-root/js/main.js
+                      ;:devtools {:http-root "resources/public"
+                      ;           :http-port 4220}
+                      }
+          }
+}
