@@ -1,4 +1,4 @@
-(ns fpsd.configuration
+(ns one.unrefined.configuration
   (:require [mount.core :as mount]
             [environ.core :refer [env]]))
 
