@@ -1,8 +1,8 @@
-(ns fpsd.unrefined.server
+(ns one.unrefined.server
   (:require [mount.core :as mount]
-            [fpsd.configuration :refer [config]]
+            [one.unrefined.configuration :refer [config]]
             [fpsd.routes :refer [http-server]]
-            [fpsd.unrefined.nrepl :refer [nrepl-server]])
+            [one.unrefined.nrepl :refer [nrepl-server]])
   (:gen-class))
 
 (defn -main [& _args]

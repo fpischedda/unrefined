@@ -1,8 +1,8 @@
-(ns fpsd.unrefined.nrepl
+(ns one.unrefined.nrepl
   (:require
    [mount.core :as mount]
    [nrepl.server :as nrepl]
-   [fpsd.configuration :refer [config]]))
+   [one.unrefined.configuration :refer [config]]))
 
 (mount/defstate nrepl-server
   :start (nrepl/start-server {:port (-> config :nrepl :port)})
