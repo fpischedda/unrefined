@@ -2,7 +2,7 @@
   (:require
    [com.brunobonacci.mulog :as u]
    [selmer.parser :refer [render-file]]
-   [fpsd.estimator :as estimator]
+   [one.unrefined.estimator :as estimator]
    [fpsd.refinements.core :as core]
    [fpsd.refinements.helpers :as helpers]))
 

@@ -17,7 +17,7 @@
             [ring.middleware.session :refer [wrap-session]]
             [com.brunobonacci.mulog :as u]
             [selmer.parser :refer [render-file]]
-            [fpsd.configuration :refer [config]]
+            [one.unrefined.configuration :refer [config]]
             [fpsd.refinements.handlers :as handlers]))
 
 (defn add-headers [handler fixed-headers]

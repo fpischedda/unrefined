@@ -1,7 +1,7 @@
 (ns fpsd.refinements.events
   (:require [cheshire.core :refer [generate-string]]
             [manifold.bus :as b]
-            [fpsd.estimator :as estimator]
+            [one.unrefined.estimator :as estimator]
             [fpsd.refinements :as refinements]))
 
 (defonce event-bus (b/event-bus))
