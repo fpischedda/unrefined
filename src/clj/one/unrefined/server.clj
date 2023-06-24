@@ -1,7 +1,7 @@
 (ns one.unrefined.server
   (:require [mount.core :as mount]
             [one.unrefined.configuration :refer [config]]
-            [fpsd.routes :refer [http-server]]
+            [one.unrefined.routes :refer [http-server]]
             [one.unrefined.nrepl :refer [nrepl-server]])
   (:gen-class))
 
