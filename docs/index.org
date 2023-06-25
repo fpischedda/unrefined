@@ -1,0 +1,9 @@
+* Unrefined documentation index
+
+Collecting TODOs, ideas, implementation plans.
+
+** [[file:ideas.org][Ideas]]
+
+** [[file:backlog.org][Backlog]]
+
+** [[file:in-progress.org][In progress]]

@@ -1,4 +1,11 @@
-{% extends "templates/base.html" %} {% block body %}
+{% extends "templates/base.html" %}
+
+{% block head %}
+{{ block.super }}
+<script defer data-domain="unrefined.one" src="https://plausible.io/js/script.js"></script>
+{% endblock %}
+
+{% block body %}
 <div class="container">
   <div class="row">
     <div class="col">
@@ -18,6 +25,45 @@
           />
           <button type="submit" class="btn btn-primary">Start!</button>
         </div>
+	<div>
+	  <button class="btn btn-default" data-bs-target="#collapseSettings" data-bs-toggle="collapse" aria-expanded="false" aria-controls="collapseSettings" type="button">
+	    Settings
+	</button></div>
+	<div class="collapse" id="collapseSettings">
+	  <div class="card card-body">
+	    <label for="cheatsheet">Cheatsheet</label>
+	    <select name="cheatsheet" class="form-select" id="cheatsheet-select">
+	      {% for cheatsheet,_ in cheatsheets%}
+	      <option value="{{cheatsheet}}">{{cheatsheet}}</option>
+	      {% endfor %}
+	    </select>
+	    <div class="form-check">
+	      <input class="form-check-input" type="checkbox" value="" id="show-cheatsheet-details">
+	      <label class="form-check-label" for="show-cheatsheet-details">
+		Show breakdown items
+	      </label>
+	    </div>
+
+	    {% for cheatsheet,breakdowns in cheatsheets%}
+	    <div id="{{cheatsheet}}-breakdowns" class="d-none cheatsheet-breakdown">
+	      <table class="table">
+		{% for breakdown in breakdowns %}
+		<tr>
+		  <td>
+		    <u>{{breakdown.name|replace:_:" "|capitalize}}</u>
+		    <br/>
+		    <i>{{breakdown.label}}</i>
+		  </td>
+		  {% for example in breakdown.examples %}
+		  <td>{{example}}</td>
+		  {% endfor %}
+		</tr>
+		{% endfor %}
+	      </table>
+	    </div>
+	    {% endfor %}
+	  </div>
+	</div>
       </form>
     </div>
   </div>
@@ -59,4 +105,42 @@
       </div>
     </div>
   </div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<script type="text/javascript">
+  const hideAllCheatSheets = () => {
+    
+    [...document.getElementsByClassName('cheatsheet-breakdown')].forEach(e => {
+      e.classList.add('d-none')
+    })
+  }
+
+  const showSelectedCheatSheet = (cheatsheet) => {
+    
+    hideAllCheatSheets()
+
+    document.getElementById(`${cheatsheet}-breakdowns`).classList.remove('d-none')
+  }
+
+  document.getElementById('show-cheatsheet-details').onchange = (e) => {
+    const checked = document.getElementById('show-cheatsheet-details').checked
+
+    if( checked ) {
+      showSelectedCheatSheet(document.getElementById('cheatsheet-select').value)
+    }
+    else {
+      hideAllCheatSheets()
+    }
+
+  }
+
+  document.getElementById('cheatsheet-select').onchange = (e) => {
+    const checked = document.getElementById('show-cheatsheet-details').checked
+    if( checked ) {
+      showSelectedCheatSheet(document.getElementById('cheatsheet-select').value)
+    }
+  }
+</script>
 {% endblock %}

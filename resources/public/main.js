@@ -134,7 +134,7 @@ const renderEstimationTopic = (topic, estimationTable, inputCallback) => {
   rangeInput.classList.add('form-range')
   rangeInput.value = 0
   rangeInput.min = 0
-  rangeInput.max = topic.maxValue
+  rangeInput.max = topic.examples.length
   rangeInput.name = topic.name
   rangeInput.oninput = inputCallback
   inputColumn.appendChild(rangeInput)

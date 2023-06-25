@@ -1,0 +1,19 @@
+#+author: FPSD
+
+* Task description
+
+** Change UI of the estimation page
+
+Exlore few different designs for the estimation page to enable new ways of
+selecting the story points for each breakdown item. Implement at least one
+and provide a way to select between available styles, starting from the
+current one. If a user changes the style, set it as default in the local
+storage.
+
+** Sub Tasks - Size S [0/5]
+
+- [ ] Try a couple of designs before implementing them
+- [ ] [FE] Implement at least one new design
+- [ ] [FE] Enable selecting from available designs
+- [ ] [FE] Set the selected design as the default in the local storage
+- [ ] [FE] Read the selected design from local storae and use that if available otherwise use the default one

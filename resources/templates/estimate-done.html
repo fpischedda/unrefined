@@ -10,9 +10,10 @@
       {% else %}
       <p>Your vote: <strong>{{estimation.score}}</strong></p>
       <p>Breakdown:
-        <ul>{% for item in estimation.breakdown %}
-    <li>{{item|first|name}}: {{item|last}}</li>
-    {% endfor %}
+        <ul>
+	  {% for item in estimation.breakdown %}
+	  <li>{{item|first|name|replace:_:" "|capitalize}}: {{item|last}}</li>
+	  {% endfor %}
         </ul>
       </p>
       {% endif %}

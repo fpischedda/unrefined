@@ -1,0 +1,23 @@
+#+author: FPSD
+
+* Task description
+
+** Create custom cheat sheet
+
+After selecting a cheat sheet, the user can customize it, creating a new
+cheat sheet.
+
+It should be possible to start from a blank page if the current templates
+do not match the user's use case.
+
+Evaulate if it is feaseble to store the new cheat sheets somewhere, considering
+that at the moment there is no way to authenticate a user.
+
+** Sub Tasks - Size L [0/6]
+
+- [ ] [FE] Enable cheat sheet customizations, adding or removing breakdowns and their items
+- [ ] [FE] Send the custom cheat sheet to the backend when starting a new refinement
+- [ ] [BE] Accept new cheat sheets from the frontend and use them when creating a refinement
+- [ ] [BE] Send the custom cheat sheet to the frontend in estimation and result pages
+- [ ] [FE] Use custom cheat sheets in the estimation and result pages
+- [ ] Evaluate how to store and retrieve custom cheat sheets

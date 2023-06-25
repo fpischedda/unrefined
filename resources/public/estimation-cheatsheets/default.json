@@ -2,7 +2,6 @@
   {
     "name": "implementation",
     "label": "Code implementations (endpoints, Airflow, models, queries, etc)",
-    "maxValue": 8,
     "examples": [
       "no change",
       "Add authorization check (one if condition added)",
@@ -18,7 +17,6 @@
   {
     "name": "backend",
     "label": "Backend API changes (protos)",
-    "maxValue": 3,
     "examples": [
       "no change",
       "Small amount of API changes (e.g. 2 new attributes in a message)",
@@ -29,20 +27,18 @@
   {
     "name": "migrations",
     "label": "Migrations",
-    "maxValue": 5,
     "examples": [
       "no change",
-      "Any schema migration changes in 1 db",
-      "",
-      "",
-      "",
-      "Change the schema in all services"
+      "Simple schema migration changes to 1 DB, adding one or more fields",
+      "Simple schema migration changes, adding one or more fields to more than one DB",
+      "Any change that would require, long running, re-indexing of existing data",
+      "Multi step schema changes requiring new fields and deprecating old ones.",
+      "Complex changes to more than one schema in all service DBs"
     ]
   },
   {
     "name": "data_migrations",
     "label": "Data migrations",
-    "maxValue": 5,
     "examples": [
       "no change",
       "Populate all NULL rows with a default value",
@@ -55,7 +51,6 @@
   {
     "name": "testing",
     "label": "Automated testing",
-    "maxValue": 3,
     "examples": [
       "no change",
       "Creating or updating few test scenarios (e.g. 2 new integration tests + 1 new unit test)",
@@ -66,7 +61,6 @@
   {
     "name": "manual_testing",
     "label": "External dependency on manual testing",
-    "maxValue": 1,
     "examples": [
       "no change",
       "Feature branch on staging for someone to test (if we think there will be challenges with running the test and/or follow-ups and coordination with an engineer are required)"
@@ -75,7 +69,6 @@
   {
     "name": "risk",
     "label": "Risk",
-    "maxValue": 2,
     "examples": [
       "no change",
       "Slight risk",
@@ -85,7 +78,6 @@
   {
     "name": "complexity",
     "label": "Complexity",
-    "maxValue": 3,
     "examples": [
       "no change",
       "There might be hidden complexities",

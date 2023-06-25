@@ -1,0 +1,86 @@
+{"estimationTopics": [
+  {
+    "name": "implementation",
+    "label": "Code implementations (for ex. core data structures, DB queries, endpoints)",
+    "examples": [
+      "No change",
+      "Improve an existing functionality, covering one new use case",
+      "Implement a small new endpoint, for example entity detail or list",
+      "Implement new entity of the domain model",
+      "Implement more than one entity of the domain model",
+      "Simple addictive change to a domain entity that affect other domain entities, requiring updates on multiple parts of the application",
+      "Multiple addictive changes to different domain entities",
+      "Domain model refactoring, changing/removing domain entities and their schema"
+    ]
+  },
+  {
+    "name": "domain",
+    "label": "Domain entities modeling, interfaces",
+    "examples": [
+      "No schema change",
+      "Schema change, adding properties to an existing model",
+      "New schema(s) or destructive changes to existing ones",
+      "Big schema refactoring, (de)normalization of existing schema"
+    ]
+  },
+  {
+    "name": "migrations",
+    "label": "Migrations",
+    "examples": [
+      "No schema migration",
+      "Single DB, non destructive DB schema change, for ex. new table, new field, change field type",
+      "Single DB, multiple changes, requiring creation of indexes or constraints, affecting many tables",
+      "Multiple DBs, non destructive DB schema change, for ex. new table, new field, change field type",
+      "Multiple DBs, multiple changes, requiring creation of indexes or constraints, affecting many tables",
+      "All of the above plus risk of unforeseen performance issues"
+    ]
+  },
+  {
+    "name": "data_migrations",
+    "label": "Data migrations",
+    "examples": [
+      "No data migrations",
+      "Populate all NULL rows with a default value",
+      "Update multiple tables, no constraint affected",
+      "Update multiple tables, multi step needed to satisfy constraint(s)",
+      "Generate and apply seed data for a new service or feature",
+      "Move entities to a new domain/service, maintaining both systems up until finally migrated"
+    ]
+  },
+  {
+    "name": "testing",
+    "label": "Automated testing",
+    "examples": [
+      "No change",
+      "Creating or updating few test scenarios (e.g. 2 new integration tests + 1 new unit test)",
+      "Creating or updating several test scenarios (e.g. 3 new integration tests + slight change to e2e test + update 2 unit tests)",
+      "Creating or updating a lot of test scenarios (e.g. 5 new integration tests + 2 updated integration tests + 4 new unit tests)"
+    ]
+  },
+  {
+    "name": "manual_testing",
+    "label": "External dependency on manual testing",
+    "examples": [
+      "No manual testing",
+      "Feature branch on staging for someone to test (if we think there will be challenges with running the test and/or follow-ups and coordination with an engineer are required)"
+    ]
+  },
+  {
+    "name": "risk",
+    "label": "Risk",
+    "examples": [
+      "No risk",
+      "Slight risk",
+      "A lot of risk, we are very uncertain"
+    ]
+  },
+  {
+    "name": "complexity",
+    "label": "Complexity",
+    "examples": [
+      "There might be hidden complexities",
+      "Some initial investigation needed, but confidentat that it should not take too much time",
+      "We need a design document"
+    ]
+  }
+]}

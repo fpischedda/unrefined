@@ -1,0 +1,18 @@
+#+author: FPSD
+
+* Task description
+
+** Change UI to select a cheat sheet from a list of available ones
+
+When starting an estimation provide the option to select the cheat sheet to be
+used during the refinement session from a list of available ones, possibly with
+a preview of the breakdown items.
+
+** Sub tasks - Size M [6/6]
+
+- [X] [BE] Provide the list of available cheat sheets to the frontend layer with their details
+- [X] [FE] Show the pre-selected cheat sheet name
+- [X] [FE] Send the selected cheat sheet to the backend when starting a refinement
+- [X] [BE] Use the cheat sheet sent by the frontend when creating a new refinement
+- [X] [FE] Enable selecting a different cheat sheet from a list of available ones
+- [X] [FE] Show the breakdown items of the currently selected cheat sheet
