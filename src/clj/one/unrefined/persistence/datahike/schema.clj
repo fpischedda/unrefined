@@ -1,4 +1,4 @@
-(ns fpsd.unrefined.persistence.datahike.schema)
+(ns one.unrefined.persistence.datahike.schema)
 
 (def voting-mode-enum-schema
   [{:db/ident :voting.mode/linear}

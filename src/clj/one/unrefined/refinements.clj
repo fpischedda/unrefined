@@ -1,5 +1,5 @@
 (ns one.unrefined.refinements
-  (:require [fpsd.refinements.helpers :refer [utc-now]]))
+  (:require [one.unrefined.refinements.helpers :refer [utc-now]]))
 
 (def default-settings {:max-points-delta 3
                        :minimum-votes 3

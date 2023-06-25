@@ -1,4 +1,4 @@
-(ns fpsd.unrefined.persistence.datahike.migrator
+(ns one.unrefined.persistence.datahike.migrator
  "Utilities to apply schema changes to an existing database.
   So far only accretive changes are supported.
 
@@ -14,7 +14,7 @@
   - in the database we have recorded a, c, b (out of order migrations)
   - in the database we have recorded a, b, b2, c (out of sync app, not covered yet)."
  (:require [datahike.api :as d]
-           [fpsd.refinements.helpers :refer [utc-now]]))
+           [one.unrefined.refinements.helpers :refer [utc-now]]))
 
 (def migrations-schema
   [{:db/ident :migration/name

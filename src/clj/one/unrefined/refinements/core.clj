@@ -4,7 +4,7 @@
             [one.unrefined.events :as events]
             [one.unrefined.refinements :as refinements]
             [one.unrefined.refinements.helpers :as helpers]
-            [one.unrefined.unrefined.state :as state]))
+            [one.unrefined.state :as state]))
 
 (defn get-refinement-ticket
   "Return a map with :refinement and :ticket keys holding

@@ -1,13 +1,13 @@
-(ns fpsd.unrefined.persistence.datahike
+(ns one.unrefined.persistence.datahike
   (:require
    [com.brunobonacci.mulog :as u]
    [datahike.api :as d]
    [mount.core :as mount]
    [nano-id.core :refer [nano-id]]
-   [fpsd.configuration :refer [config]]
-   [fpsd.unrefined.persistence.datahike.migrator :as migrator]
-   [fpsd.unrefined.persistence.datahike.schema :as schema]
-   [fpsd.refinements.helpers :refer [utc-now]]))
+   [one.unrefined.configuration :refer [config]]
+   [one.unrefined.persistence.datahike.migrator :as migrator]
+   [one.unrefined.persistence.datahike.schema :as schema]
+   [one.unrefined.refinements.helpers :refer [utc-now]]))
 
 (defn migrate-schema!
   "Try to apply migrations and log errors if any."

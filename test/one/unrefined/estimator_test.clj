@@ -1,8 +1,8 @@
 (ns one.unrefined.estimator-test
     (:require
      [clojure.test :refer [are deftest is testing]]
-     [fpsd.estimator :as estimator]
-     [fpsd.refinements :as refinements]))
+     [one.unrefined.estimator :as estimator]
+     [one.unrefined.refinements :as refinements]))
 
 (testing "Estimator utils"
   (deftest count-votes

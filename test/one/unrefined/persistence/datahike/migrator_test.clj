@@ -1,8 +1,8 @@
-(ns fpsd.unrefined.persistence.datahike.migrator-test
+(ns one.unrefined.persistence.datahike.migrator-test
     (:require
      [clojure.test :refer [deftest is testing]]
-     [fpsd.refinements.helpers :refer [utc-now]]
-     [fpsd.unrefined.persistence.datahike.migrator :as migrator]))
+     [one.unrefined.refinements.helpers :refer [utc-now]]
+     [one.unrefined.persistence.datahike.migrator :as migrator]))
 
 (def migrations
   [{:migration/name "test-01"
