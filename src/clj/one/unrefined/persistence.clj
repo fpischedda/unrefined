@@ -1,5 +1,4 @@
-(ns fpsd.unrefined.persistence
-  (:require [fpsd.configuration :refer [config]]))
+(ns one.unrefined.persistence)
 
 (defmulti store-ticket!
   (fn [configuration _code _ticket-id _data] (:backend configuration)))

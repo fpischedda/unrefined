@@ -1,4 +1,4 @@
-(ns fpsd.estimator-test
+(ns one.unrefined.estimator-test
     (:require
      [clojure.test :refer [are deftest is testing]]
      [fpsd.estimator :as estimator]

@@ -1,7 +1,7 @@
-(ns fpsd.refinements.helpers-test
+(ns one.unrefined.refinements.helpers-test
   (:require
    [clojure.test :refer [are deftest is testing]]
-   [fpsd.refinements.helpers :as helpers]))
+   [one.unrefined.refinements.helpers :as helpers]))
 
 (deftest extract-jira-id
   (testing "Extract ticket id from URL"

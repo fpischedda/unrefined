@@ -1,10 +1,10 @@
-(ns fpsd.refinements.core
-  (:require [nano-id.core :refer [nano-id]]
-            [fpsd.refinements.events :as events]
-            [fpsd.refinements :as refinements]
-            [fpsd.refinements.helpers :as helpers]
-            [fpsd.unrefined.state :as state]
-            [com.brunobonacci.mulog :as u]))
+(ns one.unrefined.refinements.core
+  (:require [com.brunobonacci.mulog :as u]
+            [nano-id.core :refer [nano-id]]
+            [one.unrefined.events :as events]
+            [one.unrefined.refinements :as refinements]
+            [one.unrefined.refinements.helpers :as helpers]
+            [one.unrefined.unrefined.state :as state]))
 
 (defn get-refinement-ticket
   "Return a map with :refinement and :ticket keys holding

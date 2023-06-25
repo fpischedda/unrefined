@@ -1,6 +1,6 @@
-(ns fpsd.unrefined.state
+(ns one.unrefined.state
   (:require [datahike.api :as d]
-            [fpsd.unrefined.persistence.datahike :refer [db]]))
+            [one.unrefined.persistence.datahike :refer [db]]))
 
 (defn insert-refinement
   [refinement]

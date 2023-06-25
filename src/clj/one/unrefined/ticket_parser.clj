@@ -1,4 +1,4 @@
-(ns fpsd.unrefined.ticket-parser
+(ns one.unrefined.ticket-parser
   (:require [cheshire.core :refer [parse-string]]
             [org.httpkit.client :as http]))
 

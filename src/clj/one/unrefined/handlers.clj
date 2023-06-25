@@ -1,10 +1,10 @@
-(ns fpsd.refinements.handlers
+(ns one.unrefined.handlers
   (:require
    [com.brunobonacci.mulog :as u]
    [selmer.parser :refer [render-file]]
    [one.unrefined.estimator :as estimator]
-   [fpsd.refinements.core :as core]
-   [fpsd.refinements.helpers :as helpers]))
+   [one.unrefined.refinements.core :as core]
+   [one.unrefined.refinements.helpers :as helpers]))
 
 (defn cookie-value
   [value]
