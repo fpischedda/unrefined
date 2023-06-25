@@ -18,7 +18,7 @@
             [com.brunobonacci.mulog :as u]
             [selmer.parser :refer [render-file]]
             [one.unrefined.configuration :refer [config]]
-            [fpsd.refinements.handlers :as handlers]))
+            [one.unrefined.handlers :as handlers]))
 
 (defn add-headers [handler fixed-headers]
   (fn [request]
